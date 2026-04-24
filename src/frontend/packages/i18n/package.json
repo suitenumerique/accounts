@@ -1,0 +1,29 @@
+{
+  "name": "packages-i18n",
+  "version": "0.0.1",
+  "repository": "https://github.com/suitenumerique/docs",
+  "author": "DINUM",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "extract-translation": "yarn extract-translation:accounts",
+    "extract-translation:accounts": "yarn i18next ../../apps/accounts/**/*.{ts,tsx} -c ./i18next-parser.config.mjs -o ./locales/accounts/translations-crowdin.json",
+    "format-deploy": "yarn format-deploy:accounts",
+    "format-deploy:accounts": "node ./format-deploy.mjs --app=accounts --output=../../apps/accounts/src/i18n/translations.json",
+    "format-rebuild-fr:accounts": "node ./rebuild-translations.mjs --language=fr --app=accounts --output=../../apps/accounts/src/i18n/translations.json",
+    "lint": "eslint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/jest": "30.0.0",
+    "@types/node": "*",
+    "eslint-plugin-docs": "*",
+    "eslint-plugin-import": "2.32.0",
+    "i18next-parser": "9.4.0",
+    "jest": "30.3.0",
+    "ts-jest": "29.4.6",
+    "typescript": "*",
+    "yargs": "18.0.0"
+  },
+  "packageManager": "yarn@1.22.22"
+}

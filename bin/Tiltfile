@@ -1,0 +1,63 @@
+load('ext://uibutton', 'cmd_button', 'bool_input', 'location')
+load('ext://namespace', 'namespace_create', 'namespace_inject')
+namespace_create('accounts')
+
+docker_build(
+    'localhost:5001/accounts-backend:latest',
+    context='..',
+    dockerfile='../Dockerfile',
+    only=['./src/backend', './src/mail', './docker'],
+    target = 'backend-production',
+    build_args={'DOCKER_USER': '1000:1000'},
+    live_update=[
+        sync('../src/backend', '/app'),
+        run(
+            'pip install -r /app/requirements.txt',
+            trigger=['./api/requirements.txt']
+        )
+    ]
+)
+
+docker_build(
+    'localhost:5001/accounts-frontend:latest',
+    context='..',
+    dockerfile='../src/frontend/Dockerfile',
+    only=['./src/frontend', './docker', './.dockerignore'],
+    target = 'accounts',
+    build_args={'DOCKER_USER': '1000:1000'},
+    live_update=[
+        sync('../src/frontend', '/home/frontend'),
+    ]
+)
+
+k8s_resource('accounts-backend-migrate', resource_deps=['dev-backend-postgres'])
+k8s_resource('accounts-backend-createsuperuser', resource_deps=['accounts-backend-migrate'])
+k8s_resource('dev-backend-keycloak', resource_deps=['dev-backend-keycloak-pg'])
+k8s_resource('accounts-backend', resource_deps=['accounts-backend-migrate', 'dev-backend-redis', 'dev-backend-keycloak', 'dev-backend-postgres', 'dev-backend-minio:statefulset'])
+k8s_yaml(local('cd ../src/helm && helmfile -n accounts -e dev template .'))
+
+migration = '''
+set -eu
+# get k8s pod name from tilt resource name
+POD_NAME="$(tilt get kubernetesdiscovery accounts-backend -ojsonpath='{.status.pods[0].name}')"
+kubectl -n accounts exec "$POD_NAME" -- python manage.py makemigrations
+'''
+cmd_button('Make migration',
+           argv=['sh', '-c', migration],
+           resource='accounts-backend',
+           icon_name='developer_board',
+           text='Run makemigration',
+)
+
+pod_migrate = '''
+set -eu
+# get k8s pod name from tilt resource name
+POD_NAME="$(tilt get kubernetesdiscovery accounts-backend -ojsonpath='{.status.pods[0].name}')"
+kubectl -n accounts exec "$POD_NAME" -- python manage.py migrate --no-input
+'''
+cmd_button('Migrate db',
+           argv=['sh', '-c', pod_migrate],
+           resource='accounts-backend',
+           icon_name='developer_board',
+           text='Run database migration',
+)

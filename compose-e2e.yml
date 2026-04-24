@@ -1,0 +1,13 @@
+services:
+
+  frontend:
+    user: "${DOCKER_USER:-1000}"
+    build: 
+      context: .
+      dockerfile: ./src/frontend/Dockerfile
+      target: frontend-production
+      args:
+        API_ORIGIN: "http://localhost:9901"
+    image: accounts:frontend-production
+    ports:
+      - "9900:3000"
