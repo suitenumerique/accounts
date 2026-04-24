@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eo pipefail
+# Run html-to-text to convert all html files to text files
+ACCOUNTS_DIR_MAILS="${ACCOUNTS_DIR_MAILS:-../backend/core/templates/mail}/"
+
+if [ ! -d "${ACCOUNTS_DIR_MAILS}" ]; then
+  mkdir -p "${ACCOUNTS_DIR_MAILS}";
+fi
+
+if [ ! -d "${ACCOUNTS_DIR_MAILS}"html/ ]; then
+  mkdir -p "${ACCOUNTS_DIR_MAILS}"html/;
+  exit;
+fi
+
+for file in "${ACCOUNTS_DIR_MAILS}"html/*.html;
+    do html-to-text -j ./html-to-text.config.json < "$file" > "${file%.html}".txt; done;
+
+if [ ! -d "${ACCOUNTS_DIR_MAILS}"text/ ]; then
+  mkdir -p "${ACCOUNTS_DIR_MAILS}"text/;
+fi
+
+mv "${ACCOUNTS_DIR_MAILS}"html/*.txt "${ACCOUNTS_DIR_MAILS}"text/;
