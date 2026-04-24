@@ -1,0 +1,151 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: lasuite-accounts\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 12:23+0000\n"
+"PO-Revision-Date: 2026-04-30 07:50\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Crowdin-Project: lasuite-accounts\n"
+"X-Crowdin-Project-ID: 892556\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: backend-accounts.pot\n"
+"X-Crowdin-File-ID: 46\n"
+
+#: core/admin.py:26
+msgid "Personal info"
+msgstr "Infos Personnelles"
+
+#: core/admin.py:40
+msgid "Permissions"
+msgstr "Permissions"
+
+#: core/admin.py:52
+msgid "Important dates"
+msgstr "Dates importantes"
+
+#: core/apps.py:12
+msgid "Accounts core application"
+msgstr "Noyau d'application Accounts"
+
+#: core/models.py:40
+msgid "id"
+msgstr "identifiant/id"
+
+#: core/models.py:41
+msgid "primary key for the record as UUID"
+msgstr "clé primaire pour l'enregistrement en tant que UUID"
+
+#: core/models.py:47
+msgid "created on"
+msgstr "créé le"
+
+#: core/models.py:48
+msgid "date and time at which a record was created"
+msgstr "date et heure de création de l'enregistrement"
+
+#: core/models.py:53
+msgid "updated on"
+msgstr "mis à jour le"
+
+#: core/models.py:54
+msgid "date and time at which a record was last updated"
+msgstr "date et heure de la dernière mise à jour de l'enregistrement"
+
+#: core/models.py:90
+msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
+msgstr "Nous n'avons pas pu trouver un utilisateur avec ce sous-groupe mais l'e-mail est déjà associé à un utilisateur enregistré."
+
+#: core/models.py:101
+msgid "sub"
+msgstr "sous-groupe"
+
+#: core/models.py:102
+msgid "Required. 255 characters or fewer. ASCII characters only."
+msgstr "Obligatoire. 255 caractères ou moins. Caractères ASCII uniquement."
+
+#: core/models.py:110
+msgid "full name"
+msgstr "nom complet"
+
+#: core/models.py:112
+msgid "short name"
+msgstr "nom court"
+
+#: core/models.py:115
+msgid "identity email address"
+msgstr "adresse e-mail d'identité"
+
+#: core/models.py:120
+msgid "admin email address"
+msgstr "adresse e-mail de l'administrateur"
+
+#: core/models.py:127
+msgid "language"
+msgstr "langue"
+
+#: core/models.py:128
+msgid "The language in which the user wants to see the interface."
+msgstr "La langue dans laquelle l'utilisateur veut voir l'interface."
+
+#: core/models.py:136
+msgid "The timezone in which the user wants to see times."
+msgstr "Le fuseau horaire dans lequel l'utilisateur souhaite voir les heures."
+
+#: core/models.py:139
+msgid "device"
+msgstr "appareil"
+
+#: core/models.py:141
+msgid "Whether the user is a device or a real user."
+msgstr "Si l'utilisateur est un appareil ou un utilisateur réel."
+
+#: core/models.py:144
+msgid "staff status"
+msgstr "statut d'équipe"
+
+#: core/models.py:146
+msgid "Whether the user can log into this admin site."
+msgstr "Si l'utilisateur peut se connecter à ce site d'administration."
+
+#: core/models.py:149
+msgid "active"
+msgstr "actif"
+
+#: core/models.py:152
+msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
+msgstr "Si cet utilisateur doit être traité comme actif. Désélectionnez ceci au lieu de supprimer des comptes."
+
+#: core/models.py:158
+msgid "Additional information about the user."
+msgstr "Informations supplémentaires sur l'utilisateur."
+
+#: core/models.py:168
+msgid "user"
+msgstr "utilisateur"
+
+#: core/models.py:169
+msgid "users"
+msgstr "utilisateurs"
+
+#: core/templates/mail/html/template.html:153
+#: core/templates/mail/text/template.txt:3
+msgid "Logo email"
+msgstr "Logo de l'e-mail"
+
+#: core/templates/mail/html/template.html:219
+#: core/templates/mail/text/template.txt:14
+msgid " LaSuite, your collaborating place. "
+msgstr " LaSuite, votre espace collaboratif. "
+
+#: core/templates/mail/html/template.html:226
+#: core/templates/mail/text/template.txt:16
+#, python-format
+msgid " Brought to you by %(brandname)s "
+msgstr " Proposé par %(brandname)s "
+

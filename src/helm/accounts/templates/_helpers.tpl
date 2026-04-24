@@ -1,0 +1,216 @@
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "accounts.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "accounts.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "accounts.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+accounts.labels
+*/}}
+{{- define "accounts.labels" -}}
+helm.sh/chart: {{ include "accounts.chart" . }}
+{{ include "accounts.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "accounts.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "accounts.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+transform dictionary of environment variables
+Usage : {{ include "accounts.env.transformDict" .Values.envVars }}
+
+Example:
+envVars:
+  # Using simple strings as env vars
+  ENV_VAR_NAME: "envVar value"
+  # Using a value from a configMap
+  ENV_VAR_FROM_CM:
+    configMapKeyRef:
+      name: cm-name
+      key: "key_in_cm"
+  # Using a value from a secret
+  ENV_VAR_FROM_SECRET:
+    secretKeyRef:
+      name: secret-name
+      key: "key_in_secret"
+*/}}
+{{- define "accounts.env.transformDict" -}}
+{{- range $key, $value := . }}
+- name: {{ $key | quote }}
+{{- if $value | kindIs "map" }}
+  valueFrom: {{ $value | toYaml | nindent 4 }}
+{{- else }}
+  value: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+{{/*
+accounts env vars
+*/}}
+{{- define "accounts.common.env" -}}
+{{- $topLevelScope := index . 0 -}}
+{{- $workerScope := index . 1 -}}
+{{- include "accounts.env.transformDict" $workerScope.envVars -}}
+{{- end }}
+
+{{/*
+accounts backend django env vars - combines common backend.envVars with backend.django.envVars
+*/}}
+{{- define "accounts.backend.django.env" -}}
+{{- $topLevelScope := index . 0 -}}
+{{- $workerScope := index . 1 -}}
+{{- include "accounts.env.transformDict" $workerScope.envVars -}}
+{{- include "accounts.env.transformDict" (($workerScope.django | default dict).envVars | default dict) -}}
+{{- end }}
+
+{{/*
+accounts celery env vars - combines common backend.envVars with backend.celery.envVars
+*/}}
+{{- define "accounts.backend.celery.env" -}}
+{{- $topLevelScope := index . 0 -}}
+{{- $workerScope := index . 1 -}}
+{{- include "accounts.env.transformDict" $workerScope.envVars -}}
+{{- include "accounts.env.transformDict" ($workerScope.celery.envVars | default dict) -}}
+{{- end }}
+
+{{/*
+Common labels
+
+Requires array with top level scope and component name
+*/}}
+{{- define "accounts.common.labels" -}}
+{{- $topLevelScope := index . 0 -}}
+{{- $component := index . 1 -}}
+{{- include "accounts.labels" $topLevelScope }}
+app.kubernetes.io/component: {{ $component }}
+{{- end }}
+
+{{/*
+Common selector labels
+
+Requires array with top level scope and component name
+*/}}
+{{- define "accounts.common.selectorLabels" -}}
+{{- $topLevelScope := index . 0 -}}
+{{- $component := index . 1 -}}
+{{- include "accounts.selectorLabels" $topLevelScope }}
+app.kubernetes.io/component: {{ $component }}
+{{- end }}
+
+{{- define "accounts.probes.abstract" -}}
+{{- if .exec -}}
+exec:
+{{- toYaml .exec | nindent 2 }}
+{{- else if .tcpSocket -}}
+tcpSocket:
+{{- toYaml .tcpSocket | nindent 2 }}
+{{- else -}}
+httpGet:
+  path: {{ .path }}
+  port: {{ .targetPort }}
+{{- end }}
+initialDelaySeconds: {{ .initialDelaySeconds | eq nil | ternary 0 .initialDelaySeconds }}
+timeoutSeconds: {{ .timeoutSeconds | eq nil | ternary 1 .timeoutSeconds }}
+{{- end }}
+
+{{/*
+Full name for the backend
+
+Requires top level scope
+*/}}
+{{- define "accounts.backend.fullname" -}}
+{{ include "accounts.fullname" . }}-backend
+{{- end }}
+
+{{/*
+Full name for the frontend
+
+Requires top level scope
+*/}}
+{{- define "accounts.frontend.fullname" -}}
+{{ include "accounts.fullname" . }}-frontend
+{{- end }}
+
+{{/*
+Full name for the Posthog
+
+Requires top level scope
+*/}}
+{{- define "accounts.posthog.fullname" -}}
+{{ include "accounts.fullname" . }}-posthog
+{{- end }}
+
+
+{{/*
+Full name for the Celery Worker
+
+Requires top level scope
+*/}}
+
+
+{{- define "accounts.celery.worker.fullname" -}}
+{{ include "accounts.fullname" . }}-celery-worker
+{{- end }}
+
+{{/*
+Usage : {{ include "accounts.secret.dockerconfigjson.name" (dict "fullname" (include "accounts.fullname" .) "imageCredentials" .Values.path.to.the.image1) }}
+*/}}
+{{- define "accounts.secret.dockerconfigjson.name" }}
+{{- if (default (dict) .imageCredentials).name }}{{ .imageCredentials.name }}{{ else }}{{ .fullname | trunc 63 | trimSuffix "-" }}-dockerconfig{{ end -}}
+{{- end }}
+
+{{/*
+Usage : {{ include "accounts.secret.dockerconfigjson" (dict "fullname" (include "accounts.fullname" .) "imageCredentials" .Values.path.to.the.image1) }}
+*/}}
+{{- define "accounts.secret.dockerconfigjson" }}
+{{- if .imageCredentials -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "accounts.secret.dockerconfigjson.name" (dict "fullname" .fullname "imageCredentials" .imageCredentials) }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ template "accounts.secret.dockerconfigjson.data" .imageCredentials }}
+{{- end -}}
+{{- end }}

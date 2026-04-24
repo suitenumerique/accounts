@@ -1,0 +1,151 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: lasuite-accounts\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 12:23+0000\n"
+"PO-Revision-Date: 2026-04-30 07:50\n"
+"Last-Translator: \n"
+"Language-Team: Ukrainian\n"
+"Language: uk_UA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
+"X-Crowdin-Project: lasuite-accounts\n"
+"X-Crowdin-Project-ID: 892556\n"
+"X-Crowdin-Language: uk\n"
+"X-Crowdin-File: backend-accounts.pot\n"
+"X-Crowdin-File-ID: 46\n"
+
+#: core/admin.py:26
+msgid "Personal info"
+msgstr "Особисті дані"
+
+#: core/admin.py:40
+msgid "Permissions"
+msgstr "Дозволи"
+
+#: core/admin.py:52
+msgid "Important dates"
+msgstr "Важливі дати"
+
+#: core/apps.py:12
+msgid "Accounts core application"
+msgstr "Ядро додатку Accounts"
+
+#: core/models.py:40
+msgid "id"
+msgstr ""
+
+#: core/models.py:41
+msgid "primary key for the record as UUID"
+msgstr "первинний ключ для запису як UUID"
+
+#: core/models.py:47
+msgid "created on"
+msgstr "створено"
+
+#: core/models.py:48
+msgid "date and time at which a record was created"
+msgstr "дата і час, коли запис було створено"
+
+#: core/models.py:53
+msgid "updated on"
+msgstr "оновлено"
+
+#: core/models.py:54
+msgid "date and time at which a record was last updated"
+msgstr "дата і час, коли запис був востаннє оновлений"
+
+#: core/models.py:90
+msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
+msgstr "Ми не змогли знайти користувача з цими даними, але адреса вже пов'язана з зареєстрованим користувачем."
+
+#: core/models.py:101
+msgid "sub"
+msgstr "вкладений документ"
+
+#: core/models.py:102
+msgid "Required. 255 characters or fewer. ASCII characters only."
+msgstr "Обов'язкове. 255 символів або менше. Тільки символи ASCII."
+
+#: core/models.py:110
+msgid "full name"
+msgstr "повне ім'я"
+
+#: core/models.py:112
+msgid "short name"
+msgstr "коротке ім'я"
+
+#: core/models.py:115
+msgid "identity email address"
+msgstr "адреса електронної пошти особи"
+
+#: core/models.py:120
+msgid "admin email address"
+msgstr "електронна адреса адміністратора"
+
+#: core/models.py:127
+msgid "language"
+msgstr "мова"
+
+#: core/models.py:128
+msgid "The language in which the user wants to see the interface."
+msgstr "Мова, якою користувач хоче бачити інтерфейс."
+
+#: core/models.py:136
+msgid "The timezone in which the user wants to see times."
+msgstr "Часовий пояс, в якому користувач хоче бачити час."
+
+#: core/models.py:139
+msgid "device"
+msgstr "пристрій"
+
+#: core/models.py:141
+msgid "Whether the user is a device or a real user."
+msgstr "Чи є користувач пристроєм чи реальним користувачем."
+
+#: core/models.py:144
+msgid "staff status"
+msgstr "статус співробітника"
+
+#: core/models.py:146
+msgid "Whether the user can log into this admin site."
+msgstr "Чи може користувач увійти на цей сайт адміністратора."
+
+#: core/models.py:149
+msgid "active"
+msgstr "активний"
+
+#: core/models.py:152
+msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
+msgstr "Чи слід ставитися до цього користувача як до активного. Зніміть вибір замість видалення облікового запису."
+
+#: core/models.py:158
+msgid "Additional information about the user."
+msgstr ""
+
+#: core/models.py:168
+msgid "user"
+msgstr "користувач"
+
+#: core/models.py:169
+msgid "users"
+msgstr "користувачі"
+
+#: core/templates/mail/html/template.html:153
+#: core/templates/mail/text/template.txt:3
+msgid "Logo email"
+msgstr "Логотип пошти"
+
+#: core/templates/mail/html/template.html:219
+#: core/templates/mail/text/template.txt:14
+msgid " LaSuite, your collaborating place. "
+msgstr ""
+
+#: core/templates/mail/html/template.html:226
+#: core/templates/mail/text/template.txt:16
+#, python-format
+msgid " Brought to you by %(brandname)s "
+msgstr " Запрошення отримане від %(brandname)s "
+

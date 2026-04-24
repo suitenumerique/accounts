@@ -1,0 +1,151 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: lasuite-accounts\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 12:23+0000\n"
+"PO-Revision-Date: 2026-04-30 07:50\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: lasuite-accounts\n"
+"X-Crowdin-Project-ID: 892556\n"
+"X-Crowdin-Language: de\n"
+"X-Crowdin-File: backend-accounts.pot\n"
+"X-Crowdin-File-ID: 46\n"
+
+#: core/admin.py:26
+msgid "Personal info"
+msgstr "Persönliche Daten"
+
+#: core/admin.py:40
+msgid "Permissions"
+msgstr "Berechtigungen"
+
+#: core/admin.py:52
+msgid "Important dates"
+msgstr "Wichtige Termine"
+
+#: core/apps.py:12
+msgid "Accounts core application"
+msgstr ""
+
+#: core/models.py:40
+msgid "id"
+msgstr "ID"
+
+#: core/models.py:41
+msgid "primary key for the record as UUID"
+msgstr "Primärschlüssel für den Datensatz als UUID"
+
+#: core/models.py:47
+msgid "created on"
+msgstr "Erstellt am"
+
+#: core/models.py:48
+msgid "date and time at which a record was created"
+msgstr "Datum und Uhrzeit, an dem ein Datensatz erstellt wurde"
+
+#: core/models.py:53
+msgid "updated on"
+msgstr "Aktualisiert"
+
+#: core/models.py:54
+msgid "date and time at which a record was last updated"
+msgstr "Datum und Uhrzeit, an dem zuletzt aktualisiert wurde"
+
+#: core/models.py:90
+msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
+msgstr "Wir konnten keinen Benutzer mit diesem Abo finden, aber die E-Mail-Adresse ist bereits einem registrierten Benutzer zugeordnet."
+
+#: core/models.py:101
+msgid "sub"
+msgstr "sub"
+
+#: core/models.py:102
+msgid "Required. 255 characters or fewer. ASCII characters only."
+msgstr "Pflichtfeld. 255 Zeichen oder weniger. Buchstaben (nur ASCII), Ziffern und die Zeichen @/-/_/."
+
+#: core/models.py:110
+msgid "full name"
+msgstr "Name"
+
+#: core/models.py:112
+msgid "short name"
+msgstr "Kurzbezeichnung"
+
+#: core/models.py:115
+msgid "identity email address"
+msgstr "Identitäts-E-Mail-Adresse"
+
+#: core/models.py:120
+msgid "admin email address"
+msgstr "Admin E-Mail-Adresse"
+
+#: core/models.py:127
+msgid "language"
+msgstr "Sprache"
+
+#: core/models.py:128
+msgid "The language in which the user wants to see the interface."
+msgstr "Die Sprache, in der der Benutzer die Benutzeroberfläche sehen möchte."
+
+#: core/models.py:136
+msgid "The timezone in which the user wants to see times."
+msgstr "Die Zeitzone, in der der Nutzer Zeiten sehen möchte."
+
+#: core/models.py:139
+msgid "device"
+msgstr "Gerät"
+
+#: core/models.py:141
+msgid "Whether the user is a device or a real user."
+msgstr "Ob der Benutzer ein Gerät oder ein echter Benutzer ist."
+
+#: core/models.py:144
+msgid "staff status"
+msgstr "Status des Teammitgliedes"
+
+#: core/models.py:146
+msgid "Whether the user can log into this admin site."
+msgstr "Gibt an, ob der Benutzer sich in diese Admin-Seite einloggen kann."
+
+#: core/models.py:149
+msgid "active"
+msgstr "aktiviert"
+
+#: core/models.py:152
+msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
+msgstr "Ob dieser Benutzer als aktiviert behandelt werden soll. Deaktivieren Sie diese Option, anstatt Konten zu löschen."
+
+#: core/models.py:158
+msgid "Additional information about the user."
+msgstr "Zusätzliche Informationen über den Benutzer."
+
+#: core/models.py:168
+msgid "user"
+msgstr "Benutzer"
+
+#: core/models.py:169
+msgid "users"
+msgstr "Benutzer"
+
+#: core/templates/mail/html/template.html:153
+#: core/templates/mail/text/template.txt:3
+msgid "Logo email"
+msgstr "Logo-E-Mail"
+
+#: core/templates/mail/html/template.html:219
+#: core/templates/mail/text/template.txt:14
+msgid " LaSuite, your collaborating place. "
+msgstr " LaSuite, Ihr gemeinsamer Ort. "
+
+#: core/templates/mail/html/template.html:226
+#: core/templates/mail/text/template.txt:16
+#, python-format
+msgid " Brought to you by %(brandname)s "
+msgstr " Erstellt von %(brandname)s "
+
