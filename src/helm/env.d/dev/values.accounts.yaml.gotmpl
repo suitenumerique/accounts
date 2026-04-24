@@ -1,0 +1,211 @@
+djangoSecretKey: &djangoSecretKey "lkjsdlushdgfkfjslkdfjslkdjfslkdjf"
+djangoSuperUserEmail: admin@example.com
+djangoSuperUserPass: admin
+oidc:
+    clientId: accounts
+    clientSecret: ThisIsAnExampleKeyForDevPurposeOnly
+
+image:
+  repository: localhost:5001/accounts-backend
+  pullPolicy: Always
+  tag: "latest"
+
+backend:
+  replicas: 1
+  envVars:
+    COLLABORATION_SERVER_SECRET: my-secret
+    DJANGO_CSRF_TRUSTED_ORIGINS: https://accounts.127.0.0.1.nip.io
+    DJANGO_CONFIGURATION: Production
+    DJANGO_ALLOWED_HOSTS: accounts.127.0.0.1.nip.io
+    DJANGO_SERVER_TO_SERVER_API_TOKENS: secret-api-key
+    DJANGO_SECRET_KEY: *djangoSecretKey
+    DJANGO_SETTINGS_MODULE: accounts.settings
+    DJANGO_SUPERUSER_PASSWORD: admin
+    DJANGO_EMAIL_BRAND_NAME: "La Suite Numérique"
+    DJANGO_EMAIL_HOST: "mailcatcher"
+    DJANGO_EMAIL_LOGO_IMG: https://accounts.127.0.0.1.nip.io/assets/logo-suite-numerique.png
+    DJANGO_EMAIL_PORT: 1025
+    DJANGO_EMAIL_URL_APP: https://accounts.127.0.0.1.nip.io
+    DJANGO_EMAIL_USE_SSL: False
+    FRONTEND_SILENT_LOGIN_ENABLED: True
+    LOGGING_LEVEL_HANDLERS_CONSOLE: ERROR
+    LOGGING_LEVEL_LOGGERS_ROOT: INFO
+    LOGGING_LEVEL_LOGGERS_APP: INFO
+    OIDC_USERINFO_SHORTNAME_FIELD: "first_name"
+    OIDC_USERINFO_FULLNAME_FIELDS: "name"
+    OIDC_OP_JWKS_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/certs
+    OIDC_OP_AUTHORIZATION_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/auth
+    OIDC_OP_TOKEN_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/token
+    OIDC_OP_USER_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/userinfo
+    OIDC_OP_LOGOUT_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/logout
+    OIDC_REDIRECT_ALLOWED_HOSTS: "accounts.127.0.0.1.nip.io"
+    OIDC_RP_CLIENT_ID: accounts
+    OIDC_RP_CLIENT_SECRET: ThisIsAnExampleKeyForDevPurposeOnly
+    OIDC_RP_SIGN_ALGO: RS256
+    OIDC_RP_SCOPES: "openid email profile"
+    OAUTH2_PROVIDER_OIDC_RSA_PRIVATE_KEY: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpQIBAAKCAQEApTqb+jCqIbqGFPkckVSyU71GtCsBXExL54mFO0h8omX1XXHC
+      dKm7MZWji5ZQM53EBlU1/w4U7b5J+IXJ1M8AiDpkYZrQG3RQOndUd4RmXGuJbRUV
+      60jaD1xXPq2iw1xmW8ptIU5RYVhb66WehGUsqK3mmaJ4IxDpQhTtWQ953hSKqr5U
+      vTAyz0GwtSI0y8WqbPoGbSR7VRg0YGpgzr8Dw/lkoBo7r9SWaTfAtYy0asy1iG1H
+      qddeYS22DVWIkyOdhZ7MCBYTlVfZ/qNAFIEwW7+ghh3V5GccbJXpFHV9cJ9aov8X
+      HGItFZBCE680ykrUWNqIDv8dQbQgmKPLJiSN9wIDAQABAoIBAQCK1cCSbanHRY+8
+      t8WFaIGfU3/BjBFMmN9+4lMNCU+QtdOCfUBD/wrIE1Ckzdz+Qiagm6EPe6miSy6k
+      oOaC5p0v2sDWMtuC9i0js3lKI/pO1h1Xh0wvs7tnBNRaWlRVi6KGpoUkY0aGYVR7
+      oWKdJNZtthH6LkZ8UI1vdV4qY5KnQ4NLz5sQhykIYkSvkCW08eMj1HMwOZL0KVS/
+      W777aBPb5lmvzbVxrFONPd/dFcV1KF48t2eZmCY2+nPukDKW3QdATZnrb3AHlsMr
+      PzQpZuhhDSlUs6DmRRjlXahQ7tf+XCyV1cJE2K5YDZt83VQulA4hQIXNOnru1Lf5
+      CqfAcpShAoGBAPmpjPOeIng71NFCr42IvSzZd17QnJERvWfHPgTquriKmb7yPfE9
+      iwP7/q9YlaMefa+2iPtlxNv1W9u4O3qMSmCtJGIOxBWxIVYzGDBuy8na/RBiIJID
+      wLyRY90hmHE6FR4zjT+1Np973pyXkirN4FTSJR68M3nejV4/ZjOqL7KzAoGBAKls
+      XLFb4wImoMkf01erWqTJFcQPF6Qh8BPCSPKNiO/PbTIZmpaT+UDva3lod8pOfpLN
+      uAVzZfJsj3kcrvDt/RRSDLEmx3qKH/byHgDJc+/iajAIL18qnL76T92ULj+kSbv4
+      bLCoOJLSe98LRiXqmchNPLbk+JA/K9wdBGOlHYmtAoGBAJT3VeMGuAqFqLYz1Avf
+      SwE3wMISN1lX/GuvtpG4fTEfgh0s7UjEL+5wrcZyVNa/mr79az6VuqCEBgtUIik9
+      DCQjK1JW/Sj0R6/nTMeZVH9c6yKbalO1aYsaNTv8j7j/rxoWKHGa7ry6bFmDFvPz
+      Y6c4vG1aXlyZLkDOE21AXrWBAoGBAIYMS8a0agdQotSfDquF02EgDM2kF1Nw2q/3
+      f5oRq+/50W7bXTmYeJUNGZ7kriruMi1bASem51mI1XfA3xWXZy8FwC8F/LySvrm3
+      VU/QFKAPJ287eqe0YnKkQD6TuIf4J7LG2tBnOOPKD+Io3GaxmN0nZ0taHOScZspw
+      VwG0KYu9AoGAYNTmu7Z4P1D0zGuA0dAhifwd6RGiRAsybxttJTFd3t4WguTxaice
+      GD3YvbdhzFut/hHvOziItiKlH3OZ71368mPAJ1mwoYkEu/AgDT1a8GTDL6rHHe3a
+      5Yv1rY2BlssBl6m44PKAHKoOyqGTSd5c+OEHxDbStn/eo+zNxyCh7wc=
+      -----END RSA PRIVATE KEY-----
+    LOGIN_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
+    LOGIN_REDIRECT_URL_FAILURE: https://accounts.127.0.0.1.nip.io
+    LOGOUT_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
+    DB_HOST: dev-backend-postgres
+    DB_NAME:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: database
+    DB_USER:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: username
+    DB_PASSWORD:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: password
+    DB_PORT: 5432
+    REDIS_URL: redis://user:pass@dev-backend-redis:6379/1
+    DJANGO_CELERY_BROKER_URL: redis://user:pass@dev-backend-redis:6379/1
+    AWS_S3_ENDPOINT_URL: http://dev-backend-minio.accounts.svc.cluster.local:9000
+    AWS_S3_ACCESS_KEY_ID: dinum
+    AWS_S3_SECRET_ACCESS_KEY: password
+    AWS_STORAGE_BUCKET_NAME: accounts-media-storage
+    STORAGES_STATICFILES_BACKEND: django.contrib.staticfiles.storage.StaticFilesStorage
+    CACHES_KEY_PREFIX: "{{ now | unixEpoch }}"
+  django:
+    envVars:
+      WEB_CONCURRENCY: 1
+      DB_PSYCOPG_POOL_MIN_SIZE: 10
+
+  migrate:
+    command:
+      - "/bin/sh"
+      - "-c"
+      - |
+        while ! python manage.py check --database default > /dev/null 2>&1
+        do
+          echo "Database not ready"
+          sleep 2
+        done
+
+        echo "Database is ready"
+
+        python manage.py migrate --no-input
+    restartPolicy: Never
+
+  # command:
+  #   - uvicorn
+  #   - --app-dir=/app
+  #   - --host=0.0.0.0
+  #   - --timeout-graceful-shutdown=300
+  #   - --limit-max-requests=20000
+  #   - --lifespan=off
+  #   - --reload
+  #   - "accounts.asgi:application"
+
+  createsuperuser:
+    command:
+      - "/bin/sh"
+      - "-c"
+      - |
+        while ! python manage.py check --database default > /dev/null 2>&1
+        do
+          echo "Database not ready"
+          sleep 2
+        done
+
+        echo "Database is ready"
+        python manage.py createsuperuser --email admin@example.com --password admin
+    restartPolicy: Never
+
+  themeCustomization:
+    enabled: true
+    file_content: {{ readFile "./configuration/theme/demo.json" }}
+
+  # Extra volume mounts to manage our local custom CA and avoid to set ssl_verify: false
+  extraVolumeMounts:
+    - name: certs
+      mountPath: /cert/cacert.pem
+      subPath: cacert.pem
+
+  # Extra volumes to manage our local custom CA and avoid to set ssl_verify: false
+  extraVolumes:
+    - name: certs
+      configMap:
+        name: certifi
+        items:
+        - key: cacert.pem
+          path: cacert.pem
+
+frontend:
+  envVars:
+    PORT: 8080
+    NEXT_PUBLIC_API_ORIGIN: https://accounts.127.0.0.1.nip.io
+
+  replicas: 1
+  command:
+    - yarn
+    - dev
+
+  image:
+    repository: localhost:5001/accounts-frontend
+    pullPolicy: Always
+    tag: "latest"
+
+  securityContext:
+    runAsNonRoot: false
+
+ingress:
+  enabled: true
+  host: accounts.127.0.0.1.nip.io
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+
+ingressAdmin:
+  enabled: true
+  host: accounts.127.0.0.1.nip.io
+
+posthog:
+  ingress:
+    enabled: false
+
+  ingressAssets:
+    enabled: false
+
+ingressMedia:
+  enabled: true
+  host: accounts.127.0.0.1.nip.io
+
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: https://accounts.127.0.0.1.nip.io/api/v1.0/documents/media-auth/
+    nginx.ingress.kubernetes.io/auth-response-headers: "Authorization, X-Amz-Date, X-Amz-Content-SHA256"
+    nginx.ingress.kubernetes.io/upstream-vhost: dev-backend-minio.accounts.svc.cluster.local:9000
+    nginx.ingress.kubernetes.io/rewrite-target: /accounts-media-storage/$1
+
+serviceMedia:
+  host: dev-backend-minio.accounts.svc.cluster.local
+  port: 9000

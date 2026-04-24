@@ -1,0 +1,60 @@
+# Django
+DJANGO_ALLOWED_HOSTS=*
+DJANGO_SECRET_KEY=ThisIsAnExampleKeyForDevPurposeOnly
+DJANGO_SETTINGS_MODULE=accounts.settings
+DJANGO_SUPERUSER_PASSWORD=admin
+
+# Logging
+# Set to DEBUG level for dev only
+LOGGING_LEVEL_HANDLERS_CONSOLE=INFO
+LOGGING_LEVEL_LOGGERS_ROOT=INFO
+LOGGING_LEVEL_LOGGERS_APP=INFO
+
+# Python
+PYTHONPATH=/app
+
+# accounts settings
+
+# Mail
+DJANGO_EMAIL_BRAND_NAME="La Suite Numérique"
+DJANGO_EMAIL_HOST="mailcatcher"
+DJANGO_EMAIL_LOGO_IMG="http://localhost:9900/assets/logo-suite-numerique.png"
+DJANGO_EMAIL_PORT=1025
+DJANGO_EMAIL_URL_APP="http://localhost:9900"
+
+# Backend url
+ACCOUNTS_BASE_URL="http://localhost:9901"
+
+# Media
+STORAGES_STATICFILES_BACKEND=django.contrib.staticfiles.storage.StaticFilesStorage
+AWS_S3_ENDPOINT_URL=http://minio:9000
+AWS_S3_ACCESS_KEY_ID=accounts
+AWS_S3_SECRET_ACCESS_KEY=password
+MEDIA_BASE_URL=http://localhost:9903
+
+# OIDC
+OIDC_OP_JWKS_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/certs
+OIDC_OP_AUTHORIZATION_ENDPOINT=http://localhost:9903/realms/accounts/protocol/openid-connect/auth
+OIDC_OP_TOKEN_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/token
+OIDC_OP_USER_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/userinfo
+OIDC_OP_INTROSPECTION_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/token/introspect
+
+OIDC_RP_CLIENT_ID=accounts
+OIDC_RP_CLIENT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
+OIDC_RP_SIGN_ALGO=RS256
+OIDC_RP_SCOPES="openid email profile"
+
+LOGIN_REDIRECT_URL=http://localhost:9900
+LOGIN_REDIRECT_URL_FAILURE=http://localhost:9900
+LOGOUT_REDIRECT_URL=http://localhost:9900
+
+OIDC_REDIRECT_ALLOWED_HOSTS="localhost:9903,localhost:9900"
+OIDC_AUTH_REQUEST_EXTRA_PARAMS={"acr_values": "eidas1"}
+
+# Store OIDC tokens in the session. Needed by search/ endpoint.
+# OIDC_STORE_ACCESS_TOKEN = True
+# OIDC_STORE_REFRESH_TOKEN = True # Store the encrypted refresh token in the session.
+
+# Must be a valid Fernet key (32 url-safe base64-encoded bytes)
+# To create one, use the bin/fernetkey command.
+# OIDC_STORE_REFRESH_TOKEN_KEY="your-32-byte-encryption-key=="

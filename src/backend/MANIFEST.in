@@ -1,0 +1,8 @@
+include LICENSE
+include README.md
+recursive-include accounts *.html *.png *.gif *.css *.ico *.jpg *.jpeg *.po *.mo *.eot *.svg *.ttf *.woff *.woff2
+recursive-include core/static *.png *.gif *.css *.ico *.jpg *.jpeg *.eot *.svg *.ttf *.woff *.woff2
+recursive-include core/templates *.html *.mjml
+recursive-include locale *.po *.mo
+recursive-include authentication *.html
+recursive-include oidc_provider *.html
