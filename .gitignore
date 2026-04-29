@@ -82,3 +82,6 @@ db.sqlite3
 
 # Cursor rules
 .cursorrules
+
+# Load testing
+src/loadtests/oidc/results/*
