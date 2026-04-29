@@ -64,6 +64,21 @@ FRONT_ESLINT_YARN   = $(COMPOSE_RUN) -w //app/src/frontend/packages/eslint-plugi
 FRONT_I18N_YARN     = $(COMPOSE_RUN) -w //app/src/frontend/packages/i18n node yarn
 FRONT_DEV_YARN      = $(COMPOSE) run --rm --service-ports -w //app/src/frontend/apps/accounts node yarn
 
+# -- Load tests
+OIDC_LOADTEST_LOCUSTFILE   = src/loadtests/oidc/locustfile.py
+OIDC_LOADTEST_HOST        ?= http://localhost:9901
+OIDC_LOADTEST_PROFILE     ?= mix-realistic
+OIDC_LOADTEST_RESULTS_DIR ?= src/loadtests/oidc/results
+OIDC_LOADTEST_CSV_PREFIX  ?= $(OIDC_LOADTEST_RESULTS_DIR)/$(OIDC_LOADTEST_PROFILE)
+OIDC_LOADTEST_CLIENT_ID   ?= oidc-test-client
+OIDC_LOADTEST_CLIENT_SECRET ?= oidc-test-secret
+OIDC_LOADTEST_REDIRECT_URI ?= https://client.example.test/callback
+OIDC_LOADTEST_SCOPE       ?= openid email
+OIDC_LOADTEST_PRECHECK_TIMEOUT ?= 5
+OIDC_SLO_MAX_FAILURE_PCT  ?= 1.0
+OIDC_SLO_MAX_P95_MS       ?= 1500
+OIDC_SLO_MAX_P99_MS       ?= 2500
+
 # ==============================================================================
 # RULES
 
@@ -445,3 +460,64 @@ bump-packages-version: ## bump the version of the project - VERSION_TYPE can be 
 	@$(FRONT_ESLINT_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 	@$(FRONT_I18N_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 .PHONY: bump-packages-version
+
+# -- Load tests
+oidc-loadtest-mix-realistic: ## run OIDC full E2E loadtest with realistic mixed profile (70/30 default)
+	@$(MAKE) oidc-loadtest-profile OIDC_LOADTEST_PROFILE=mix-realistic
+.PHONY: oidc-loadtest-mix-realistic
+
+oidc-loadtest-nominal: ## run OIDC full E2E loadtest with nominal profile
+	@$(MAKE) oidc-loadtest-profile OIDC_LOADTEST_PROFILE=nominal
+.PHONY: oidc-loadtest-nominal
+
+oidc-loadtest-profile: ## run OIDC full E2E loadtest in headless mode for a given profile
+	@$(MAKE) oidc-loadtest-preflight
+	@$(MAKE) oidc-loadtest-setup
+	@mkdir -p $(OIDC_LOADTEST_RESULTS_DIR)
+	@OIDC_LOADTEST_PROFILE=$(OIDC_LOADTEST_PROFILE) uv run --with locust==2.42.1 \
+		locust -f $(OIDC_LOADTEST_LOCUSTFILE) --host=$(OIDC_LOADTEST_HOST) \
+		--headless --csv=$(OIDC_LOADTEST_CSV_PREFIX)
+.PHONY: oidc-loadtest-profile
+
+oidc-loadtest-preflight: ## fail fast if backend is down or upstream authorize is interactive
+	@uv run python src/loadtests/oidc/preflight.py \
+		--host $(OIDC_LOADTEST_HOST) \
+		--client-id $(OIDC_LOADTEST_CLIENT_ID) \
+		--redirect-uri $(OIDC_LOADTEST_REDIRECT_URI) \
+		--scope "$(OIDC_LOADTEST_SCOPE)" \
+		--timeout $(OIDC_LOADTEST_PRECHECK_TIMEOUT)
+.PHONY: oidc-loadtest-preflight
+
+oidc-loadtest-setup: ## create/update OAuth client used by OIDC loadtests
+	@$(MANAGE) setup_oidc_loadtest \
+		--client-id $(OIDC_LOADTEST_CLIENT_ID) \
+		--client-secret $(OIDC_LOADTEST_CLIENT_SECRET) \
+		--redirect-uri $(OIDC_LOADTEST_REDIRECT_URI)
+.PHONY: oidc-loadtest-setup
+
+oidc-loadtest-smoke: ## run OIDC full E2E loadtest with smoke profile
+	@$(MAKE) oidc-loadtest-profile OIDC_LOADTEST_PROFILE=smoke
+.PHONY: oidc-loadtest-smoke
+
+oidc-loadtest-ui: ## open Locust UI for OIDC full E2E loadtests
+	@$(MAKE) oidc-loadtest-preflight
+	@$(MAKE) oidc-loadtest-setup
+	@uv run --with locust==2.42.1 locust -f $(OIDC_LOADTEST_LOCUSTFILE) --host=$(OIDC_LOADTEST_HOST)
+.PHONY: oidc-loadtest-ui
+
+oidc-slo-check: ## validate OIDC SLO from Locust CSV output
+	@python src/loadtests/oidc/check_slo_from_csv.py \
+		--csv-prefix $(OIDC_LOADTEST_CSV_PREFIX) \
+		--max-failure-pct $(OIDC_SLO_MAX_FAILURE_PCT) \
+		--max-p95-ms $(OIDC_SLO_MAX_P95_MS) \
+		--max-p99-ms $(OIDC_SLO_MAX_P99_MS)
+.PHONY: oidc-slo-check
+
+oidc-slo-check-flows: ## validate OIDC SLO from Locust CSV including flow rows
+	@python src/loadtests/oidc/check_slo_from_csv.py \
+		--csv-prefix $(OIDC_LOADTEST_CSV_PREFIX) \
+		--max-failure-pct $(OIDC_SLO_MAX_FAILURE_PCT) \
+		--max-p95-ms $(OIDC_SLO_MAX_P95_MS) \
+		--max-p99-ms $(OIDC_SLO_MAX_P99_MS) \
+		--include-flow-rows
+.PHONY: oidc-slo-check-flows

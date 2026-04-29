@@ -76,6 +76,7 @@ dev = [
     "freezegun==1.5.5",
     "ipdb==0.13.13",
     "ipython==9.8.0",
+    "locust==2.43.4",
     "pyfakefs==6.0.0",
     "pylint-django==2.6.1",
     "pylint<4.0.0",

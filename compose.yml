@@ -74,6 +74,8 @@ services:
       - env.d/development/postgresql.local
     ports:
       - "9901:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       default: {}
       lasuite:
