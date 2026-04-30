@@ -43,7 +43,6 @@ jobs:
       context: .
       file: src/frontend/Dockerfile
       target: frontend-production
-      arm64_reuse_amd64_build_arg: "FRONTEND_IMAGE"
       should_push: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'preview') }}
       docker_user: 1001:127
 
