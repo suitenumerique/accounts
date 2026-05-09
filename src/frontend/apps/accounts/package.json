@@ -76,7 +76,7 @@
     "react-select": "5.10.2",
     "styled-components": "6.3.12",
     "use-debounce": "10.1.0",
-    "uuid": "13.0.0",
+    "uuid": "13.0.1",
     "y-protocols": "1.0.7",
     "yjs": "*",
     "zod": "4.3.6",
