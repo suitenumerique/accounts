@@ -60,11 +60,11 @@ function _dc_run() {
     _set_user
 
     user_args="--user=$USER_ID"
-    if [ -z $USER_ID ]; then
+    if [ -z "$USER_ID" ]; then
         user_args=""
     fi
 
-    _docker_compose run --rm $user_args "$@"
+    _docker_compose run --rm "$user_args" "$@"
 }
 
 # _dc_exec: wrap docker compose exec command
@@ -79,11 +79,11 @@ function _dc_exec() {
     echo "🐳(compose) exec command: '\$@'"
 
     user_args="--user=$USER_ID"
-    if [ -z $USER_ID ]; then
+    if [ -z "$USER_ID" ]; then
         user_args=""
     fi
 
-    _docker_compose exec $user_args "$@"
+    _docker_compose exec "$user_args" "$@"
 }
 
 # _django_manage: wrap django's manage.py command with docker compose
