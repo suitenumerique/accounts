@@ -107,7 +107,6 @@ function _set_openstack_project() {
     declare -a projects
     declare -i default=1
     declare -i choice=0
-    declare -i n_projects
 
     # List projects by looking in the "./env.d/terraform" directory
     # and store them in an array
