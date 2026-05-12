@@ -120,16 +120,16 @@ $ make superuser
 
 When running the project, the following services are available:
 
-| Service         | URL / Port                                     | Description                 | Credentials                     |
-|-----------------|------------------------------------------------|-----------------------------|---------------------------------|
-| **Frontend**    | [http://localhost:9900](http://localhost:9900) | Main Messages frontend      | `user1@example.local` / `user1` |
-| **Backend API** | [http://localhost:9901](http://localhost:9901) | Django                      | `admin@admin.local` / `admin`   |
-| **Keycloak**    | [http://localhost:9902](http://localhost:9902) | Identity provider admin     | `admin` / `admin`               |
-| **Nginx**       | [http://localhost:9903](http://localhost:9903) | Nginx                       | No auth required                |
-| **Mailcatcher** | [http://localhost:9904](http://localhost:9904) | Email testing interface     | No auth required                |
-| **PostgreSQL**  | 9912                                           | Database server             | `user` / `pass`                 |
-| **Redis**       | 9913                                           | Cache and message broker    | No auth required                |
-| **MinIO**       | 9905 and [http://localhost:9906](http://localhost:9906) | Local S3 storage            | No auth required                |
+| Service         | URL / Port                                              | Description              | Credentials                     |
+|-----------------|---------------------------------------------------------|--------------------------|---------------------------------|
+| **Frontend**    | [http://localhost:9900](http://localhost:9900)          | Main Messages frontend   | `user1@example.local` / `user1` |
+| **Backend API** | [http://localhost:9901](http://localhost:9901)          | Django                   | `admin@admin.local` / `admin`   |
+| **Keycloak**    | [http://localhost:9902](http://localhost:9902)          | Identity provider admin  | `admin` / `admin`               |
+| **Nginx**       | [http://localhost:9903](http://localhost:9903)          | Nginx                    | No auth required                |
+| **Mailcatcher** | [http://localhost:9904](http://localhost:9904)          | Email testing interface  | No auth required                |
+| **PostgreSQL**  | 9912                                                    | Database server          | `user` / `pass`                 |
+| **Redis**       | 9913                                                    | Cache and message broker | No auth required                |
+| **MinIO**       | 9905 and [http://localhost:9906](http://localhost:9906) | Local S3 storage         | No auth required                |
 
 ## License 📝
 
