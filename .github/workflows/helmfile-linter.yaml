@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - 'main'
+    paths:
+      - "src/helm/**"
+      - ".github/workflows/helmfile-linter.yaml"
 
 jobs:
   helmfile-lint:
