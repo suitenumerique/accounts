@@ -1,0 +1,36 @@
+name: Changelog Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-slim
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'noChangeLog')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 50
+      - name: Check that the CHANGELOG has been modified in the current branch
+        run: git diff --name-only ${{ github.event.pull_request.base.sha }}..HEAD | grep 'CHANGELOG.md'
+
+  lint-changelog:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Check CHANGELOG max line length
+        run: |
+          max_line_length=$(cat CHANGELOG.md | grep -Ev "^\[.*\]: https://github.com" | wc -L)
+          if [ $max_line_length -ge 80 ]; then
+            echo "ERROR: CHANGELOG has lines longer than 80 characters."
+            exit 1
+          fi
