@@ -1,0 +1,37 @@
+name: End-to-end Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "src/backend/**"
+      - "src/frontend/**"
+      - ".github/workflows/_dependencies.yml"
+      - ".github/workflows/_e2e-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  install-dependencies:
+    uses: ./.github/workflows/_dependencies.yml
+    with:
+      node_version: '22.x'
+      with-front-dependencies-installation: true
+
+  test-e2e-chromium:
+    uses: ./.github/workflows/_e2e-tests.yml
+    with:
+      browser-name: chromium
+      projects: --project=chromium
+      timeout-minutes: 25
+
+  test-e2e-other-browser:
+    needs: test-e2e-chromium
+    uses: ./.github/workflows/_e2e-tests.yml
+    with:
+      browser-name: other-browser
+      projects: --project=firefox --project=webkit
+      timeout-minutes: 30

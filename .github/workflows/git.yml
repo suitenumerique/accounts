@@ -1,0 +1,31 @@
+name: Git Workflow
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-git:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: show
+        run: git log origin/${{ github.event.pull_request.base.ref }}..HEAD
+      - name: Enforce absence of print statements in code
+        if: always()
+        run: |
+          ! git diff origin/${{ github.event.pull_request.base.ref }}..HEAD -- src/backend ':(exclude)**/git.yml' | grep "print("
+      - name: Check absence of fixup commits
+        if: always()
+        run: |
+          ! git log origin/${{ github.event.pull_request.base.ref }}..HEAD | grep 'fixup!'
+      - name: Lint commit messages added to main
+        if: always()
+        run: |
+          pip install --user requests gitlint
+          ~/.local/bin/gitlint --commits origin/${{ github.event.pull_request.base.ref }}..HEAD
