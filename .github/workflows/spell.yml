@@ -1,0 +1,28 @@
+name: Spell Workflow
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-spell-mistakes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Install codespell
+        run: pip install --user codespell
+      - name: Check for typos
+        run: |
+          codespell \
+            --check-filenames \
+            --ignore-words-list "afterAll,statics" \
+            --skip "./git/" \
+            --skip "**/*.pdf" \
+            --skip "**/*.po" \
+            --skip "**/*.pot" \
+            --skip "**/*.json" \
+            --skip "**/uv.lock" \
+            --skip "**/yarn.lock"
