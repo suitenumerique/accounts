@@ -5,8 +5,10 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - "*"
+    paths:
+      - "src/backend/**"
+      - ".github/workflows/accounts-backend.yml"
+      - ".github/workflows/_dependencies.yml"
 
 permissions:
   contents: read

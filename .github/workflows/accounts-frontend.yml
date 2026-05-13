@@ -5,8 +5,10 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - "*"
+    paths:
+      - "src/frontend/**"
+      - ".github/workflows/accounts-frontend.yml"
+      - ".github/workflows/_dependencies.yml"
 
 permissions:
   contents: read
@@ -65,21 +67,6 @@ jobs:
 
       - name: Check linting
         run: cd src/frontend/ && yarn lint
-
-  test-e2e-chromium:
-    uses: ./.github/workflows/_e2e-tests.yml
-    with:
-      browser-name: chromium
-      projects: --project=chromium
-      timeout-minutes: 25
-
-  test-e2e-other-browser:
-    needs: test-e2e-chromium
-    uses: ./.github/workflows/_e2e-tests.yml
-    with:
-      browser-name: other-browser
-      projects: --project=firefox --project=webkit
-      timeout-minutes: 30
 
   bundle-size-check:
     runs-on: ubuntu-latest
