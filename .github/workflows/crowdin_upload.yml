@@ -28,7 +28,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13.3"
+          python-version-file: "src/backend/pyproject.toml"
           cache: "pip"
       - name: Upgrade pip and setuptools
         run: pip install --upgrade pip setuptools
