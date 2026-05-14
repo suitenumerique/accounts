@@ -95,6 +95,9 @@ zip-safe = true
 [tool.distutils.bdist_wheel]
 universal = true
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 exclude = [
     ".git",
