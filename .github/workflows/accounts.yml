@@ -89,6 +89,15 @@ jobs:
             --skip "**/uv.lock" \
             --skip "**/yarn.lock"
 
+  check-shell-scripts:
+    runs-on: ubuntu-slim
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Check shell scripts
+        run: find . -type f -name '*.sh' -exec shellcheck --external-sources {} +
+
   lint-back:
     runs-on: ubuntu-latest
     defaults:
