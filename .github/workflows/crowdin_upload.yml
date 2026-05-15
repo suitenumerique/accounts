@@ -29,12 +29,13 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.14.5"
-          cache: "pip"
-      - name: Upgrade pip and setuptools
-        run: pip install --upgrade pip setuptools
-      - name: Install development dependencies
-        run: pip install --user .
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+      - name: Install dependencies
         working-directory: src/backend
+        run: |
+          uv venv --no-managed-python venv
+          VIRTUAL_ENV=venv uv sync --locked --no-install-project --no-dev
       - name: Restore the mail templates
         uses: actions/cache@v5
         id: mail-templates
@@ -49,7 +50,7 @@ jobs:
       - name: generate pot files
         working-directory: src/backend
         run: |
-          DJANGO_CONFIGURATION=Build python manage.py makemessages -a --keep-pot
+          DJANGO_CONFIGURATION=Build venv/python manage.py makemessages -a --keep-pot
       # frontend i18n
       - name: Restore the frontend cache
         uses: actions/cache@v5

@@ -101,17 +101,18 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.14.5"
-          cache: "pip"
-      - name: Upgrade pip and setuptools
-        run: pip install --upgrade pip setuptools
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Install development dependencies
-        run: pip install --user . --group dev
+        run: |
+          uv venv --no-managed-python venv
+          VIRTUAL_ENV=venv uv sync --locked --no-install-project --dev
       - name: Check code formatting with ruff
-        run: ~/.local/bin/ruff format . --diff
+        run: ./venv/bin/ruff format . --diff
       - name: Lint code with ruff
-        run: ~/.local/bin/ruff check .
+        run: ./venv/bin/ruff check .
       - name: Lint code with pylint
-        run: ~/.local/bin/pylint .
+        run: ./venv/bin/pylint .
 
   test-back:
     runs-on: ubuntu-latest
@@ -197,10 +198,13 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.14.5"
-          cache: "pip"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Install development dependencies
-        run: pip install --user . --group dev
+        run: |
+          uv venv --no-managed-python venv
+          VIRTUAL_ENV=venv uv sync --locked --no-install-project --dev
 
       - name: Install gettext (required to compile messages) and MIME support
         run: |
