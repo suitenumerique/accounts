@@ -14,28 +14,9 @@
       "matchPackageNames": []
     },
     {
-      "groupName": "allowed redis versions",
+      "groupName": "only update the python lock file",
       "matchManagers": ["pep621"],
-      "matchPackageNames": ["redis"],
-      "allowedVersions": "<6.0.0"
-    },
-    {
-      "groupName": "allowed pylint versions",
-      "matchManagers": ["pep621"],
-      "matchPackageNames": ["pylint"],
-      "allowedVersions": "<4.0.0"
-    },
-    {
-      "groupName": "allowed django versions",
-      "matchManagers": ["pep621"],
-      "matchPackageNames": ["django"],
-      "allowedVersions": "<6.0.0"
-    },
-    {
-      "groupName": "allowed celery versions",
-      "matchManagers": ["pep621"],
-      "matchPackageNames": ["celery"],
-      "allowedVersions": "<5.6.0"
+      "rangeStrategy": "in-range-only"
     },
     {
       "enabled": false,
