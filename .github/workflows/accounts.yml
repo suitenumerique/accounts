@@ -105,7 +105,7 @@ jobs:
       - name: Upgrade pip and setuptools
         run: pip install --upgrade pip setuptools
       - name: Install development dependencies
-        run: pip install --user .[dev]
+        run: pip install --user . --group dev
       - name: Check code formatting with ruff
         run: ~/.local/bin/ruff format . --diff
       - name: Lint code with ruff
@@ -200,7 +200,7 @@ jobs:
           cache: "pip"
 
       - name: Install development dependencies
-        run: pip install --user .[dev]
+        run: pip install --user . --group dev
 
       - name: Install gettext (required to compile messages) and MIME support
         run: |
