@@ -118,7 +118,7 @@ USER root:root
 RUN apk add --no-cache postgresql-client
 
  # Install development dependencies
-RUN --mount=from=ghcr.io/astral-sh/uv:0.9.26,source=/uv,target=/bin/uv \
+RUN --mount=from=back-builder,source=/bin/uv,target=/bin/uv \
     uv sync --all-extras --locked
 
 # Restore the un-privileged user running the application
