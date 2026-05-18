@@ -1,7 +1,14 @@
 # Django accounts
+ARG PYTHON_VERSION=3.14.4
+ARG UV_VERSION=0.11.8
+ARG NODE_VERSION=24
+
+# ---- Workaround: variable expansion is not supported for --from ----
+# https://github.com/moby/buildkit/issues/2034
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 
 # ---- base image to inherit from ----
-FROM python:3.14.5-alpine AS base
+FROM python:${PYTHON_VERSION}-alpine AS base
 
 # Upgrade system packages to install security updates
 RUN apk update && apk upgrade --no-cache
@@ -13,7 +20,7 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_PYTHON_DOWNLOADS=0
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.8 /uv /uvx /bin/
+COPY --from=uv /uv /uvx /bin/
 
 WORKDIR /app
 
@@ -27,7 +34,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 
 # ---- mails ----
-FROM node:24 AS mail-builder
+FROM node:${NODE_VERSION} AS mail-builder
 
 COPY ./src/mail /mail/app
 
