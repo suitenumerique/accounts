@@ -32,29 +32,22 @@ AWS_S3_ACCESS_KEY_ID=accounts
 AWS_S3_SECRET_ACCESS_KEY=password
 MEDIA_BASE_URL=http://localhost:9903
 
-# OIDC
-OIDC_OP_JWKS_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/certs
-OIDC_OP_AUTHORIZATION_ENDPOINT=http://localhost:9903/realms/accounts/protocol/openid-connect/auth
-OIDC_OP_TOKEN_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/token
-OIDC_OP_USER_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/userinfo
-OIDC_OP_INTROSPECTION_ENDPOINT=http://nginx:9903/realms/accounts/protocol/openid-connect/token/introspect
-
-OIDC_RP_CLIENT_ID=accounts
-OIDC_RP_CLIENT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
-OIDC_RP_SIGN_ALGO=RS256
-OIDC_RP_SCOPES="openid email profile"
-
+# Authentication
 LOGIN_REDIRECT_URL=http://localhost:9900
-LOGIN_REDIRECT_URL_FAILURE=http://localhost:9900
 LOGOUT_REDIRECT_URL=http://localhost:9900
+SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS="localhost:9900,localhost:9903"
 
-OIDC_REDIRECT_ALLOWED_HOSTS="localhost:9903,localhost:9900"
-OIDC_AUTH_REQUEST_EXTRA_PARAMS={"acr_values": "eidas1"}
+SOCIAL_AUTH_PRO_CONNECT_KEY=accounts
+SOCIAL_AUTH_PRO_CONNECT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
+# Override the endpoints URL called from the backend as they doesn't match the Keycloak hostname
+SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT=http://nginx:9903/realms/accounts
+SOCIAL_AUTH_PRO_CONNECT_ACCESS_TOKEN_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/token
+SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/revoke
+SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/userinfo
+SOCIAL_AUTH_PRO_CONNECT_JWKS_URI=http://nginx:9903/realms/accounts/protocol/openid-connect/certs
 
+# OIDC - Mozilla
 # Store OIDC tokens in the session. Needed by search/ endpoint.
-# OIDC_STORE_ACCESS_TOKEN = True
-# OIDC_STORE_REFRESH_TOKEN = True # Store the encrypted refresh token in the session.
-
 # Must be a valid Fernet key (32 url-safe base64-encoded bytes)
 # To create one, use the bin/fernetkey command.
-# OIDC_STORE_REFRESH_TOKEN_KEY="your-32-byte-encryption-key=="
+# OIDC_STORE_REFRESH_TOKEN_KEY="your-32-byte-encryption-key=="  # FIXME

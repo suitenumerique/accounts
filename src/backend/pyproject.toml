@@ -49,7 +49,6 @@ dependencies = [
     "gunicorn==23.0.0",
     "jsonschema==4.25.1",
     "lxml==6.0.2",
-    "mozilla-django-oidc==5.0.2",
     "nested-multipart-parser==1.6.0",
     "psycopg[binary]==3.3.2",
     "PyJWT==2.12.1",
@@ -57,6 +56,7 @@ dependencies = [
     "redis<6.0.0",
     "requests==2.33.1",
     "sentry-sdk==2.48.0",
+    "social-auth-app-django==5.9.0",
     "whitenoise==6.11.0",
 ]
 

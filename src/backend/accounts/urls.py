@@ -11,14 +11,12 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from lasuite.oidc_login.urls import urlpatterns as oidc_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path(f"api/{settings.API_VERSION}/", include("core.urls")),
     path(f"api/{settings.API_VERSION}/", include("authentication.urls")),
     path(f"api/{settings.API_VERSION}/o/", include("oidc_provider.urls")),
-    path(f"api/{settings.API_VERSION}/oidc/", include(oidc_urls)),
 ]
 
 if settings.DEBUG:
