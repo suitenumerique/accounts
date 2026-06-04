@@ -17,7 +17,7 @@ class UserAdmin(auth_admin.UserAdmin):
             {
                 "fields": (
                     "id",
-                    "admin_email",
+                    "username",
                     "password",
                 )
             },
@@ -64,7 +64,7 @@ class UserAdmin(auth_admin.UserAdmin):
         "id",
         "sub",
         "full_name",
-        "admin_email",
+        "username",
         "email",
         "is_active",
         "is_staff",
@@ -91,4 +91,4 @@ class UserAdmin(auth_admin.UserAdmin):
         "created_at",
         "updated_at",
     )
-    search_fields = ("id", "sub", "admin_email", "email", "full_name")
+    search_fields = ("id", "sub", "username", "email", "full_name")

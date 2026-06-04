@@ -115,9 +115,13 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
     email = models.EmailField(_("identity email address"), blank=True, null=True)
 
     # Unlike the "email" field which stores the email coming from the OIDC token, this field
-    # stores the email used by staff users to login to the admin site
-    admin_email = models.EmailField(
-        _("admin email address"), unique=True, blank=True, null=True
+    # stores the email used by staff users to log in to the admin site
+    username = models.EmailField(
+        _("username"),
+        unique=True,
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
     )
 
     language = models.CharField(
@@ -160,7 +164,7 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "admin_email"
+    USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -169,4 +173,4 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return self.email or self.admin_email or str(self.id)
+        return self.email or self.username or str(self.id)

@@ -139,7 +139,7 @@ def create_demo(stdout):
             first_name = random.choice(first_names)
             queue.push(
                 models.User(
-                    admin_email=f"user.test{i:d}@example.com",
+                    username=f"user.test{i:d}@example.com",
                     email=f"user.test{i:d}@example.com",
                     password="!",
                     is_superuser=False,

@@ -29,9 +29,9 @@ class Command(BaseCommand):
         """
         email = options.get("email")
         try:
-            user = UserModel.objects.get(admin_email=email)
+            user = UserModel.objects.get_by_natural_key(username=email)
         except UserModel.DoesNotExist:
-            user = UserModel(admin_email=email)
+            user = UserModel.objects.create_superuser(username=email, email=email)
             message = "Superuser created successfully."
         else:
             if user.is_superuser and user.is_staff:
