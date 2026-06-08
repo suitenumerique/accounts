@@ -10,6 +10,10 @@ on:
       - "src/helm/**"
       - ".github/workflows/helmfile-linter.yaml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   helmfile-lint:
     runs-on: ubuntu-latest
