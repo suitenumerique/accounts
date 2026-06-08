@@ -290,9 +290,7 @@ class ConfigView(drf.views.APIView):
             return theme_customization
 
         try:
-            with open(
-                settings.THEME_CUSTOMIZATION_FILE_PATH, "r", encoding="utf-8"
-            ) as f:
+            with open(settings.THEME_CUSTOMIZATION_FILE_PATH, encoding="utf-8") as f:
                 theme_customization = json.load(f)
         except FileNotFoundError:
             logger.error(

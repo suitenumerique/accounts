@@ -170,7 +170,7 @@ def test_api_config_with_original_theme_customization(is_authenticated, settings
     assert response.status_code == HTTP_200_OK
     content = response.json()
 
-    with open(settings.THEME_CUSTOMIZATION_FILE_PATH, "r", encoding="utf-8") as f:
+    with open(settings.THEME_CUSTOMIZATION_FILE_PATH, encoding="utf-8") as f:
         theme_customization = json.load(f)
 
     assert content["theme_customization"] == theme_customization

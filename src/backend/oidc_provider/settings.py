@@ -4,7 +4,7 @@ Django settings dedicated to oidc_provider application.
 
 import re
 import textwrap
-from typing import Any, Dict, Optional
+from typing import Any
 
 from configurations import values
 from cryptography.hazmat.primitives import serialization
@@ -18,7 +18,7 @@ TEMPORARY_OIDC_RSA_KEY_ALLOWED_ENVIRONMENTS = {
 }
 
 
-def _value_format_pem_str(value: Optional[str]) -> Optional[str]:
+def _value_format_pem_str(value: str | None) -> str | None:
     """
     Receive a bad formatted PEM string and convert it to good formatted PEM string.
 
@@ -162,7 +162,7 @@ class OIDCProviderSettings:
         )
 
     @property
-    def OAUTH2_PROVIDER(self) -> Dict[str, Any]:  # pylint: disable=invalid-name
+    def OAUTH2_PROVIDER(self) -> dict[str, Any]:  # pylint: disable=invalid-name
         """Build the OAUTH2_PROVIDER settings dictionary based on the configuration provided."""
 
         return {
