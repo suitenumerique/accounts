@@ -23,10 +23,10 @@ jobs:
         if: always()
         run: |
           ! git diff origin/${{ github.event.pull_request.base.ref }}..HEAD -- src/backend ':(exclude)**/git.yml' | grep "print("
-      - name: Check absence of fixup commits
+      - name: Check absence of fixup or squash commits
         if: always()
         run: |
-          ! git log origin/${{ github.event.pull_request.base.ref }}..HEAD | grep 'fixup!'
+          ! git log --format=%s origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -E '^(fixup!|squash!)'
       - name: Lint commit messages added to main
         if: always()
         run: |
