@@ -31,6 +31,11 @@ description: Build and push a container image based on the input arguments provi
         required: false
         default: ""
         description: The docker_user ARGUMENT to pass to the build step
+    secrets:
+      DOCKER_HUB_USER:
+        required: true
+      DOCKER_HUB_PASSWORD:
+        required: true
 
 permissions:
   contents: read
