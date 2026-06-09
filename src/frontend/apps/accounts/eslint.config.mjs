@@ -1,21 +1,24 @@
-import { defineConfig } from '@eslint/config-helpers';
-import docsPlugin from 'eslint-plugin-docs';
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const eslintConfig = defineConfig([
+const eslintConfig = [
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
-    ignores: ['.next/**', 'out/**'],
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+    ],
   },
   {
-    plugins: {
-      docs: docsPlugin,
-    },
-    extends: ['docs/next'],
-    settings: {
-      next: {
-        rootDir: import.meta.dirname,
-      },
+    rules: {
+      "react-hooks/exhaustive-deps": "off",
+      "@next/next/no-img-element": "off",
     },
   },
-]);
+];
 
 export default eslintConfig;

@@ -1,35 +1,68 @@
-import type { AppProps } from 'next/app';
-import Head from 'next/head';
-import { useTranslation } from 'react-i18next';
+import { createContext, useContext, useState } from "react";
+import type { AppProps } from "next/app";
+import Head from "next/head";
+import { CunninghamProvider } from "@gouvfr-lasuite/ui-kit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AppProvider } from '@/core/';
-import '@/i18n/initI18n';
-import { NextPageWithLayout } from '@/types/next';
+import "../styles/globals.scss";
+import "@/i18n/initI18n";
+import { useLocales } from "@/i18n/useLocale";
+import { ConfigProvider } from "@/features/config/ConfigProvider";
+import { Auth } from "@/features/auth/Auth";
 
-import './globals.css';
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
-type AppPropsWithLayout = AppProps & {
-  Component: NextPageWithLayout;
+export interface AppContextType {
+  theme: string;
+  setTheme: (theme: string) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useAppContext must be used within an AppContextProvider");
+  }
+  return context;
 };
 
-export default function App({ Component, pageProps }: AppPropsWithLayout) {
-  const getLayout = Component.getLayout ?? ((page) => page);
-  const { t } = useTranslation();
+export default function MyApp(props: AppProps) {
+  const [theme, setTheme] = useState<string>("dsfr-light");
+
+  return (
+    <AppContext.Provider value={{ theme, setTheme }}>
+      <QueryClientProvider client={queryClient}>
+        <MyAppInner {...props} />
+      </QueryClientProvider>
+    </AppContext.Provider>
+  );
+}
+
+function MyAppInner({ Component, pageProps }: AppProps) {
+  const locale = useLocales();
+  const { theme } = useAppContext();
 
   return (
     <>
       <Head>
-        <title>{t('My Account')}</title>
-        <meta property="og:title" content={t('My Account')} key="title" />
-        <meta
-          name="description"
-          content={t(
-            'My Account: the gateway to La Suite collaborative tools, with account management features coming soon.',
-          )}
-        />
+        <title>La Suite Account</title>
+        <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <AppProvider>{getLayout(<Component {...pageProps} />)}</AppProvider>
+      <CunninghamProvider currentLocale={locale} theme={theme}>
+        <ConfigProvider>
+          <Auth>
+            <Component {...pageProps} />
+          </Auth>
+        </ConfigProvider>
+      </CunninghamProvider>
     </>
   );
 }

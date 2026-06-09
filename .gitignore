@@ -28,6 +28,7 @@ share/python-wheels/
 MANIFEST
 .DS_Store
 .next/
+out/
 
 # Translations	# Translations
 *.mo
@@ -79,6 +80,16 @@ db.sqlite3
 .vscode/
 *.iml
 .devcontainer
+.agents/
+.agents
+.claude/
+.claude
+.codex/
+.playwright-mcp/
+openspec/
+.zed/
+AGENTS.md
+CLAUDE.md
 
 # Cursor rules
 .cursorrules

@@ -12,13 +12,10 @@ WORKDIR /home/frontend/
 COPY ./src/frontend/package.json ./package.json
 COPY ./src/frontend/yarn.lock ./yarn.lock
 COPY ./src/frontend/apps/accounts/package.json ./apps/accounts/package.json
-COPY ./src/frontend/packages/eslint-plugin-docs/package.json ./packages/eslint-plugin-docs/package.json
 
 RUN yarn install --frozen-lockfile
 
 COPY .dockerignore ./.dockerignore
-COPY ./src/frontend/.prettierrc.js ./.prettierrc.js
-COPY ./src/frontend/packages/eslint-plugin-docs ./packages/eslint-plugin-docs
 COPY ./src/frontend/apps/accounts ./apps/accounts
 
 ### ---- Front-end builder image ----
@@ -30,7 +27,7 @@ FROM frontend-deps AS accounts-dev
 
 WORKDIR /home/frontend/apps/accounts
 
-EXPOSE 3000
+EXPOSE 9900
 
 CMD [ "yarn", "dev"]
 
