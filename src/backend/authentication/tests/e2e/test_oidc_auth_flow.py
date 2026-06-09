@@ -179,7 +179,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     assert user.email == "testuser@example.com"
     assert user.short_name == "Test"
     assert user.full_name == "Test User"
-    assert user.social_auth.get(provider="pro-connect").extra_data == {
+    assert user.identity_providers.get(provider="pro-connect").extra_data == {
         "access_token": "upstream-access-token",
         "auth_time": int(user.last_login.timestamp()),
         "email": "testuser@example.com",

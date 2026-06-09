@@ -4,7 +4,7 @@ from django.urls import reverse
 
 import pytest
 
-from authentication.strategies import OptionalURLSettingStrategy
+from authentication.social_auth import OptionalURLSettingStrategy
 
 
 @pytest.mark.parametrize(

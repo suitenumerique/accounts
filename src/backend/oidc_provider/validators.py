@@ -159,14 +159,14 @@ class LaSuiteValidator(BaseValidator):
         if "uid" in request.scopes:
             additional_claims["uid"] = str(request.user.pk)
 
-        if "siret" in request.scopes and request.user.social_auth:
-            social_auth_siret = [
+        if "siret" in request.scopes and request.user.identity_providers.exists():
+            identity_providers_siret = [
                 s.extra_data["siret"]
-                for s in request.user.social_auth
+                for s in request.user.identity_providers.all()
                 if s.extra_data.get("siret")
             ]
-            if social_auth_siret:
-                additional_claims["siret"] = social_auth_siret[0]
+            if identity_providers_siret:
+                additional_claims["siret"] = identity_providers_siret[0]
 
         # Include 'acr' claim if it is present in the request claims and equals 'eidas1'
         # see _create_authorization_code method for more details

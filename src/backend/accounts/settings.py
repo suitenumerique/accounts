@@ -21,6 +21,8 @@ from lasuite.configuration.values import SecretFileValue
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import ignore_logger
 
+from core.configuration.values import SecretFileListValue
+
 from authentication.settings import AuthenticationSettings
 from oidc_provider.settings import OIDCProviderSettings
 
@@ -81,6 +83,8 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     # Security
     ALLOWED_HOSTS = values.ListValue([])
     SECRET_KEY = SecretFileValue(None)
+    SECRET_KEY_FALLBACKS = SecretFileListValue([])
+    SALT_KEY = SecretFileListValue(None)
     SERVER_TO_SERVER_API_TOKENS = values.ListValue([])
 
     # Application definition
