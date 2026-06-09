@@ -1,8 +1,5 @@
-# e2e
-test-results/
-report*/
-blob-report/
-playwright/.auth/
-playwright/.cache/
-screenshots/
+node_modules/
+/test-results/
+/report/
+/playwright/.cache/
 .env.local

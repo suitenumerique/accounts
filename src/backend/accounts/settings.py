@@ -68,6 +68,12 @@ class Base(OIDCProviderSettings, Configuration):
 
     DEBUG = False
     USE_SWAGGER = False
+    # Load the e2e auth-bypass URLs. Always False here so it can never be
+    # enabled in production; turned on via env (e.g. env.d/development/common.e2e)
+    # for the e2e backend only.
+    LOAD_E2E_URLS = values.BooleanValue(
+        default=False, environ_name="LOAD_E2E_URLS", environ_prefix=None
+    )
 
     API_VERSION = "v1.0"
 
@@ -723,7 +729,7 @@ class Development(Base):
 
     def __init__(self):
         # pylint: disable=invalid-name
-        self.INSTALLED_APPS += ["django_extensions", "drf_spectacular_sidecar"]
+        self.INSTALLED_APPS += ["django_extensions", "drf_spectacular_sidecar", "e2e"]
 
 
 class Test(Base):
@@ -741,7 +747,7 @@ class Test(Base):
 
     def __init__(self):
         # pylint: disable=invalid-name
-        self.INSTALLED_APPS += ["drf_spectacular_sidecar"]
+        self.INSTALLED_APPS += ["drf_spectacular_sidecar", "e2e"]
 
 
 class ContinuousIntegration(Test):

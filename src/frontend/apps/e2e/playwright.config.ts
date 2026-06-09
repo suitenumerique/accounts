@@ -1,92 +1,60 @@
-import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-
-dotenv.config({
-  path: ['./.env.local', './.env'],
-  quiet: true,
-  debug: !process.env.CI,
-});
-
-const PORT = process.env.PORT;
-const baseURL = process.env.BASE_URL;
+import { defineConfig, devices } from "@playwright/test";
 
 /**
+ * The accounts stack (backend, Keycloak, frontend) is expected to be up and
+ * serving the frontend at BASE_URL — locally via `make run` (or `make
+ * run-frontend-development`) and in CI via `make bootstrap-e2e`.
+ *
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig({
-  // Timeout per test
-  timeout: 30 * 1000,
-  testDir: './__tests__',
-  outputDir: './test-results',
+const baseURL = process.env.BASE_URL || "http://localhost:9900";
 
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+export default defineConfig({
+  timeout: 30 * 1000,
+  testDir: "./__tests__",
+  outputDir: "./test-results",
+
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  maxFailures: process.env.CI ? 3 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 3 : undefined,
+  /* Opt out of parallel tests. */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['html', { outputFolder: './report' }],
-    ['list', { printSteps: true }],
-  ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: [["html", { outputFolder: "./report", open: "never" }], ["list"]],
+
   use: {
     baseURL,
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    viewport: { width: 1280, height: 720 },
+    trace: "retain-on-failure",
+    video: "on-first-retry",
+    screenshot: "only-on-failure",
   },
-  ...(process.env.CI
-    ? {}
-    : {
-        webServer: {
-          command: `cd ../.. && yarn app:dev --port ${PORT}`,
-          url: baseURL,
-          timeout: 120 * 1000,
-          reuseExistingServer: true,
-        },
-      }),
-  globalSetup: require.resolve('./__tests__/app-accounts/auth.setup'),
-  /* Configure projects for major browsers */
+
   projects: [
     {
-      name: 'chromium',
+      name: "chromium",
       use: {
-        ...devices['Desktop Chrome'],
-        locale: 'en-US',
-        timezoneId: 'Europe/Paris',
-        storageState: 'playwright/.auth/user-chromium.json',
-        contextOptions: {
-          permissions: ['clipboard-read', 'clipboard-write'],
-        },
+        ...devices["Desktop Chrome"],
+        locale: "en-US",
+        timezoneId: "Europe/Paris",
       },
     },
     {
-      name: 'webkit',
+      name: "webkit",
       use: {
-        ...devices['Desktop Safari'],
-        locale: 'en-US',
-        timezoneId: 'Europe/Paris',
-        storageState: 'playwright/.auth/user-webkit.json',
+        ...devices["Desktop Safari"],
+        locale: "en-US",
+        timezoneId: "Europe/Paris",
       },
     },
     {
-      name: 'firefox',
+      name: "firefox",
       use: {
-        ...devices['Desktop Firefox'],
-        locale: 'en-US',
-        timezoneId: 'Europe/Paris',
-        storageState: 'playwright/.auth/user-firefox.json',
-        launchOptions: {
-          firefoxUserPrefs: {
-            'dom.events.asyncClipboard.readText': true,
-            'dom.events.testing.asyncClipboard': true,
-          },
-        },
+        ...devices["Desktop Firefox"],
+        locale: "en-US",
+        timezoneId: "Europe/Paris",
       },
     },
   ],

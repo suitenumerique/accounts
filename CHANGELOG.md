@@ -6,5 +6,7 @@ and this project adheres to
 
 ## [Unreleased]
 
+- ✨(frontend) init the frontend app (webaoo + e2e)
+
 
 [unreleased]: https://github.com/suitenumerique/docs/compare/main

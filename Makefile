@@ -52,6 +52,7 @@ COMPOSE_RUN_CROWDIN = $(COMPOSE_RUN) crowdin crowdin
 
 # -- Backend
 MANAGE              = $(COMPOSE_RUN_APP) python manage.py
+PSQL_E2E            = ./bin/postgres_e2e
 MAIL_YARN           = $(COMPOSE_RUN) -w //app/src/mail node yarn
 
 # -- Frontend
@@ -60,7 +61,6 @@ PATH_FRONT_ACCOUNTS  = $(PATH_FRONT)/apps/accounts
 FRONT_YARN          = $(COMPOSE_RUN) -w //app/src/frontend node yarn
 FRONT_E2E_YARN      = $(COMPOSE_RUN) -w //app/src/frontend/apps/e2e node yarn
 FRONT_ACCOUNTS_YARN = $(COMPOSE_RUN) -w //app/src/frontend/apps/accounts node yarn
-FRONT_ESLINT_YARN   = $(COMPOSE_RUN) -w //app/src/frontend/packages/eslint-plugin-docs node yarn
 FRONT_I18N_YARN     = $(COMPOSE_RUN) -w //app/src/frontend/packages/i18n node yarn
 FRONT_DEV_YARN      = $(COMPOSE) run --rm --service-ports -w //app/src/frontend/apps/accounts node yarn
 
@@ -191,7 +191,7 @@ bootstrap-e2e: ## Prepare Docker production images to be used for e2e tests
 bootstrap-e2e: \
 	pre-bootstrap \
 	build-e2e \
-	post-bootstrap \
+	back-i18n-compile \
 	run-e2e
 .PHONY: bootstrap-e2e
 
@@ -220,6 +220,7 @@ build-e2e: ## build the e2e container
 
 down: ## stop and remove containers, networks, images, and volumes
 	@$(COMPOSE_E2E) down
+	rm -rf data/postgresql.e2e
 .PHONY: down
 
 logs: ## display app-dev logs (follow mode)
@@ -236,11 +237,40 @@ run:
 	@$(COMPOSE) up --force-recreate -d frontend-development
 .PHONY: run
 
-run-e2e: ## start the e2e server
-run-e2e:
-	@$(MAKE) run-backend
+run-backend-e2e: ## start the backend for e2e tests (clean accounts_e2e DB + auth bypass)
+	@$(MAKE) stop
+	rm -rf data/postgresql.e2e
+	@ENV_OVERRIDE=e2e $(MAKE) run-backend
+	@ENV_OVERRIDE=e2e $(MAKE) migrate
+.PHONY: run-backend-e2e
+
+run-e2e-frontend: ## start only the e2e (production static) frontend
 	@$(COMPOSE_E2E) up --force-recreate -d frontend
+.PHONY: run-e2e-frontend
+
+run-e2e: ## start the full e2e stack (e2e backend + production frontend)
+run-e2e:
+	@$(MAKE) run-backend-e2e
+	@$(MAKE) run-e2e-frontend
 .PHONY: run-e2e
+
+clear-db-e2e: ## quickly clears the e2e database, used between e2e tests
+	$(PSQL_E2E) -c "$$(cat bin/clear_db_e2e.sql)"
+.PHONY: clear-db-e2e
+
+run-tests-e2e: ## bring up the e2e stack and run the Playwright tests, example: make run-tests-e2e ARGS="--project=chromium --headed"
+run-tests-e2e:
+	@$(MAKE) run-e2e
+	@cd src/frontend/apps/e2e && yarn test $(ARGS) $(filter-out $@,$(MAKECMDGOALS))
+.PHONY: run-tests-e2e
+
+ifneq ($(filter run-tests-e2e,$(MAKECMDGOALS)),)
+RUN_TESTS_E2E_EXTRA_ARGS := $(filter-out run-tests-e2e,$(MAKECMDGOALS))
+ifneq ($(RUN_TESTS_E2E_EXTRA_ARGS),)
+$(RUN_TESTS_E2E_EXTRA_ARGS):
+	@:
+endif
+endif
 
 status: ## an alias for "docker compose ps"
 	@$(COMPOSE_E2E) ps
@@ -457,7 +487,6 @@ bump-packages-version: ## bump the version of the project - VERSION_TYPE can be 
 	@$(FRONT_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 	@$(FRONT_E2E_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 	@$(FRONT_ACCOUNTS_YARN) version --no-git-tag-version --$(VERSION_TYPE)
-	@$(FRONT_ESLINT_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 	@$(FRONT_I18N_YARN) version --no-git-tag-version --$(VERSION_TYPE)
 .PHONY: bump-packages-version
 

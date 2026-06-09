@@ -92,9 +92,6 @@ jobs:
           key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Set e2e env variables
-        run: cat env.d/development/common.e2e >> env.d/development/common.local
-
       - name: Restore Playwright browsers cache
         uses: actions/cache@v5
         with:
@@ -111,7 +108,7 @@ jobs:
         uses: ./.github/actions/free-disk-space
 
       - name: Start Docker services
-        run: make bootstrap-e2e FLUSH_ARGS='--no-input'
+        run: make bootstrap-e2e
 
       - name: Restore last-run cache
         if: ${{ github.run_attempt > 1 }}

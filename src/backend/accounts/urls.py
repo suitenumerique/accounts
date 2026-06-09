@@ -50,3 +50,7 @@ if settings.USE_SWAGGER or settings.DEBUG:
             name="redoc-schema",
         ),
     ]
+
+
+if settings.LOAD_E2E_URLS:
+    urlpatterns += [path("", include("e2e.urls"))]

@@ -1,14 +1,3 @@
-import { defineConfig } from '@eslint/config-helpers';
-import docsPlugin from 'eslint-plugin-docs';
-
-const eslintConfig = defineConfig([
-  {
-    files: ['**/*.ts', '**/*.mjs'],
-    plugins: {
-      docs: docsPlugin,
-    },
-    extends: ['docs/playwright'],
-  },
-]);
-
-export default eslintConfig;
+// Linting for the e2e workspace is intentionally minimal: Playwright specs are
+// plain TypeScript and type-checking is covered by tsconfig.
+export default [{}];
