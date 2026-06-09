@@ -3,7 +3,10 @@ from django.shortcuts import resolve_url
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
+from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
+
+from authentication.models import IdentityProviderUser
 
 
 class OptionalSettingStrategy(DjangoStrategy):
@@ -17,3 +20,7 @@ class OptionalSettingStrategy(DjangoStrategy):
                 value = force_str(value)
             value = resolve_url(value)
         return value
+
+
+class EncryptedDjangoStorage(DjangoStorage):
+    user = IdentityProviderUser

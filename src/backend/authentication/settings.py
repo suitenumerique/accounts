@@ -1,4 +1,5 @@
 from configurations import values
+from lasuite.configuration.values import SecretFileValue
 
 
 class AuthenticationSettings:
@@ -21,7 +22,8 @@ class AuthenticationSettings:
         True  # FIXME: This doesn't apply to the copied username
     )
 
-    SOCIAL_AUTH_STRATEGY = "authentication.strategies.OptionalSettingStrategy"
+    SOCIAL_AUTH_STRATEGY = "authentication.social_auth.OptionalSettingStrategy"
+    SOCIAL_AUTH_STORAGE = "authentication.social_auth.EncryptedDjangoStorage"
 
     SOCIAL_AUTH_PIPELINE = (
         # Get the information we can about the user and return it in a simple
@@ -65,12 +67,8 @@ class AuthenticationSettings:
     )
 
     # ProConnect backend
-    SOCIAL_AUTH_PRO_CONNECT_KEY = values.Value(
-        environ_prefix=None, environ_required=True
-    )
-    SOCIAL_AUTH_PRO_CONNECT_SECRET = values.Value(
-        environ_prefix=None, environ_required=True
-    )
+    SOCIAL_AUTH_PRO_CONNECT_KEY = values.Value(environ_prefix=None)
+    SOCIAL_AUTH_PRO_CONNECT_SECRET = SecretFileValue(environ_prefix=None)
 
     SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_ID_TOKEN_ISSUER = values.Value(environ_prefix=None)

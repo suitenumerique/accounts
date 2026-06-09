@@ -58,6 +58,7 @@ dependencies = [
     "sentry-sdk==2.48.0",
     "social-auth-app-django==5.9.0",
     "whitenoise==6.11.0",
+    "django-fernet-encrypted-fields==0.4.0",
 ]
 
 [project.urls]

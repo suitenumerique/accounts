@@ -81,6 +81,10 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     # Security
     ALLOWED_HOSTS = values.ListValue([])
     SECRET_KEY = SecretFileValue(None)
+    SECRET_KEY_FALLBACKS = values.ListValue(
+        []
+    )  # FIXME: Make it a SecretFileListValue()
+    SALT_KEY = values.ListValue([])  # FIXME: Make it a SecretFileListValue()
     SERVER_TO_SERVER_API_TOKENS = values.ListValue([])
 
     # Application definition
