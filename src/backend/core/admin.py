@@ -26,13 +26,11 @@ class UserAdmin(auth_admin.UserAdmin):
             _("Personal info"),
             {
                 "fields": (
-                    "sub",
                     "email",
                     "full_name",
                     "short_name",
                     "language",
                     "timezone",
-                    "metadata",
                 )
             },
         ),
@@ -62,7 +60,6 @@ class UserAdmin(auth_admin.UserAdmin):
     )
     list_display = (
         "id",
-        "sub",
         "full_name",
         "username",
         "email",
@@ -84,11 +81,10 @@ class UserAdmin(auth_admin.UserAdmin):
     )
     readonly_fields = (
         "id",
-        "sub",
         "email",
         "full_name",
         "short_name",
         "created_at",
         "updated_at",
     )
-    search_fields = ("id", "sub", "username", "email", "full_name")
+    search_fields = ("id", "username", "email", "full_name")

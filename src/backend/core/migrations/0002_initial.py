@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
                 "db_table": "accounts_user",
             },
             managers=[
-                ("objects", core.models.UserManager()),
+                # ("objects", core.models.UserManager()),
             ],
         ),
     ]

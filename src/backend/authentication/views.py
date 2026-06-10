@@ -25,13 +25,16 @@ class LoginRoutingView(View):
 
     def get(self, request, *args, **kwargs):
         """First implementation is just a redirect to the only configured IdP (ProConnect)."""
+        query = {}
+        if redirect_value := request.GET.get(REDIRECT_FIELD_NAME, ""):
+            # We don't validate the URL here because python-social-auth is configured to do it
+            query[REDIRECT_FIELD_NAME] = redirect_value
 
         return HttpResponseRedirect(
             reverse(
                 "authentication:social:begin",
                 kwargs={"backend": "pro-connect"},
-                # We don't validate the URL here because PSA is configured to do it
-                query={REDIRECT_FIELD_NAME: request.GET.get(REDIRECT_FIELD_NAME)},
+                query=query,
             )
         )
 

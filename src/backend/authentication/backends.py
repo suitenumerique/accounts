@@ -10,18 +10,11 @@ class ProConnect(OpenIdConnectAuth):
     name = "pro-connect"
 
     # ProConnect split the `profile` scope into 2: `given_name` and `usual_name`
-    SCOPE = ["given_name", "usual_name"]
+    DEFAULT_SCOPE = ["openid", "email", "given_name", "usual_name"]
+    FIRST_NAME_KEY = "given_name"
     LAST_NAME_KEY = "usual_name"
 
-    USER_FIELDS = [
-        "username",
-        "email",
-        "sub",
-        "fullname",
-        "short_name",
-    ]
-
-    # def request(self, *args, **kwargs) -> Response:
+    # def request(self, *args, **kwargs):
     #     response = super().request(*args, **kwargs)
     #     print("REQUEST - response", response, response.url, response.content)
     #     return response
@@ -39,9 +32,6 @@ class ProConnect(OpenIdConnectAuth):
             raise AuthTokenError(self, "Signature verification failed")
 
         try:
-            # {'sub': 'accounts@accounts.world', 'aud': 'accounts', 'email_verified': False, 'name': 'John Doe',
-            #  'iss': 'http://localhost:9903/realms/accounts', 'last_name': 'Doe', 'preferred_username': 'accounts',
-            #  'first_name': 'John', 'email': 'accounts@accounts.world'}
             user_info = jwt.decode(
                 user_info_jwt,
                 jwt.PyJWK(key).key,
@@ -55,7 +45,10 @@ class ProConnect(OpenIdConnectAuth):
         return self.validate_userinfo_sub(user_info)
 
     def get_user_details(self, response):
-        # {'username': 'accounts', 'email': 'accounts@accounts.world', 'fullname': 'John Doe', 'first_name': None, 'last_name': None}
         data = super().get_user_details(response)
-        data["full_name"] = data.pop("fullname")
-        return data
+        return {
+            "username": data["username"],
+            "email": data["email"],
+            "short_name": data["first_name"],
+            "full_name": " ".join([data["first_name"], data["last_name"]]),
+        }

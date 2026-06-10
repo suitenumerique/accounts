@@ -8,24 +8,13 @@ from logging import getLogger
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import UserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from timezone_field import TimeZoneField
 
-from core.validators import sub_validator
-
 logger = getLogger(__name__)
-
-
-class DuplicateEmailError(Exception):
-    """Raised when an email is already associated with a pre-existing user."""
-
-    def __init__(self, message=None, email=None):
-        """Set message and email to describe the exception."""
-        self.message = message
-        self.email = email
-        super().__init__(self.message)
 
 
 class BaseModel(models.Model):
@@ -65,48 +54,7 @@ class BaseModel(models.Model):
         super().save(*args, **kwargs)
 
 
-class UserManager(auth_models.UserManager):
-    """Custom manager for User model with additional methods."""
-
-    def get_user_by_sub_or_email(self, sub, email):
-        """Fetch existing user by sub or email."""
-        try:
-            return self.get(sub=sub)
-        except self.model.DoesNotExist as err:
-            if not email:
-                return None
-
-            if settings.OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION:
-                try:
-                    return self.get(email__iexact=email)
-                except self.model.DoesNotExist:
-                    pass
-            elif (
-                self.filter(email__iexact=email).exists()
-                and not settings.OIDC_ALLOW_DUPLICATE_EMAILS
-            ):
-                raise DuplicateEmailError(
-                    _(
-                        "We couldn't find a user with this sub but the email is already "
-                        "associated with a registered user."
-                    )
-                ) from err
-        return None
-
-
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
-    """User model to work with OIDC only authentication."""
-
-    sub = models.CharField(
-        _("sub"),
-        help_text=_("Required. 255 characters or fewer. ASCII characters only."),
-        max_length=255,
-        validators=[sub_validator],
-        unique=True,
-        blank=True,
-        null=True,
-    )
-
     full_name = models.CharField(_("full name"), max_length=100, null=True, blank=True)
     short_name = models.CharField(
         _("short name"), max_length=100, null=True, blank=True
@@ -158,14 +106,10 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         ),
     )
 
-    metadata = models.JSONField(
-        default=dict, blank=True, help_text=_("Additional information about the user.")
-    )
-
-    objects = UserManager()
-
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
+
+    objects = UserManager()
 
     class Meta:
         db_table = "accounts_user"
