@@ -21,7 +21,7 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
     Implements an endpoint for token introspection based
     on RFC 7662 https://rfc-editor.org/rfc/rfc7662.html
 
-    Overrides the oauth2_provider IntrospectTokenView to adapt to our needs.
+    Copy the oauth2_provider IntrospectTokenView to adapt to our needs.
 
     To access this view the request must pass a OAuth2 Bearer Token
     which is allowed to access the scope `introspection`.
@@ -29,13 +29,9 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
 
     required_scopes = ["introspection"]
 
-    def _get_issuer(self, request):
-        """Retrieve the issuer for the token introspection endpoint."""
-        return oauth2_settings.oidc_issuer(request)
-
-    @staticmethod
-    def get_token_response(issuer, token_value=None):
+    def get_token_response(self, token_value=None):
         """Build the response for the token introspection endpoint."""
+        issuer = oauth2_settings.oidc_issuer(self.request)
         try:
             token_checksum = hashlib.sha256(token_value.encode("utf-8")).hexdigest()
             token = (
@@ -44,7 +40,8 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
                 .get(token_checksum=token_checksum)
             )
         except ObjectDoesNotExist:
-            return JsonResponse({"active": False}, status=200)
+            # TODO: Handle introspection of ProConnect token? Do we need it?
+            return JsonResponse({"active": False})
 
         if token.is_valid():
             data = {
@@ -56,12 +53,14 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
             if token.application:
                 data["client_id"] = token.application.client_id
             if token.user:
-                data["sub"] = token.user.sub
+                data["sub"] = (
+                    token.user.get_username()
+                )  # FIXME: See the related FIXME in `.get_additional_claims()`
                 data["email"] = token.user.email
 
             return JsonResponse(data)
 
-        return JsonResponse({"active": False}, status=200)
+        return JsonResponse({"active": False})
 
     def get(self, request, *args, **kwargs):
         """
@@ -73,8 +72,7 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
         :param kwargs:
         :return:
         """
-        issuer = self._get_issuer(request)
-        return self.get_token_response(issuer, request.GET.get("token", None))
+        return self.get_token_response(request.GET.get("token", None))
 
     def post(self, request, *args, **kwargs):
         """
@@ -86,5 +84,4 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
         :param kwargs:
         :return:
         """
-        issuer = self._get_issuer(request)
-        return self.get_token_response(issuer, request.POST.get("token", None))
+        return self.get_token_response(request.POST.get("token", None))

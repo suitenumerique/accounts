@@ -14,6 +14,15 @@ class ProConnect(OpenIdConnectAuth):
     FIRST_NAME_KEY = "given_name"
     LAST_NAME_KEY = "usual_name"
 
+    EXTRA_DATA = [
+        "id_token",
+        "refresh_token",
+        "sub",
+        "email",
+        "given_name",
+        "usual_name",
+    ]
+
     # def request(self, *args, **kwargs):
     #     response = super().request(*args, **kwargs)
     #     print("REQUEST - response", response, response.url, response.content)

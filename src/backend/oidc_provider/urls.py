@@ -6,6 +6,8 @@ from oauth2_provider import urls as oauth2_urls
 
 from . import views
 
+app_name = "oidc_provider"
+
 urlpatterns = [
     # Override oauth2_provider's IntrospectTokenView
     path("introspect/", views.IntrospectTokenView.as_view(), name="introspect"),

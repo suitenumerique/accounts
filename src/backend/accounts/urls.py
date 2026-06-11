@@ -16,7 +16,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path(f"api/{settings.API_VERSION}/", include("core.urls")),
     path(f"api/{settings.API_VERSION}/", include("authentication.urls")),
-    path(f"api/{settings.API_VERSION}/o/", include("oidc_provider.urls")),
+    path(
+        f"api/{settings.API_VERSION}/o/",
+        include("oidc_provider.urls", namespace="oauth2_provider"),
+    ),
 ]
 
 if settings.DEBUG:

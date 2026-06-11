@@ -243,6 +243,7 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
         # accounts
         "core",
         "authentication",
+        "oidc_provider",
         "demo",
         "drf_spectacular",
         # Third party apps

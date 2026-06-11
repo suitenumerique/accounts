@@ -1,3 +1,5 @@
+import json
+
 from configurations import values
 from lasuite.configuration.values import SecretFileValue
 
@@ -42,6 +44,7 @@ class AuthenticationSettings:
         # Associates the current social details with another user account with
         # a similar email address. Beware that could be a security issue if a
         # provider doesn't validate the email, as explained by the pipeline function.
+        # TODO: Override it so we do it based on the `email_verified` claims
         "social_core.pipeline.social_auth.associate_by_email",
         # Create a user account if we haven't found one yet.
         "social_core.pipeline.user.create_user",
@@ -69,6 +72,19 @@ class AuthenticationSettings:
     # ProConnect backend
     SOCIAL_AUTH_PRO_CONNECT_KEY = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_SECRET = SecretFileValue(environ_prefix=None)
+    SOCIAL_AUTH_PRO_CONNECT_AUTH_EXTRA_ARGUMENTS = {
+        "claims": json.dumps(
+            {
+                "id_token": {
+                    "amr": {"essential": True},
+                    "acr": {
+                        "essential": False,
+                        "values": ["eidas0-mfa", "eidas1-mfa", "eida2", "eida3"],
+                    },
+                }
+            }
+        )
+    }
 
     SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_ID_TOKEN_ISSUER = values.Value(environ_prefix=None)
@@ -77,6 +93,3 @@ class AuthenticationSettings:
     SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_JWKS_URI = values.Value(environ_prefix=None)
-    SOCIAL_AUTH_PRO_CONNECT_TOKEN_ENDPOINT_AUTH_METHOD = values.Value(
-        environ_prefix=None
-    )

@@ -79,6 +79,8 @@ class OIDCProviderSettings:
             "openid": "OpenID Connect",
             "profile": "Profile information",
             "email": "Email address",
+            "given_name": "Given name",  # For backward compatibility ProConnect
+            "usual_name": "Usual name",  # For backward compatibility ProConnect
         },
         environ_name="OAUTH2_PROVIDER_SCOPES",
         environ_prefix=None,
@@ -110,7 +112,7 @@ class OIDCProviderSettings:
         environ_prefix=None,
     )
     _OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS = values.Value(
-        default="oauth2_provider.oauth2_validators.OAuth2Validator",
+        default="oidc_provider.validators.LaSuiteValidator",
         environ_name="OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS",
         environ_prefix=None,
     )
