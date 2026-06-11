@@ -691,6 +691,67 @@
     {
       "attributes": {
         "consent.screen.text": "",
+        "display.on.consent.screen": "true",
+        "gui.order": "",
+        "include.in.token.scope": "true"
+      },
+      "description": "ProConnect scope",
+      "id": "30d0771a-3e60-47f2-97ce-6d1d95a1fcfe",
+      "name": "usual_name",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "config": {
+            "access.token.claim": "true",
+            "claim.name": "usual_name",
+            "id.token.claim": "true",
+            "introspection.token.claim": "true",
+            "jsonType.label": "String",
+            "lightweight.claim": "false",
+            "user.attribute": "lastName",
+            "userinfo.token.claim": "true"
+          },
+          "consentRequired": false,
+          "id": "e3196ccd-ac83-4554-ba54-85fe23476452",
+          "name": "usual name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper"
+        }
+      ]
+    },
+    {
+      "attributes": {
+        "consent.screen.text": "",
+        "display.on.consent.screen": "true",
+        "gui.order": "",
+        "include.in.token.scope": "true"
+      },
+      "description": "ProConnect scope",
+      "id": "78ebd603-892f-4aea-bd22-6d23b9323f34",
+      "name": "given_name",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "config": {
+            "access.token.claim": "true",
+            "claim.name": "given_name",
+            "id.token.claim": "true",
+            "introspection.token.claim": "true",
+            "jsonType.label": "String",
+            "user.attribute": "firstName",
+            "userinfo.token.claim": "true"
+          },
+          "consentRequired": false,
+          "id": "4f94c0de-70cd-4cc2-a025-73b23bbe55fa",
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper"
+        }
+      ]
+    },
+    {
+      "attributes": {
+        "consent.screen.text": "",
         "display.on.consent.screen": "false",
         "include.in.token.scope": "false"
       },
@@ -1229,9 +1290,11 @@
       "notBefore": 0,
       "optionalClientScopes": [
         "address",
+        "given_name",
         "microprofile-jwt",
         "offline_access",
-        "phone"
+        "phone",
+        "usual_name"
       ],
       "protocol": "openid-connect",
       "publicClient": false,
@@ -1767,9 +1830,11 @@
   ],
   "defaultOptionalClientScopes": [
     "address",
+    "given_name",
     "microprofile-jwt",
     "offline_access",
-    "phone"
+    "phone",
+    "usual_name"
   ],
   "defaultRole": {
     "clientRole": false,
