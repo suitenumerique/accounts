@@ -51,7 +51,7 @@ dependencies = [
     "lxml==6.1.0",
     "nested-multipart-parser==1.6.0",
     "psycopg[binary]==3.3.2",
-    "PyJWT==2.12.1",
+    "PyJWT==2.13.0",
     "python-magic==0.4.27",
     "redis<6.0.0",
     "requests==2.33.1",
