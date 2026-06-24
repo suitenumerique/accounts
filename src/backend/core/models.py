@@ -55,12 +55,10 @@ class BaseModel(models.Model):
 
 
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
-    full_name = models.CharField(_("full name"), max_length=100, null=True, blank=True)
-    short_name = models.CharField(
-        _("short name"), max_length=100, null=True, blank=True
-    )
+    full_name = models.CharField(_("full name"), max_length=100, blank=True)
+    short_name = models.CharField(_("short name"), max_length=100, blank=True)
 
-    email = models.EmailField(_("identity email address"), blank=True, null=True)
+    email = models.EmailField(_("identity email address"), blank=True)
 
     # Unlike the "email" field which stores the email coming from the OIDC token, this field
     # stores the email used by staff users to log in to the admin site
@@ -75,10 +73,8 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
     language = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
-        default=None,
         verbose_name=_("language"),
         help_text=_("The language in which the user wants to see the interface."),
-        null=True,
         blank=True,
     )
     timezone = TimeZoneField(
