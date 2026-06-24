@@ -73,6 +73,15 @@ class OIDCProviderSettings:
         environ_name="OAUTH2_PROVIDER_OIDC_ENABLED",
         environ_prefix=None,
     )
+    _OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT = values.Value(
+        environ_name="OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT",
+        environ_prefix=None,
+    )
+    _OAUTH2_PROVIDER_OIDC_RP_INITIATED_LOGOUT_ENABLED = values.BooleanValue(
+        default=True,
+        environ_name="OAUTH2_PROVIDER_OIDC_RP_INITIATED_LOGOUT_ENABLED",
+        environ_prefix=None,
+    )
 
     _OAUTH2_PROVIDER_SCOPES = values.DictValue(
         default={
@@ -178,6 +187,9 @@ class OIDCProviderSettings:
             ),
             # OIDC configuration
             "OIDC_ENABLED": self._OAUTH2_PROVIDER_OIDC_ENABLED,
+            "OIDC_ISS_ENDPOINT": self._OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT,
+            "OIDC_RP_INITIATED_LOGOUT_ENABLED": self._OAUTH2_PROVIDER_OIDC_RP_INITIATED_LOGOUT_ENABLED,
+            "OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT": False,  # FIXME: Disabled while we don't have a frontend page
             "OIDC_RSA_PRIVATE_KEY": self._get_oidc_rsa_private_key(),
             "OAUTH2_VALIDATOR_CLASS": self._OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS,
             # Redirection URI schemes allowed for authorization code flow.
