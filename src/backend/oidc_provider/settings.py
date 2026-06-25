@@ -86,16 +86,15 @@ class OIDCProviderSettings:
     _OAUTH2_PROVIDER_SCOPES = values.DictValue(
         default={
             "openid": "OpenID Connect",
-            "profile": "Profile information",
             "email": "Email address",
-            "given_name": "Given name",  # For backward compatibility ProConnect
-            "usual_name": "Usual name",  # For backward compatibility ProConnect
+            "profile": "Profile information",
+            # "siret": "SIRET",
         },
         environ_name="OAUTH2_PROVIDER_SCOPES",
         environ_prefix=None,
     )
     _OAUTH2_PROVIDER_PKCE_REQUIRED = values.BooleanValue(
-        default=False,  # For backward compatibility ProConnect
+        default=True,
         environ_name="OAUTH2_PROVIDER_PKCE_REQUIRED",
         environ_prefix=None,
     )

@@ -69,18 +69,11 @@ OIDC_OP_LOGOUT_ENDPOINT="http://accounts:8000/api/v1.0/o/logout"
 OIDC_RP_CLIENT_ID="new-client-id"
 OIDC_RP_CLIENT_SECRET="new-client-secret"
 OIDC_RP_SIGN_ALGO="RS256"  # should be unchanged
+
+OIDC_USE_PKCE=True  # PKCE is enabled by default for accounts
 ```
 
-For scopes, either you may keep the same scopes as before:
-
-```python
-OIDC_RP_SCOPES="openid email given_name usual_name"
-OIDC_USERINFO_SHORTNAME_FIELD="given_name"
-OIDC_USERINFO_FULLNAME_FIELDS="given_name,usual_name"
-```
-
-Or you can add/use the new scopes:
-
+For scopes, replace `given_name` and `usual_name` by `profile`:
 ```python
 OIDC_RP_SCOPES="openid email profile"
 OIDC_USERINFO_SHORTNAME_FIELD="given_name"  # should be unchanged

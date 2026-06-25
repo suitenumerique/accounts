@@ -28,10 +28,8 @@ class LaSuiteValidator(OAuth2Validator):
         # Claims for "profile" scope
         "family_name": "profile",
         "given_name": "profile",
-        # ProConnect claims for compatibility.
-        "usual_name": "usual_name",
-        "given_name": "given_name",  # FIXME: The key clash with the one for the "profile" scope :/. We have to choose
-        "siret": "siret",
+        # Claims for "siret" scope FIXME: Maybe have a broader one, like "organization"?
+        # "siret": "siret",  # TODO?
     }
 
     def get_discovery_claims(self, request):
@@ -72,11 +70,6 @@ class LaSuiteValidator(OAuth2Validator):
         additional_claims["given_name"] = request.user.short_name
         additional_claims["name"] = request.user.full_name
 
-        # ProConnect compatibility claims
-        additional_claims["given_name"] = request.user.short_name
-        additional_claims["usual_name"] = request.user.full_name.replace(
-            request.user.short_name, ""
-        ).strip()
         # FIXME: .metadata is replaced by `.identity_providers`
         #  As we are going to have only one identity provider for now, and until we normalized Organizations, we could
         #  extract the needed informations directly from the stored id_token.
@@ -131,9 +124,11 @@ class LaSuiteValidator(OAuth2Validator):
             request.access_token, None, request
         )
 
-        # `acr` and `amr` claims are only meaningful for the ID Token, as we reuse
-        # its plumbing to create the UserInfo response we need to remove them.
-        # https://openid.net/specs/openid-connect-basic-1_0.html#IDToken
+        # Per the specifications[1] `acr` and `amr` claims are only meaningful for the ID Token,
+        # as we reuse its plumbing to create the UserInfo response we need to remove them.
+        # But we could add the support of "OAuth 2.0 Step Up Authentication Challenge Protocol" [2].
+        # [1] https://openid.net/specs/openid-connect-basic-1_0.html#IDToken
+        # [2] https://datatracker.ietf.org/doc/html/rfc9470
         claims.pop("acr", None)
         claims.pop("amr", None)
 
