@@ -89,6 +89,7 @@ class OIDCProviderSettings:
             "email": "Email address",
             "profile": "Profile information",
             # "siret": "SIRET",
+            "introspection": "Introspect token scope",
         },
         environ_name="OAUTH2_PROVIDER_SCOPES",
         environ_prefix=None,
