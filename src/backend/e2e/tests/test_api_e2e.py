@@ -4,12 +4,11 @@ Test e2e API endpoints.
 
 import importlib
 
+from django.contrib.auth import get_user_model
 from django.urls import clear_url_caches
 
 import pytest
 from rest_framework.test import APIClient
-
-from core import models
 
 import accounts.urls
 
@@ -58,7 +57,7 @@ def test_api_e2e_user_auth_anonymous(settings):
     response = client.post("/api/v1.0/e2e/user-auth/", {"email": "test@example.com"})
     assert response.status_code == 200
     assert response.json() == {"email": "test@example.com"}
-    assert models.User.objects.filter(email="test@example.com").exists()
+    assert get_user_model().objects.filter(email="test@example.com").exists()
 
     response = client.get("/api/v1.0/users/me/")
     assert response.status_code == 200

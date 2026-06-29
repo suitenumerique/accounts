@@ -1,10 +1,9 @@
 """Client serializers for the accounts core app."""
 
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
 from rest_framework import serializers
-
-from core import models
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     short_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = models.User
+        model = get_user_model()
         fields = ["id", "email", "full_name", "short_name", "language"]
         read_only_fields = ["id", "email", "full_name", "short_name"]
 
@@ -39,6 +38,6 @@ class UserLightSerializer(UserSerializer):
     """Serialize users with limited fields."""
 
     class Meta:
-        model = models.User
+        model = get_user_model()
         fields = ["full_name", "short_name"]
         read_only_fields = ["full_name", "short_name"]

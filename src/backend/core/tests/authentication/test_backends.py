@@ -3,6 +3,7 @@
 import random
 import re
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import SuspiciousOperation
 
 import pytest
@@ -10,7 +11,6 @@ import responses
 from cryptography.fernet import Fernet
 from lasuite.oidc_login.backends import get_oidc_refresh_token
 
-from core import models
 from core.authentication.backends import (
     OIDCAuthenticationBackend,
 )
@@ -111,7 +111,7 @@ def test_authentication_getter_email_none(monkeypatch):
     )
 
     # Since the sub and email didn't match, it should create a new user
-    assert models.User.objects.count() == 2
+    assert get_user_model().objects.count() == 2
     assert user != db_user
     assert user.sub == "123"
 
@@ -141,7 +141,7 @@ def test_authentication_getter_existing_user_no_fallback_to_email_allow_duplicat
     )
 
     # Since the sub doesn't match, it should create a new user
-    assert models.User.objects.count() == 2
+    assert get_user_model().objects.count() == 2
     assert user != db_user
     assert user.sub == "123"
 
@@ -176,7 +176,7 @@ def test_authentication_getter_existing_user_no_fallback_to_email_no_duplicate(
         klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
     # Since the sub doesn't match, it should not create a new user
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_authentication_getter_existing_user_no_fallback_to_email_no_duplicate_case_insensitive(
@@ -209,7 +209,7 @@ def test_authentication_getter_existing_user_no_fallback_to_email_no_duplicate_c
         klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
     # Since the sub doesn't match, it should not create a new user
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_authentication_getter_existing_user_with_email(
@@ -347,7 +347,7 @@ def test_authentication_getter_new_user_no_email(monkeypatch):
     assert user.full_name is None
     assert user.short_name is None
     assert user.has_usable_password() is False
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_authentication_getter_new_user_with_email(monkeypatch):
@@ -374,7 +374,7 @@ def test_authentication_getter_new_user_with_email(monkeypatch):
     assert user.full_name == "John Doe"
     assert user.short_name == "John"
     assert user.has_usable_password() is False
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_authentication_getter_existing_disabled_user_via_sub(
@@ -404,7 +404,7 @@ def test_authentication_getter_existing_disabled_user_via_sub(
     ):
         klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_authentication_getter_existing_disabled_user_via_email(
@@ -434,7 +434,7 @@ def test_authentication_getter_existing_disabled_user_via_email(
     ):
         klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 @responses.activate

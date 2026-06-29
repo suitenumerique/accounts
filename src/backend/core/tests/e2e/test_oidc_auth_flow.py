@@ -13,6 +13,7 @@ import re
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
+from django.contrib.auth import get_user_model
 from django.test import Client
 
 import pytest
@@ -20,7 +21,6 @@ import responses
 
 from core.authentication.backends import OIDCAuthenticationBackend
 from core.factories import UserFactory
-from core.models import User
 
 from oidc_provider.factories import (
     CLIENT_ID,
@@ -173,7 +173,7 @@ def test_full_oidc_auth_flow_new_user(upstream_oidc_settings):  # pylint: disabl
     assert callback_response.status_code in (302, 200)
 
     # The user must now be authenticated in the session
-    assert User.objects.filter(sub=sub).exists(), (
+    assert get_user_model().objects.filter(sub=sub).exists(), (
         "The user must have been created after OIDC authentication"
     )
 

@@ -2,12 +2,11 @@
 
 from unittest import mock
 
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import override_settings
 
 import pytest
-
-from core import models
 
 pytestmark = pytest.mark.django_db
 
@@ -23,4 +22,4 @@ def test_commands_create_demo():
     """The create_demo management command should create objects as expected."""
     call_command("create_demo")
 
-    assert models.User.objects.count() >= 10
+    assert get_user_model().objects.count() >= 10

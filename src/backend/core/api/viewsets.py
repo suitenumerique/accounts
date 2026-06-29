@@ -4,6 +4,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.cache import cache
 from django.db.models.expressions import RawSQL
@@ -16,7 +17,6 @@ from lasuite.tools.email import get_domain_from_email
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
-from core import models
 from core.api.filters import remove_accents
 
 from . import permissions, serializers
@@ -116,7 +116,7 @@ class UserViewSet(
     """User ViewSet"""
 
     permission_classes = [permissions.IsSelf]
-    queryset = models.User.objects.filter(is_active=True)
+    queryset = get_user_model().objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     pagination_class = None
     throttle_classes = []

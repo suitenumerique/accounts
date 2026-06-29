@@ -2,10 +2,12 @@
 Test users API endpoints in the accounts core app.
 """
 
+from django.contrib.auth import get_user_model
+
 import pytest
 from rest_framework.test import APIClient
 
-from core import factories, models
+from core import factories
 from core.api import serializers
 
 pytestmark = pytest.mark.django_db
@@ -455,7 +457,7 @@ def test_api_users_create_anonymous():
     assert response.json() == {
         "detail": "Authentication credentials were not provided."
     }
-    assert models.User.objects.exists() is False
+    assert get_user_model().objects.exists() is False
 
 
 def test_api_users_create_authenticated():
@@ -475,7 +477,7 @@ def test_api_users_create_authenticated():
     )
     assert response.status_code == 405
     assert response.json() == {"detail": 'Method "POST" not allowed.'}
-    assert models.User.objects.exclude(id=user.id).exists() is False
+    assert get_user_model().objects.exclude(id=user.id).exists() is False
 
 
 def test_api_users_update_anonymous():
@@ -650,7 +652,7 @@ def test_api_users_delete_list_anonymous():
     response = client.delete("/api/v1.0/users/")
 
     assert response.status_code == 401
-    assert models.User.objects.count() == 2
+    assert get_user_model().objects.count() == 2
 
 
 def test_api_users_delete_list_authenticated():
@@ -666,7 +668,7 @@ def test_api_users_delete_list_authenticated():
     )
 
     assert response.status_code == 405
-    assert models.User.objects.count() == 3
+    assert get_user_model().objects.count() == 3
 
 
 def test_api_users_delete_anonymous():
@@ -676,7 +678,7 @@ def test_api_users_delete_anonymous():
     response = APIClient().delete(f"/api/v1.0/users/{user.id!s}/")
 
     assert response.status_code == 401
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1
 
 
 def test_api_users_delete_authenticated():
@@ -695,7 +697,7 @@ def test_api_users_delete_authenticated():
     )
 
     assert response.status_code == 405
-    assert models.User.objects.count() == 2
+    assert get_user_model().objects.count() == 2
 
 
 def test_api_users_delete_self():
@@ -710,4 +712,4 @@ def test_api_users_delete_self():
     )
 
     assert response.status_code == 405
-    assert models.User.objects.count() == 1
+    assert get_user_model().objects.count() == 1

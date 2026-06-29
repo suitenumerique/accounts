@@ -1,13 +1,11 @@
 """Viewsets for the e2e app."""
 
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 
 import rest_framework as drf
 from rest_framework import response as drf_response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-
-from core import models
 
 from e2e.serializers import E2EAuthSerializer
 
@@ -29,11 +27,13 @@ class UserAuthViewSet(drf.viewsets.ViewSet):
         serializer = E2EAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = models.User.objects.filter(
-            email=serializer.validated_data["email"]
-        ).first()
+        user = (
+            get_user_model()
+            .objects.filter(email=serializer.validated_data["email"])
+            .first()
+        )
         if not user:
-            user = models.User(email=serializer.validated_data["email"])
+            user = get_user_model()(email=serializer.validated_data["email"])
             user.set_unusable_password()
             user.save()
 

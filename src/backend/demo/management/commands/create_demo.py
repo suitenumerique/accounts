@@ -9,12 +9,11 @@ from collections import defaultdict
 
 from django import db
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from faker import Faker
 from oauth2_provider.models import Application
-
-from core import models
 
 from demo import defaults
 
@@ -138,7 +137,7 @@ def create_demo(stdout):
         for i in range(defaults.NB_OBJECTS["users"]):
             first_name = random.choice(first_names)
             queue.push(
-                models.User(
+                get_user_model()(
                     admin_email=f"user.test{i:d}@example.com",
                     email=f"user.test{i:d}@example.com",
                     password="!",
