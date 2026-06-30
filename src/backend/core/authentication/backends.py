@@ -32,8 +32,8 @@ class OIDCAuthenticationBackend(LaSuiteOIDCAuthenticationBackend):
           dict: A dictionary of extra claims.
         """
         return {
-            "full_name": self.compute_full_name(user_info),
-            "short_name": user_info.get(settings.OIDC_USERINFO_SHORTNAME_FIELD),
+            "full_name": self.compute_full_name(user_info) or "",
+            "short_name": user_info.get(settings.OIDC_USERINFO_SHORTNAME_FIELD, ""),
             "metadata": self.get_user_metadata(user_info),
         }
 

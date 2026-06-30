@@ -79,9 +79,12 @@ class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin
         null=True,
     )
 
-    full_name = models.CharField(_("full name"), max_length=100, null=True, blank=True)
+    full_name = models.CharField(_("full name"), max_length=100, default="", blank=True)
     short_name = models.CharField(
-        _("short name"), max_length=100, null=True, blank=True
+        _("short name"),
+        max_length=100,
+        default="",
+        blank=True,
     )
 
     email = models.EmailField(_("email address"), unique=True)

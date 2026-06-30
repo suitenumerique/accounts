@@ -374,8 +374,8 @@ def test_api_users_retrieve_me_authenticated_empty_name():
     """
     user = factories.UserFactory(
         email="test_foo@test.com",
-        full_name=None,
-        short_name=None,
+        full_name="",
+        short_name="",
     )
 
     client = APIClient()
