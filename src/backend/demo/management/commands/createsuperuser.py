@@ -1,9 +1,8 @@
 """Management user to create a superuser."""
 
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-UserModel = get_user_model()
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -29,19 +28,19 @@ class Command(BaseCommand):
         """
         email = options.get("email")
         try:
-            user = UserModel.objects.get(admin_email=email)
-        except UserModel.DoesNotExist:
-            user = UserModel(admin_email=email)
+            user = User.objects.get_by_natural_key(email)
+        except User.DoesNotExist:
+            User.objects.create_superuser(email=email, password=options["password"])
             message = "Superuser created successfully."
         else:
             if user.is_superuser and user.is_staff:
                 message = "Superuser already exists."
             else:
+                user.is_superuser = True
+                user.is_staff = True
                 message = "User already existed and was upgraded to superuser."
 
-        user.is_superuser = True
-        user.is_staff = True
-        user.set_password(options["password"])
-        user.save()
+            user.set_password(options["password"])
+            user.save()
 
         self.stdout.write(self.style.SUCCESS(message))

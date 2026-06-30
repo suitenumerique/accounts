@@ -236,6 +236,7 @@ class Base(OIDCProviderSettings, Configuration):
     INSTALLED_APPS = [
         # accounts
         "core",
+        "users",
         "demo",
         "drf_spectacular",
         # Third party apps
@@ -337,7 +338,7 @@ class Base(OIDCProviderSettings, Configuration):
     EMAIL_USE_SSL = values.BooleanValue(False)
     EMAIL_FROM = values.Value("from@example.com")
 
-    AUTH_USER_MODEL = "core.User"
+    AUTH_USER_MODEL = "users.User"
     INVITATION_VALIDITY_DURATION = 604800  # 7 days, in seconds
 
     # CORS

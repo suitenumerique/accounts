@@ -138,7 +138,6 @@ def create_demo(stdout):
             first_name = random.choice(first_names)
             queue.push(
                 get_user_model()(
-                    admin_email=f"user.test{i:d}@example.com",
                     email=f"user.test{i:d}@example.com",
                     password="!",
                     is_superuser=False,

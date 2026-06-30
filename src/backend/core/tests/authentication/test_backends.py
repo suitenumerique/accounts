@@ -1,10 +1,9 @@
 """Unit tests for the Authentication Backends."""
 
-import random
 import re
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import SuspiciousOperation, ValidationError
 
 import pytest
 import responses
@@ -58,7 +57,8 @@ def test_authentication_getter_existing_user_via_email(
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    with django_assert_num_queries(4):  # user by sub, user by mail, update sub
+    # user by sub, user by mail, unique sub and email, update sub
+    with django_assert_num_queries(5):
         user = klass.get_or_create_user(
             access_token="test-token", id_token=None, payload=None
         )
@@ -82,7 +82,8 @@ def test_authentication_getter_existing_user_via_email_case_insensitive(
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    with django_assert_num_queries(4):  # user by sub, user by mail, update sub
+    # user by sub, user by mail, unique sub and email, update sub
+    with django_assert_num_queries(5):
         user = klass.get_or_create_user(
             access_token="test-token", id_token=None, payload=None
         )
@@ -90,33 +91,7 @@ def test_authentication_getter_existing_user_via_email_case_insensitive(
     assert user == db_user
 
 
-def test_authentication_getter_email_none(monkeypatch):
-    """
-    If no user is found with the sub and no email is provided, a new user should be created.
-    """
-
-    klass = OIDCAuthenticationBackend()
-    db_user = UserFactory(email=None)
-
-    def get_userinfo_mocked(*args):
-        user_info = {"sub": "123"}
-        if random.choice([True, False]):
-            user_info["email"] = None
-        return user_info
-
-    monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
-
-    user = klass.get_or_create_user(
-        access_token="test-token", id_token=None, payload=None
-    )
-
-    # Since the sub and email didn't match, it should create a new user
-    assert get_user_model().objects.count() == 2
-    assert user != db_user
-    assert user.sub == "123"
-
-
-def test_authentication_getter_existing_user_no_fallback_to_email_allow_duplicate(
+def test_authentication_getter_existing_user_no_fallback_to_email_error(
     settings, monkeypatch
 ):
     """
@@ -136,14 +111,11 @@ def test_authentication_getter_existing_user_no_fallback_to_email_allow_duplicat
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    user = klass.get_or_create_user(
-        access_token="test-token", id_token=None, payload=None
-    )
-
-    # Since the sub doesn't match, it should create a new user
-    assert get_user_model().objects.count() == 2
-    assert user != db_user
-    assert user.sub == "123"
+    with pytest.raises(
+        ValidationError,
+        match=re.escape("{'email': ['User with this Email address already exists.']}"),
+    ):
+        klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
 
 def test_authentication_getter_existing_user_no_fallback_to_email_no_duplicate(
@@ -271,8 +243,8 @@ def test_authentication_getter_existing_user_change_fields_sub(
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    # One and only one additional update query when a field has changed
-    with django_assert_num_queries(3):
+    # 1 (get_existing_user) + 2 (unique sub and email) + 1 (update_user_if_needed)
+    with django_assert_num_queries(4):
         authenticated_user = klass.get_or_create_user(
             access_token="test-token", id_token=None, payload=None
         )
@@ -313,8 +285,8 @@ def test_authentication_getter_existing_user_change_fields_email(
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    # One and only one additional update query when a field has changed
-    with django_assert_num_queries(4):
+    # 2 (get_existing_user) + 2 (unique sub and email) + 1 (update_user_if_needed)
+    with django_assert_num_queries(5):
         authenticated_user = klass.get_or_create_user(
             access_token="test-token", id_token=None, payload=None
         )
@@ -329,7 +301,7 @@ def test_authentication_getter_existing_user_change_fields_email(
 def test_authentication_getter_new_user_no_email(monkeypatch):
     """
     If no user matches the user's info sub, a user should be created.
-    User's info doesn't contain an email, created user's email should be empty.
+    User's info doesn't contain an email, an exception should be raised.
     """
     klass = OIDCAuthenticationBackend()
 
@@ -338,16 +310,10 @@ def test_authentication_getter_new_user_no_email(monkeypatch):
 
     monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
 
-    user = klass.get_or_create_user(
-        access_token="test-token", id_token=None, payload=None
-    )
-
-    assert user.sub == "123"
-    assert user.email is None
-    assert user.full_name is None
-    assert user.short_name is None
-    assert user.has_usable_password() is False
-    assert get_user_model().objects.count() == 1
+    with pytest.raises(
+        ValidationError, match=re.escape("{'email': ['This field cannot be null.']}")
+    ):
+        klass.get_or_create_user(access_token="test-token", id_token=None, payload=None)
 
 
 def test_authentication_getter_new_user_with_email(monkeypatch):
@@ -477,7 +443,8 @@ def test_authentication_session_tokens(
         status=200,
     )
 
-    with django_assert_num_queries(5):
+    # 2 (get_existing_user) + 3 (unique id, sub and email) + 1 (update_user_if_needed)
+    with django_assert_num_queries(6):
         user = klass.authenticate(
             request,
             code="test-code",
