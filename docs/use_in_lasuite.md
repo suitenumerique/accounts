@@ -80,15 +80,15 @@ However, to ensure a smooth transition, you need to update the following setting
 ```python
 # OIDC
 
-OIDC_OP_JWKS_ENDPOINT=http://host.docker.internal:9901/api/v1.0/o/.well-known/jwks.json
-OIDC_OP_AUTHORIZATION_ENDPOINT=http://localhost:9901/api/v1.0/o/authorize/
-OIDC_OP_TOKEN_ENDPOINT=http://host.docker.internal:9901/api/v1.0/o/token/
-OIDC_OP_USER_ENDPOINT=http://host.docker.internal:9901/api/v1.0/o/userinfo/
-OIDC_OP_LOGOUT_ENDPOINT=http://host.docker.internal:9901/api/v1.0/o/logout
+OIDC_OP_JWKS_ENDPOINT="http://host.docker.internal:9901/api/v1.0/o/.well-known/jwks.json"
+OIDC_OP_AUTHORIZATION_ENDPOINT="http://localhost:9901/api/v1.0/o/authorize/"
+OIDC_OP_TOKEN_ENDPOINT="http://host.docker.internal:9901/api/v1.0/o/token/"
+OIDC_OP_USER_ENDPOINT="http://host.docker.internal:9901/api/v1.0/o/userinfo/"
+OIDC_OP_LOGOUT_ENDPOINT="http://host.docker.internal:9901/api/v1.0/o/logout"
 
-OIDC_RP_CLIENT_ID=new-client-id
-OIDC_RP_CLIENT_SECRET=new-client-secret
-OIDC_RP_SIGN_ALGO=RS256  # should be unchanged
+OIDC_RP_CLIENT_ID="new-client-id"
+OIDC_RP_CLIENT_SECRET="new-client-secret"
+OIDC_RP_SIGN_ALGO="RS256"  # should be unchanged
 ```
 
 For scopes, either you may keep the same scopes as before:

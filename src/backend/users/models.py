@@ -123,10 +123,6 @@ class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin
         ),
     )
 
-    metadata = models.JSONField(
-        default=dict, blank=True, help_text=_("Additional information about the user.")
-    )
-
     objects = UserManager()
 
     USERNAME_FIELD = "email"

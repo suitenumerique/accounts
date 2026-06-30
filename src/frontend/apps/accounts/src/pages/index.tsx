@@ -1,7 +1,7 @@
 import { Button } from '@gouvfr-lasuite/cunningham-react';
 import { useTranslation } from 'react-i18next';
 
-import { login, useAuth } from '@/features/auth/Auth';
+import { login, logout, useAuth } from '@/features/auth/Auth';
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -12,7 +12,7 @@ export default function HomePage() {
       <main className="welcome">
         <div>
           <h1>{t('Welcome on LaSuite Account')} </h1>
-          <Button disabled>{t('Logout')}</Button>
+            <Button onClick={() => logout()}>{t('Logout')}</Button>
         </div>
       </main>
     );

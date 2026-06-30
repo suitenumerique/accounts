@@ -123,7 +123,6 @@ class LaSuiteValidator(BaseValidator):
         "usual_name": "usual_name",
         "siret": "siret",
         "uid": "uid",
-        "siren": "siren",
         "groups": "groups",
         "organizational_unit": "organizational_unit",
         "belonging_population": "belonging_population",
@@ -153,20 +152,21 @@ class LaSuiteValidator(BaseValidator):
         if "given_name" in request.scopes:  # backward compatibility ProConnect
             additional_claims["given_name"] = request.user.short_name
         if "usual_name" in request.scopes:  # backward compatibility ProConnect
-            additional_claims["usual_name"] = request.user.metadata.get(
-                "usual_name", ""
-            )
+            additional_claims["usual_name"] = request.user.full_name.replace(
+                request.user.short_name, ""
+            ).strip()
 
         if "uid" in request.scopes:
             additional_claims["uid"] = str(request.user.pk)
 
-        if "siret" in request.scopes:
-            # The following line will fail on purpose if we don't have the proper information
-            additional_claims["siret"] = request.user.metadata["siret"]
-
-        if "siren" in request.scopes:
-            # The following line will fail on purpose if we don't have the proper information
-            additional_claims["siren"] = request.user.metadata["siren"]
+        if "siret" in request.scopes and request.user.social_auth:
+            social_auth_siret = [
+                s.extra_data["siret"]
+                for s in request.user.social_auth
+                if s.extra_data.get("siret")
+            ]
+            if social_auth_siret:
+                additional_claims["siret"] = social_auth_siret[0]
 
         # Include 'acr' claim if it is present in the request claims and equals 'eidas1'
         # see _create_authorization_code method for more details

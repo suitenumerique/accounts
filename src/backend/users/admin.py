@@ -34,7 +34,6 @@ class UserAdmin(core_admin.UserAdmin):
                     "short_name",
                     "language",
                     "timezone",
-                    "metadata",
                 )
             },
         ),

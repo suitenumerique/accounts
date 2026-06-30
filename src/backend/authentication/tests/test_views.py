@@ -2,46 +2,60 @@
 Tests for authentication views.
 """
 
-from django.test import Client
+from django.urls import reverse
 
 import pytest
+from pytest_django.asserts import assertRedirects
+from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
+
+from core.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 
 
-def test_login_routing_view_redirect_to_oidc():
+@pytest.mark.parametrize(
+    "query,expected_query",
+    [
+        pytest.param(None, None, id="without_query"),
+        pytest.param({}, {}, id="empty_query"),
+        pytest.param(
+            {"next": "/path/?param=value&other=1"},
+            {"next": "/path/?param=value&other=1"},
+            id="next_is_forwarded_and_escaped",
+        ),
+        pytest.param(
+            {"next": "/dashboard/", "foo": "bar"},
+            {"next": "/dashboard/"},
+            id="only_next_is_forwarded",
+        ),
+    ],
+)
+def test_login_routing_view_redirect(client, query, expected_query):
     """GET on login view should redirect to OIDC authenticate endpoint."""
-    client = Client()
-    response = client.get("/api/v1.0/login/")
+    response = client.get(reverse("authentication:login", query=query))
 
-    assert response.status_code == 302
-    assert response["Location"] == "/api/v1.0/oidc/authenticate/"
-
-
-def test_login_routing_view_redirect_with_next_parameter():
-    """GET on login view with a 'next' parameter should encode it and pass it along."""
-    client = Client()
-    response = client.get("/api/v1.0/login/", {"next": "/dashboard/"})
-
-    assert response.status_code == 302
-    assert response["Location"] == "/api/v1.0/oidc/authenticate/?next=%2Fdashboard%2F"
+    assertRedirects(
+        response,
+        reverse(
+            "authentication:social:begin",
+            kwargs={"backend": "pro-connect"},
+            query=expected_query,
+        ),
+        fetch_redirect_response=False,
+    )
 
 
-def test_login_routing_view_redirect_with_next_special_characters():
-    """GET on login view with special characters in 'next' should be properly encoded."""
-    client = Client()
-    response = client.get("/api/v1.0/login/", {"next": "/path/?param=value&other=1"})
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_logout_view(settings, client, method):
+    """Test calling our LogoutView."""
+    settings.LOGOUT_REDIRECT_URL = "/example-logout"
+    client.force_login(UserFactory())
 
-    assert response.status_code == 302
-    location = response["Location"]
-    assert location.startswith("/api/v1.0/oidc/authenticate/?next=")
-    assert "/path/" not in location.split("?next=")[1]  # Should be encoded
-
-
-def test_login_routing_view_get_no_next():
-    """GET without 'next' parameter should redirect to /oidc/authenticate/ without query string."""
-    client = Client()
-    response = client.get("/api/v1.0/login/")
-
-    assert response.status_code == 302
-    assert "next" not in response["Location"]
+    assert client.get(reverse("users-me")).status_code == HTTP_200_OK
+    assertRedirects(
+        getattr(client, method.lower())(reverse("authentication:logout")),
+        "/example-logout",
+        fetch_redirect_response=False,
+    )
+    # Check we are indeed log out
+    assert client.get(reverse("users-me")).status_code == HTTP_403_FORBIDDEN

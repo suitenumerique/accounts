@@ -21,6 +21,7 @@ from lasuite.configuration.values import SecretFileValue
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import ignore_logger
 
+from authentication.settings import AuthenticationSettings
 from oidc_provider.settings import OIDCProviderSettings
 
 # pylint: disable=too-many-lines
@@ -46,7 +47,7 @@ def get_release():
         return "NA"  # Default: not available
 
 
-class Base(OIDCProviderSettings, Configuration):
+class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     """
     This is the base configuration every configuration (aka environment) should inherit from. It
     is recommended to configure third-party applications by creating a configuration mixins in
@@ -225,11 +226,12 @@ class Base(OIDCProviderSettings, Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
         "dockerflow.django.middleware.DockerflowMiddleware",
         "csp.middleware.CSPMiddleware",
+        "social_django.middleware.SocialAuthExceptionMiddleware",
     ]
 
     AUTHENTICATION_BACKENDS = [
         "django.contrib.auth.backends.ModelBackend",
-        "core.authentication.backends.OIDCAuthenticationBackend",
+        "authentication.backends.ProConnect",
     ]
 
     # Django applications from the highest priority to the lowest
@@ -237,6 +239,7 @@ class Base(OIDCProviderSettings, Configuration):
         # accounts
         "core",
         "users",
+        "authentication",
         "demo",
         "drf_spectacular",
         # Third party apps
@@ -255,7 +258,7 @@ class Base(OIDCProviderSettings, Configuration):
         "django.contrib.messages",
         "django.contrib.staticfiles",
         # OIDC third party
-        "mozilla_django_oidc",
+        "social_django",
         "csp",
     ]
 
@@ -266,7 +269,6 @@ class Base(OIDCProviderSettings, Configuration):
 
     REST_FRAMEWORK = {
         "DEFAULT_AUTHENTICATION_CLASSES": (
-            "mozilla_django_oidc.contrib.drf.OIDCAuthentication",
             "rest_framework.authentication.SessionAuthentication",
         ),
         "DEFAULT_PARSER_CLASSES": [
@@ -398,143 +400,6 @@ class Base(OIDCProviderSettings, Configuration):
     )
     SESSION_COOKIE_NAME = "accounts_sessionid"
 
-    # OIDC - Authorization Code Flow
-    OIDC_AUTHENTICATE_CLASS = values.Value(
-        "lasuite.oidc_login.views.OIDCAuthenticationRequestView",
-        environ_name="OIDC_AUTHENTICATE_CLASS",
-        environ_prefix=None,
-    )
-    OIDC_CALLBACK_CLASS = values.Value(
-        "lasuite.oidc_login.views.OIDCAuthenticationCallbackView",
-        environ_name="OIDC_CALLBACK_CLASS",
-        environ_prefix=None,
-    )
-    OIDC_CREATE_USER = values.BooleanValue(
-        default=True,
-        environ_name="OIDC_CREATE_USER",
-    )
-    OIDC_RP_SIGN_ALGO = values.Value(
-        "RS256", environ_name="OIDC_RP_SIGN_ALGO", environ_prefix=None
-    )
-    OIDC_RP_CLIENT_ID = values.Value(
-        "accounts", environ_name="OIDC_RP_CLIENT_ID", environ_prefix=None
-    )
-    OIDC_RP_CLIENT_SECRET = SecretFileValue(
-        None,
-        environ_name="OIDC_RP_CLIENT_SECRET",
-        environ_prefix=None,
-    )
-    OIDC_OP_JWKS_ENDPOINT = values.Value(
-        environ_name="OIDC_OP_JWKS_ENDPOINT", environ_prefix=None
-    )
-    OIDC_OP_AUTHORIZATION_ENDPOINT = values.Value(
-        environ_name="OIDC_OP_AUTHORIZATION_ENDPOINT", environ_prefix=None
-    )
-    OIDC_OP_TOKEN_ENDPOINT = values.Value(
-        None, environ_name="OIDC_OP_TOKEN_ENDPOINT", environ_prefix=None
-    )
-    OIDC_OP_USER_ENDPOINT = values.Value(
-        None, environ_name="OIDC_OP_USER_ENDPOINT", environ_prefix=None
-    )
-    OIDC_OP_LOGOUT_ENDPOINT = values.Value(
-        None, environ_name="OIDC_OP_LOGOUT_ENDPOINT", environ_prefix=None
-    )
-    OIDC_AUTH_REQUEST_EXTRA_PARAMS = values.DictValue(
-        {}, environ_name="OIDC_AUTH_REQUEST_EXTRA_PARAMS", environ_prefix=None
-    )
-    OIDC_RP_SCOPES = values.Value(
-        "openid email", environ_name="OIDC_RP_SCOPES", environ_prefix=None
-    )
-    LOGIN_REDIRECT_URL = values.Value(
-        None, environ_name="LOGIN_REDIRECT_URL", environ_prefix=None
-    )
-    LOGIN_REDIRECT_URL_FAILURE = values.Value(
-        None, environ_name="LOGIN_REDIRECT_URL_FAILURE", environ_prefix=None
-    )
-    LOGOUT_REDIRECT_URL = values.Value(
-        None, environ_name="LOGOUT_REDIRECT_URL", environ_prefix=None
-    )
-    OIDC_USE_NONCE = values.BooleanValue(
-        default=True, environ_name="OIDC_USE_NONCE", environ_prefix=None
-    )
-    OIDC_REDIRECT_REQUIRE_HTTPS = values.BooleanValue(
-        default=False, environ_name="OIDC_REDIRECT_REQUIRE_HTTPS", environ_prefix=None
-    )
-    OIDC_REDIRECT_ALLOWED_HOSTS = values.ListValue(
-        default=[], environ_name="OIDC_REDIRECT_ALLOWED_HOSTS", environ_prefix=None
-    )
-    OIDC_STORE_ID_TOKEN = values.BooleanValue(
-        default=True, environ_name="OIDC_STORE_ID_TOKEN", environ_prefix=None
-    )
-    OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION = values.BooleanValue(
-        default=True,
-        environ_name="OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION",
-        environ_prefix=None,
-    )
-    OIDC_USE_PKCE = values.BooleanValue(
-        default=False, environ_name="OIDC_USE_PKCE", environ_prefix=None
-    )
-    OIDC_PKCE_CODE_CHALLENGE_METHOD = values.Value(
-        default="S256",
-        environ_name="OIDC_PKCE_CODE_CHALLENGE_METHOD",
-        environ_prefix=None,
-    )
-    OIDC_PKCE_CODE_VERIFIER_SIZE = values.IntegerValue(
-        default=64, environ_name="OIDC_PKCE_CODE_VERIFIER_SIZE", environ_prefix=None
-    )
-    OIDC_STORE_ACCESS_TOKEN = values.BooleanValue(
-        default=False, environ_name="OIDC_STORE_ACCESS_TOKEN", environ_prefix=None
-    )
-    OIDC_STORE_REFRESH_TOKEN = values.BooleanValue(
-        default=False, environ_name="OIDC_STORE_REFRESH_TOKEN", environ_prefix=None
-    )
-    OIDC_STORE_REFRESH_TOKEN_KEY = values.Value(
-        default=None,
-        environ_name="OIDC_STORE_REFRESH_TOKEN_KEY",
-        environ_prefix=None,
-    )
-    OIDC_USERINFO_MANDATORY_METADATA_FIELDS = values.ListValue(
-        default=[],
-        environ_name="OIDC_USERINFO_MANDATORY_METADATA_FIELDS",
-        environ_prefix=None,
-    )
-
-    # WARNING: Enabling this setting allows multiple user accounts to share the same email
-    # address. This may cause security issues and is not recommended for production use when
-    # email is activated as fallback for identification (see previous setting).
-    OIDC_ALLOW_DUPLICATE_EMAILS = values.BooleanValue(
-        default=False,
-        environ_name="OIDC_ALLOW_DUPLICATE_EMAILS",
-        environ_prefix=None,
-    )
-
-    USER_OIDC_ESSENTIAL_CLAIMS = values.ListValue(
-        default=[], environ_name="USER_OIDC_ESSENTIAL_CLAIMS", environ_prefix=None
-    )
-
-    OIDC_USERINFO_FULLNAME_FIELDS = values.ListValue(
-        default=values.ListValue(  # retrocompatibility
-            default=["first_name", "last_name"],
-            environ_name="USER_OIDC_FIELDS_TO_FULLNAME",
-            environ_prefix=None,
-        ),
-        environ_name="OIDC_USERINFO_FULLNAME_FIELDS",
-        environ_prefix=None,
-    )
-    OIDC_USERINFO_SHORTNAME_FIELD = values.Value(
-        default=values.Value(  # retrocompatibility
-            default="first_name",
-            environ_name="USER_OIDC_FIELD_TO_SHORTNAME",
-            environ_prefix=None,
-        ),
-        environ_name="OIDC_USERINFO_SHORTNAME_FIELD",
-        environ_prefix=None,
-    )
-
-    ALLOW_LOGOUT_GET_METHOD = values.BooleanValue(
-        default=True, environ_name="ALLOW_LOGOUT_GET_METHOD", environ_prefix=None
-    )
-
     # Logging
     # We want to make it easy to log to console but by default we log production
     # to Sentry and don't want to log to console.
@@ -625,9 +490,6 @@ class Base(OIDCProviderSettings, Configuration):
         ),
     }
 
-    # Login URL
-    LOGIN_URL = f"/api/{API_VERSION}/login/"
-
     # pylint: disable=invalid-name
     @property
     def ENVIRONMENT(self):
@@ -664,15 +526,6 @@ class Base(OIDCProviderSettings, Configuration):
 
             # Ignore the logs added by the DockerflowMiddleware
             ignore_logger("request.summary")
-
-        if (
-            cls.OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION
-            and cls.OIDC_ALLOW_DUPLICATE_EMAILS
-        ):
-            raise ValueError(
-                "Both OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION and "
-                "OIDC_ALLOW_DUPLICATE_EMAILS cannot be set to True simultaneously. "
-            )
 
 
 class Build(Base):
@@ -745,6 +598,13 @@ class Test(Base):
     STATIC_ROOT = None
 
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(True)
+
+    # Empty Python Social Auth URLs to force consistent tests results when running them locally
+    SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = ""
+    SOCIAL_AUTH_PRO_CONNECT_ACCESS_TOKEN_URL = ""
+    SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL = ""
+    SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL = ""
+    SOCIAL_AUTH_PRO_CONNECT_JWKS_URI = ""
 
     def __init__(self):
         # pylint: disable=invalid-name

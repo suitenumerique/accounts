@@ -13,5 +13,6 @@ and this project adheres to
 ### Changed
 
 - ✨(users) make `email` our username
+- ✨(authentication) Support multiple identity providers
 
 [unreleased]: https://github.com/suitenumerique/docs/compare/main
