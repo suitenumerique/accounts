@@ -183,6 +183,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "access_token": "upstream-access-token",
         "auth_time": int(user.last_login.timestamp()),
         "email": "testuser@example.com",
+        "email_verified": None,
         "given_name": "Test",
         "id_token": "upstream-id-token",
         "refresh_token": "upstream-refresh-token",

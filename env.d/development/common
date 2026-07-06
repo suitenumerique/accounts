@@ -46,3 +46,5 @@ SOCIAL_AUTH_PRO_CONNECT_ACCESS_TOKEN_URL=http://nginx:9903/realms/accounts/proto
 SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/revoke
 SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/userinfo
 SOCIAL_AUTH_PRO_CONNECT_JWKS_URI=http://nginx:9903/realms/accounts/protocol/openid-connect/certs
+
+OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT=http://accounts:8000/api/v1.0/o

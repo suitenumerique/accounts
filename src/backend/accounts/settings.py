@@ -244,6 +244,7 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
         "core",
         "users",
         "authentication",
+        "oidc_provider",
         "demo",
         "drf_spectacular",
         # Third party apps

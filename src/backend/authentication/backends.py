@@ -23,6 +23,7 @@ class ProConnect(OpenIdConnectAuth):
         "refresh_token",
         "sub",
         "email",
+        "email_verified",
         "given_name",
         "usual_name",
         "siret",

@@ -1,12 +1,14 @@
 """Tests for OAuth2/OIDC routes exposed under ``/api/<version>/o/``."""
 
 import base64
+import uuid
 from urllib.parse import parse_qs, urlparse
 
-from django.conf import settings
+from django.urls import reverse
 
 import pytest
 from oauth2_provider.models import AccessToken, Grant, RefreshToken
+from oauth2_provider.settings import oauth2_settings
 
 from core.factories import UserFactory
 
@@ -48,7 +50,7 @@ def _authorize(client, application, user, **overrides):
     """Perform an authorization request for a logged-in user."""
     client.force_login(user)
     return client.get(
-        "/api/v1.0/o/authorize/",
+        reverse("oauth2_provider:authorize"),
         _build_authorize_params(application, **overrides),
     )
 
@@ -75,7 +77,7 @@ def _exchange_code(client, application, code, **overrides):
         "client_secret": CLIENT_SECRET,
     }
     payload.update(overrides)
-    return client.post("/api/v1.0/o/token/", payload)
+    return client.post(reverse("oauth2_provider:token"), payload)
 
 
 def _issue_tokens(client, application, user):
@@ -319,78 +321,93 @@ def test_revoke_token_rejects_unauthenticated_clients(client):
     assert response.json()["error"] == "invalid_client"
 
 
-def test_introspect_returns_active_metadata_for_valid_access_token(
-    client,
+@pytest.mark.parametrize(
+    "token_type,token_model",
+    [
+        pytest.param("access_token", AccessToken, id="access_token"),
+        pytest.param("refresh_token", RefreshToken, id="refresh_token"),
+    ],
+)
+def test_introspect_returns_active_metadata_for_valid_token(
+    settings, client, token_type, token_model
 ):
     """A valid access token should be reported as active with its metadata."""
+    settings.OAUTH2_PROVIDER["OIDC_ISS_ENDPOINT"] = "http://issuer.domain"
+    # `settings.OAUTH2_PROVIDER` are copied (then cached) into the
+    # `oauth2_settings` object, so we need to manually "reload" it as
+    # the setting_changed` signal is not triggered in this situation.
+    oauth2_settings.reload()
     application = SimpleApplicationFactory()
-    user = UserFactory(email="test@example.com", sub="123")
+    user = UserFactory()
     tokens = _issue_tokens(client, application, user)
+    token = token_model.objects.get(token=tokens[token_type])
 
     response = client.post(
         "/api/v1.0/o/introspect/",
-        {"token": tokens["access_token"]},
+        {"token": token.token},
         **_build_basic_auth_headers(application),
     )
-
     assert response.status_code == 200
-
-    payload = response.json()
-    assert isinstance(payload.pop("exp"), int)  # might check the value at some point
-    assert payload == {
+    expected = {
         "active": True,
-        "iss": f"http://testserver/api/{settings.API_VERSION}/o",
         "scope": "openid email",
         "client_id": application.client_id,
-        "email": "test@example.com",
-        "sub": "123",
+        "username": user.get_username(),
+        "iat": int(token.created.timestamp()),
+        "sub": user.sub,
+        "aud": application.client_id,
+        "iss": settings.OAUTH2_PROVIDER["OIDC_ISS_ENDPOINT"],
     }
+    if token_type == "access_token":
+        expected["exp"] = int(token.expires.timestamp())
+    assert response.json() == expected
 
 
 def test_introspect_returns_inactive_for_unknown_token(client):
     """Unknown tokens should be reported as inactive."""
     application = SimpleApplicationFactory()
-    response = client.get(
+
+    response = client.post(
         "/api/v1.0/o/introspect/",
-        {"token": "missing-token"},
+        {"token": uuid.uuid4()},
         **_build_basic_auth_headers(application),
     )
-
     assert response.status_code == 200
     assert response.json() == {"active": False}
 
 
-def test_introspect_returns_inactive_for_revoked_access_token(
-    client,
-):
+@pytest.mark.parametrize(
+    "token_type,token_model",
+    [
+        pytest.param("access_token", AccessToken, id="access_token"),
+        pytest.param("refresh_token", RefreshToken, id="refresh_token"),
+    ],
+)
+def test_introspect_returns_inactive_for_revoked_token(client, token_type, token_model):
     """A revoked token should no longer be reported as active."""
     application = SimpleApplicationFactory()
     user = UserFactory()
     tokens = _issue_tokens(client, application, user)
-    access_token = tokens["access_token"]
+    token = token_model.objects.get(token=tokens[token_type])
+    token.revoke()
 
-    client.post(
-        "/api/v1.0/o/revoke_token/",
-        {"token": access_token, "token_type_hint": "access_token"},
-        **_build_basic_auth_headers(application),
-    )
-
-    response = client.get(
+    response = client.post(
         "/api/v1.0/o/introspect/",
-        {"token": access_token},
+        {"token": token.token},
         **_build_basic_auth_headers(application),
     )
-
     assert response.status_code == 200
     assert response.json() == {"active": False}
 
 
-def test_introspect_rejects_unauthenticated_clients(client):
+@pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
+def test_introspect_rejects_unauthenticated_clients(client, token_type):
     """The introspection endpoint must reject requests without client authentication."""
     application = SimpleApplicationFactory()
     user = UserFactory()
     tokens = _issue_tokens(client, application, user)
 
-    response = client.post("/api/v1.0/o/introspect/", {"token": tokens["access_token"]})
-
-    assert response.status_code == 403
+    response = client.post("/api/v1.0/o/introspect/", {"token": tokens[token_type]})
+    assert (
+        response.status_code == 403
+    )  # Per the RFC6750 section 3.1 it should be a 401...

@@ -68,63 +68,81 @@ class OIDCProviderSettings:
     OIDC Provider settings: this allows OIDC authentication from products through this project.
     """
 
-    _OAUTH2_PROVIDER_OIDC_ENABLED = values.BooleanValue(
-        default=True,
-        environ_name="OAUTH2_PROVIDER_OIDC_ENABLED",
-        environ_prefix=None,
-    )
-
+    # OAuth configuration
     _OAUTH2_PROVIDER_SCOPES = values.DictValue(
         default={
+            # Base OIDC scopes
             "openid": "OpenID Connect",
-            "profile": "Profile information",
             "email": "Email address",
+            "profile": "Profile information",
+            # Internal scopes
+            "introspection": "Introspect token scope",
+            # LaSuite scopes
+            "organization": "Organization information",
         },
-        environ_name="OAUTH2_PROVIDER_SCOPES",
-        environ_prefix=None,
+        environ_name="SCOPES",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
+    _OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS = values.Value(
+        default="oidc_provider.validators.LaSuiteValidator",
+        environ_name="OAUTH2_VALIDATOR_CLASS",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
+    # Redirection URI schemes allowed for authorization code flow.
+    # By default, only http and https are allowed, but you can add custom schemes
+    # if needed (e.g., for mobile applications).
+    _OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES = values.ListValue(
+        default=["http", "https"],
+        environ_name="ALLOWED_REDIRECT_URI_SCHEMES",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
+    _OAUTH2_PROVIDER_ROTATE_REFRESH_TOKEN = values.BooleanValue(
+        default=True,
+        environ_name="ROTATE_REFRESH_TOKEN",
+        environ_prefix="OAUTH2_PROVIDER",
     )
     _OAUTH2_PROVIDER_PKCE_REQUIRED = values.BooleanValue(
         default=False,  # For backward compatibility ProConnect
-        environ_name="OAUTH2_PROVIDER_PKCE_REQUIRED",
-        environ_prefix=None,
+        environ_name="PKCE_REQUIRED",
+        environ_prefix="OAUTH2_PROVIDER",
     )
+
+    # Token expiration configuration
     _OAUTH2_PROVIDER_ACCESS_TOKEN_EXPIRE_SECONDS = values.IntegerValue(
         default=60 * 60,  # 1 hour
-        environ_name="OAUTH2_PROVIDER_ACCESS_TOKEN_EXPIRE_SECONDS",
-        environ_prefix=None,
+        environ_name="ACCESS_TOKEN_EXPIRE_SECONDS",
+        environ_prefix="OAUTH2_PROVIDER",
     )
     _OAUTH2_PROVIDER_REFRESH_TOKEN_EXPIRE_SECONDS = values.IntegerValue(
         default=24 * 60 * 60,  # 24 hours
-        environ_name="OAUTH2_PROVIDER_REFRESH_TOKEN_EXPIRE_SECONDS",
-        environ_prefix=None,
+        environ_name="REFRESH_TOKEN_EXPIRE_SECONDS",
+        environ_prefix="OAUTH2_PROVIDER",
     )
     _OAUTH2_PROVIDER_AUTHORIZATION_CODE_EXPIRE_SECONDS = values.IntegerValue(
         default=5 * 60,  # 5 minutes
-        environ_name="OAUTH2_PROVIDER_AUTHORIZATION_CODE_EXPIRE_SECONDS",
-        environ_prefix=None,
+        environ_name="AUTHORIZATION_CODE_EXPIRE_SECONDS",
+        environ_prefix="OAUTH2_PROVIDER",
     )
 
+    # OIDC configuration
+    _OAUTH2_PROVIDER_OIDC_ENABLED = values.BooleanValue(
+        default=True,
+        environ_name="OIDC_ENABLED",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
+    _OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT = values.Value(
+        environ_name="OIDC_ISS_ENDPOINT",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
+    _OAUTH2_PROVIDER_OIDC_RP_INITIATED_LOGOUT_ENABLED = values.BooleanValue(
+        default=True,
+        environ_name="OIDC_RP_INITIATED_LOGOUT_ENABLED",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
     _OAUTH2_PROVIDER_OIDC_RSA_PRIVATE_KEY = PEMValue(
         default=None,
-        environ_name="OAUTH2_PROVIDER_OIDC_RSA_PRIVATE_KEY",
-        environ_prefix=None,
-    )
-    _OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS = values.Value(
-        default="oauth2_provider.oauth2_validators.OAuth2Validator",
-        environ_name="OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS",
-        environ_prefix=None,
-    )
-
-    _OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES = values.ListValue(
-        default=["http", "https"],
-        environ_name="OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES",
-        environ_prefix=None,
-    )
-
-    _OAUTH2_PROVIDER_ROTATE_REFRESH_TOKEN = values.BooleanValue(
-        default=True,
-        environ_name="OAUTH2_PROVIDER_ROTATE_REFRESH_TOKEN",
-        environ_prefix=None,
+        environ_name="OIDC_RSA_PRIVATE_KEY",
+        environ_prefix="OAUTH2_PROVIDER",
     )
 
     @classmethod
@@ -165,23 +183,27 @@ class OIDCProviderSettings:
     def OAUTH2_PROVIDER(self) -> dict[str, Any]:  # pylint: disable=invalid-name
         """Build the OAUTH2_PROVIDER settings dictionary based on the configuration provided."""
 
-        return {
-            "SCOPES": self._OAUTH2_PROVIDER_SCOPES,
-            "PKCE_REQUIRED": self._OAUTH2_PROVIDER_PKCE_REQUIRED,
-            # Token expiration settings
-            "ACCESS_TOKEN_EXPIRE_SECONDS": self._OAUTH2_PROVIDER_ACCESS_TOKEN_EXPIRE_SECONDS,
-            "REFRESH_TOKEN_EXPIRE_SECONDS": self._OAUTH2_PROVIDER_REFRESH_TOKEN_EXPIRE_SECONDS,
-            "AUTHORIZATION_CODE_EXPIRE_SECONDS": (
-                self._OAUTH2_PROVIDER_AUTHORIZATION_CODE_EXPIRE_SECONDS
-            ),
+        keys = {
+            # OAuth configuration
+            "SCOPES",
+            "OAUTH2_VALIDATOR_CLASS",
+            "ALLOWED_REDIRECT_URI_SCHEMES",
+            "ROTATE_REFRESH_TOKEN",
+            "PKCE_REQUIRED",
+            # Token expiration configuration
+            "ACCESS_TOKEN_EXPIRE_SECONDS",
+            "REFRESH_TOKEN_EXPIRE_SECONDS",
+            "AUTHORIZATION_CODE_EXPIRE_SECONDS",
             # OIDC configuration
-            "OIDC_ENABLED": self._OAUTH2_PROVIDER_OIDC_ENABLED,
-            "OIDC_RSA_PRIVATE_KEY": self._get_oidc_rsa_private_key(),
-            "OAUTH2_VALIDATOR_CLASS": self._OAUTH2_PROVIDER_OAUTH2_VALIDATOR_CLASS,
-            # Redirection URI schemes allowed for authorization code flow.
-            # By default, only http and https are allowed, but you can add custom schemes
-            # if needed (e.g., for mobile applications).
-            "ALLOWED_REDIRECT_URI_SCHEMES": self._OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES,
-            # Refresh token configuration
-            "ROTATE_REFRESH_TOKEN": self._OAUTH2_PROVIDER_ROTATE_REFRESH_TOKEN,
+            "OIDC_ENABLED",
+            "OIDC_ISS_ENDPOINT",
+            "OIDC_RP_INITIATED_LOGOUT_ENABLED",
         }
+        config = {
+            config_key: getattr(self, f"_OAUTH2_PROVIDER_{config_key}")
+            for config_key in keys
+        }
+        config["OIDC_RSA_PRIVATE_KEY"] = self._get_oidc_rsa_private_key()
+        # rsebille: Disabled while we don't have a frontend page
+        config["OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT"] = False
+        return config

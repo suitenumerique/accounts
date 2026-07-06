@@ -2,30 +2,26 @@
 
 import base64
 import json
-from unittest.mock import MagicMock
-from urllib.parse import parse_qs, urlparse
 
+import oauthlib.common
 import pytest
+from oauth2_provider.oauth2_validators import OAuth2Validator
 
 from core.factories import UserFactory
 
-from oidc_provider.factories import (
-    CLIENT_SECRET,
-    REDIRECT_URI,
-    SimpleApplicationFactory,
-)
-from oidc_provider.validators import LaSuiteValidator
+from authentication.factories import IdentityProviderUserFactory
+from oidc_provider.factories import SimpleApplicationFactory
+from oidc_provider.validators import LaSuiteValidator, OIDCValidator
 
 pytestmark = pytest.mark.django_db
 
 
-def _make_request(user, scopes=None, claims=None):
-    """Build a minimal mock OAuth2 request for unit tests."""
-    request = MagicMock()
-    request.user = user
-    request.scopes = scopes or []
-    request.claims = claims
-    return request
+def _make_request(user, scopes="", client=None):
+    """Build a minimal OAuth2 request for unit tests."""
+    return oauthlib.common.Request(
+        "http://dummy-uri/",
+        body={"user": user, "scopes": scopes, "client": client},
+    )
 
 
 def _decode_jwt_payload(token: str) -> dict:
@@ -38,176 +34,108 @@ def _decode_jwt_payload(token: str) -> dict:
     return json.loads(base64.urlsafe_b64decode(payload_b64))
 
 
-def _build_authorize_params(application, **overrides):
-    """Return a default authorization request payload."""
-    params = {
-        "response_type": "code",
-        "client_id": application.client_id,
-        "redirect_uri": REDIRECT_URI,
-        "scope": "openid email",
-        "state": "test-state",
+@pytest.fixture(name="validator", params=[OIDCValidator, LaSuiteValidator])
+def validator_fixture(request) -> OAuth2Validator:
+    """Pytest fixture that return an `OAuth2Validator` validator class."""
+    return request.param()
+
+
+def test_openid_scope(validator):
+    """Test the `openid` scope claims: `sub`."""
+    user = UserFactory()
+
+    claims = validator.get_oidc_claims(None, None, _make_request(user, scopes="openid"))
+    assert claims["sub"] == user.sub
+
+
+def test_profile_scope(validator):
+    """Test the `profile` scope claims: `given_name`, `name`."""
+    user = UserFactory()
+
+    claims = validator.get_oidc_claims(
+        None, None, _make_request(user, scopes="profile")
+    )
+    assert claims["given_name"] == user.short_name
+    assert claims["name"] == user.full_name
+
+
+def test_email_scope(validator):
+    """Test the `email` scope claims: `email`, `email_verified`."""
+    user = UserFactory()
+
+    claims = validator.get_oidc_claims(None, None, _make_request(user, scopes="email"))
+    assert claims["email"] == user.email
+    assert claims["email_verified"] is False
+
+
+def test_email_scope_for_lasuite():
+    """Test the `email` scope claims for LaSuiteValidator: `email`, `email_verified`."""
+    user = UserFactory()
+    request = _make_request(user, scopes="email")
+    validator = LaSuiteValidator()
+
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["email"] == user.email
+    assert claims["email_verified"] is False
+
+    # Link an identity, which hasn't verified the email
+    IdentityProviderUserFactory(user=user, extra_data={"email_verified": False})
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["email"] == user.email
+    assert claims["email_verified"] is False
+
+    # Link an additional identity, which has verified the email
+    IdentityProviderUserFactory(user=user, extra_data={"email_verified": True})
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["email"] == user.email
+    assert claims["email_verified"] is True
+
+
+def test_organization_scope_for_lasuite():
+    """Test the `organization` scope claims for LaSuiteValidator: `siret`."""
+    user = UserFactory()
+    request = _make_request(user, scopes="organization")
+    validator = LaSuiteValidator()
+
+    claims = validator.get_oidc_claims(None, None, request)
+    assert "siret" not in claims
+
+    # Link an identity
+    IdentityProviderUserFactory(user=user, extra_data={"siret": "1234567890123"})
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["siret"] == "1234567890123"
+
+    # Link an additional identity
+    IdentityProviderUserFactory(user=user, extra_data={"siret": "3210987654321"})
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["siret"] == "3210987654321"
+
+
+@pytest.mark.parametrize("validator", [OIDCValidator], indirect=True)
+def test_get_userinfo_claims(validator):
+    """Test UserInfo is a dict containing the requested scopes' claims."""
+    user = UserFactory()
+
+    userinfo = validator.get_userinfo_claims(
+        _make_request(user, scopes="openid profile")
+    )
+    assert userinfo == {
+        "sub": user.sub,
+        "given_name": user.short_name,
+        "name": user.full_name,
     }
-    params.update(overrides)
-    return params
 
 
-def _get_authorization_code(client, application, user, **overrides):
-    """Perform the authorization step and return the authorization code."""
-    client.force_login(user)
-    response = client.get(
-        "/api/v1.0/o/authorize/",
-        _build_authorize_params(application, **overrides),
+def test_get_userinfo_claims_for_lasuite():
+    """Test LaSuiteValidator's UserInfo is a JWT containing the requested scopes' claims."""
+    user = UserFactory()
+
+    userinfo = LaSuiteValidator().get_userinfo_claims(
+        _make_request(user, scopes="openid profile", client=SimpleApplicationFactory())
     )
-    assert response.status_code == 302
-
-    params = parse_qs(urlparse(response["Location"]).query)
-    assert "code" in params
-    return params["code"][0]
-
-
-def _exchange_code_for_tokens(client, application, code):
-    """Exchange an authorization code for tokens and return the JSON payload."""
-    response = client.post(
-        "/api/v1.0/o/token/",
-        {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": REDIRECT_URI,
-            "client_id": application.client_id,
-            "client_secret": CLIENT_SECRET,
-        },
-    )
-    assert response.status_code == 200
-    return response.json()
-
-
-@pytest.fixture(name="use_lasuite_validator", autouse=True)
-def fixture_use_lasuite_validator(settings):
-    """Set the OAUTH2_VALIDATOR_CLASS to LaSuiteValidator for tests which need it."""
-    settings.OAUTH2_PROVIDER = settings.OAUTH2_PROVIDER | {
-        "OAUTH2_VALIDATOR_CLASS": "oidc_provider.validators.LaSuiteValidator",
+    claims = _decode_jwt_payload(userinfo)
+    assert claims == {
+        "sub": user.sub,
+        "given_name": user.short_name,
+        "name": user.full_name,
     }
-
-
-def test_acr_claim_included_when_claims_acr_equals_eidas1():
-    """
-    When request.claims contains {'acr': 'eidas1'}, the 'acr' claim
-    must be present with value 'eidas1' in the returned additional claims.
-    """
-    user = UserFactory()
-    request = _make_request(user, claims={"acr": "eidas1"})
-
-    additional_claims = LaSuiteValidator().get_additional_claims(request)
-
-    assert "acr" in additional_claims
-    assert additional_claims["acr"] == "eidas1"
-
-
-def test_acr_claim_absent_when_claims_is_none():
-    """
-    When request.claims is None, the 'acr' claim must NOT appear in the
-    additional claims.
-    """
-    user = UserFactory()
-    request = _make_request(user, claims=None)
-
-    additional_claims = LaSuiteValidator().get_additional_claims(request)
-
-    assert "acr" not in additional_claims
-
-
-def test_acr_claim_absent_when_claims_is_empty_dict():
-    """
-    When request.claims is an empty dict, the 'acr' claim must NOT appear.
-    """
-    user = UserFactory()
-    request = _make_request(user, claims={})
-
-    additional_claims = LaSuiteValidator().get_additional_claims(request)
-
-    assert "acr" not in additional_claims
-
-
-def test_acr_claim_absent_when_acr_value_is_not_eidas1():
-    """
-    When request.claims contains 'acr' but with a value other than 'eidas1',
-    the 'acr' claim must NOT appear in the additional claims.
-    """
-    user = UserFactory()
-    request = _make_request(user, claims={"acr": "loa2"})
-
-    additional_claims = LaSuiteValidator().get_additional_claims(request)
-
-    assert "acr" not in additional_claims
-
-
-def test_acr_claim_absent_when_claims_does_not_contain_acr_key():
-    """
-    When request.claims is a non-empty dict but does not contain the 'acr'
-    key, the 'acr' claim must NOT appear in the additional claims.
-    """
-    user = UserFactory()
-    request = _make_request(user, claims={"some_other": "value"})
-
-    additional_claims = LaSuiteValidator().get_additional_claims(request)
-
-    assert "acr" not in additional_claims
-
-
-def test_id_token_contains_acr_eidas1_when_acr_values_requested(client):
-    """
-    When the authorization request includes 'acr_values=eidas1', the resulting
-    id_token must carry the 'acr' claim with value 'eidas1'.
-
-    This verifies the full chain:
-    1. _create_authorization_code stores the acr claim on the grant.
-    2. get_additional_claims reads it and adds it to the token.
-    """
-    application = SimpleApplicationFactory()
-    user = UserFactory()
-
-    code = _get_authorization_code(client, application, user, acr_values="eidas1")
-    tokens = _exchange_code_for_tokens(client, application, code)
-
-    id_token_payload = _decode_jwt_payload(tokens["id_token"])
-
-    assert "acr" in id_token_payload, (
-        "The 'acr' claim should be present in the id_token when acr_values=eidas1"
-    )
-    assert id_token_payload["acr"] == "eidas1"
-
-
-def test_id_token_does_not_contain_acr_without_acr_values(client):
-    """
-    When the authorization request does NOT include 'acr_values', the resulting
-    id_token must NOT contain the 'acr' claim.
-    """
-    application = SimpleApplicationFactory()
-    user = UserFactory()
-
-    code = _get_authorization_code(client, application, user)
-    tokens = _exchange_code_for_tokens(client, application, code)
-
-    id_token_payload = _decode_jwt_payload(tokens["id_token"])
-
-    assert "acr" not in id_token_payload, (
-        "The 'acr' claim should NOT be present in the id_token when acr_values is absent"
-    )
-
-
-def test_id_token_does_not_contain_acr_when_acr_values_not_eidas1(client):
-    """
-    When the authorization request includes 'acr_values' with a value other than
-    'eidas1', the resulting id_token must NOT contain the 'acr' claim.
-    """
-    application = SimpleApplicationFactory()
-    user = UserFactory()
-
-    code = _get_authorization_code(client, application, user, acr_values="loa2")
-    tokens = _exchange_code_for_tokens(client, application, code)
-
-    id_token_payload = _decode_jwt_payload(tokens["id_token"])
-
-    assert "acr" not in id_token_payload, (
-        "The 'acr' claim should NOT be present when acr_values is not 'eidas1'"
-    )

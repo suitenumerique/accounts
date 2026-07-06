@@ -11,14 +11,33 @@ from jwcrypto import jwt
 from oauth2_provider.models import AbstractApplication
 from oauth2_provider.oauth2_validators import OAuth2Validator
 
+from authentication.models import IdentityProviderUser
 
-class BaseValidator(OAuth2Validator):
-    """This validator adds additional claims to the token based on the requested scopes."""
+
+class OIDCValidator(OAuth2Validator):
+    """
+    Base Validator of the project, it only supports officials
+    OIDC scopes and claims that are available in Accounts.
+    """
+
+    oidc_claim_scope = {
+        "sub": "openid",
+        # Claims for "email" scope
+        "email": "email",
+        "email_verified": "email",
+        # Claims for "profile" scope
+        "given_name": "profile",
+        "name": "profile",
+    }
+
+    def get_discovery_claims(self, request):
+        return super().get_discovery_claims(request) + list(
+            self.oidc_claim_scope.keys()
+        )
 
     def get_additional_claims(self, request):
         """
         Generate additional claims to be included in the token.
-        Warning, here the request.user is a Mailbox object.
 
         Args:
             request: The OAuth2 request object containing user and scope information.
@@ -28,48 +47,17 @@ class BaseValidator(OAuth2Validator):
         """
         additional_claims = super().get_additional_claims(request)
 
-        # Enforce the use of the sub instead of the user pk as sub
-        additional_claims["sub"] = str(request.user.pk)
+        additional_claims["sub"] = str(request.user.sub)
 
-        # Authentication method reference
-        # additional_claims["amr"] = "pwd"
+        # "email" claims
+        additional_claims["email"] = request.user.email
+        additional_claims["email_verified"] = False
 
-        # Include the user's email if 'email' scope is requested
-        if "email" in request.scopes:
-            additional_claims["email"] = request.user.email
+        # "profile" claims
+        additional_claims["given_name"] = request.user.short_name
+        additional_claims["name"] = request.user.full_name
 
         return additional_claims
-
-    def introspect_token(self, token, token_type_hint, request, *args, **kwargs):
-        """Introspect an access or refresh token.
-
-        Called once the introspect request is validated. This method should
-        verify the *token* and either return a dictionary with the list of
-        claims associated, or `None` in case the token is unknown.
-
-        Below the list of registered claims you should be interested in:
-
-        - scope : space-separated list of scopes
-        - client_id : client identifier
-        - username : human-readable identifier for the resource owner
-        - token_type : type of the token
-        - exp : integer timestamp indicating when this token will expire
-        - iat : integer timestamp indicating when this token was issued
-        - nbf : integer timestamp indicating when it can be "not-before" used
-        - sub : subject of the token - identifier of the resource owner
-        - aud : list of string identifiers representing the intended audience
-        - iss : string representing issuer of this token
-        - jti : string identifier for the token
-
-        Note that most of them are coming directly from JWT RFC. More details
-        can be found in `Introspect Claims`_ or `JWT Claims`_.
-
-        The implementation can use *token_type_hint* to improve lookup
-        efficiency, but must fallback to other types to be compliant with RFC.
-
-        The dict of claims is added to request.token after this method.
-        """
-        raise RuntimeError("Introspection not implemented")
 
     def validate_silent_authorization(self, request):
         """Ensure the logged in user has authorized silent OpenID authorization.
@@ -109,26 +97,32 @@ class BaseValidator(OAuth2Validator):
         """
         return request.user.is_authenticated
 
+    def introspect_token(self, *args, **kwargs):
+        # `django-oauth-toolkit` doesn't use the validator in its
+        # `IntrospectTokenView` (which we copied) so the method is no use to
+        # us and shouldn't be called, but pylint want it implemented.
+        raise Exception("Not Implemented")  # pylint: disable=broad-exception-raised
 
-class LaSuiteValidator(BaseValidator):
+
+class LaSuiteValidator(OIDCValidator):
     """
-    This validator is to be used with the LaSuite projects, but can also be used
-    for any project that needs to add the same claims to the token.
-    It adds additional claims to support migration from ProConnect to Accounts.
+    Validator to be used for the LaSuite projects, it adds additional
+    claims to support migration from ProConnect to Accounts.
     """
 
-    oidc_claim_scope = OAuth2Validator.oidc_claim_scope | {
-        "acr": "openid",  # might be a dedicated scope?
-        "given_name": "given_name",
-        "usual_name": "usual_name",
-        "siret": "siret",
-        "uid": "uid",
-        "groups": "groups",
-        "organizational_unit": "organizational_unit",
-        "belonging_population": "belonging_population",
-        "phone": "phone",
-        "chorusdt": "chorusdt",
+    oidc_claim_scope = OIDCValidator.oidc_claim_scope | {
+        # Claims for "organization" scope
+        "siret": "organization",
     }
+
+    def _get_claim_from_identity_providers(
+        self, identity_providers: list[IdentityProviderUser], claim
+    ):
+        return [
+            s.extra_data[claim]
+            for s in identity_providers
+            if s.extra_data.get(claim) is not None
+        ]
 
     def get_additional_claims(self, request):
         """
@@ -141,71 +135,25 @@ class LaSuiteValidator(BaseValidator):
             dict: A dictionary of additional claims to be included in the token.
         """
         additional_claims = super().get_additional_claims(request)
-
-        # Include the user's name if 'profile' scope is requested
-        if "profile" in request.scopes:
-            additional_claims["given_name"] = request.user.short_name
-            additional_claims["name"] = (
-                request.user.full_name
-            )  # as per OIDC standard claims
-
-        if "given_name" in request.scopes:  # backward compatibility ProConnect
-            additional_claims["given_name"] = request.user.short_name
-        if "usual_name" in request.scopes:  # backward compatibility ProConnect
-            additional_claims["usual_name"] = request.user.full_name.replace(
-                request.user.short_name, ""
-            ).strip()
-
-        if "uid" in request.scopes:
-            additional_claims["uid"] = str(request.user.pk)
-
-        if "siret" in request.scopes and request.user.identity_providers.exists():
-            identity_providers_siret = [
-                s.extra_data["siret"]
-                for s in request.user.identity_providers.all()
-                if s.extra_data.get("siret")
-            ]
-            if identity_providers_siret:
-                additional_claims["siret"] = identity_providers_siret[0]
-
-        # Include 'acr' claim if it is present in the request claims and equals 'eidas1'
-        # see _create_authorization_code method for more details
-        if request.claims and request.claims.get("acr") == "eidas1":
-            additional_claims["acr"] = "eidas1"
-
-        # We need to add `amr` based on upstream information or user authentication backend.
-        # additional_claims["amr"] = "pwd"
-
-        return additional_claims
-
-    def _create_authorization_code(self, request, code, expires=None):
-        """
-        Create an authorization code and handle 'acr_values' in the request.
-
-        Args:
-            request: The OAuth2 request object containing user and scope information.
-            code: The authorization code to be created.
-            expires: The expiration time of the authorization code.
-
-        Returns:
-            The created authorization code.
-        """
-        # Split and strip 'acr_values' from the request, if present
-        acr_values = (
-            [value.strip() for value in request.acr_values.split(",")]
-            if request.acr_values
-            else []
+        identity_providers = list(
+            request.user.identity_providers.order_by("-updated_at")
         )
 
-        # If 'eidas1' is in 'acr_values', add 'acr' claim to the request claims
-        # This allows the token to have this information and pass it to the /token
-        # endpoint and return it in the token response
-        if "eidas1" in acr_values:
-            request.claims = request.claims or {}
-            request.claims["acr"] = "eidas1"
+        # "email" claims
+        additional_claims["email_verified"] |= any(
+            self._get_claim_from_identity_providers(
+                identity_providers, "email_verified"
+            )
+        )
 
-        # Call the superclass method to create the authorization code
-        return super()._create_authorization_code(request, code, expires)
+        # "organization" claims
+        identity_providers_siret = self._get_claim_from_identity_providers(
+            identity_providers, "siret"
+        )
+        if identity_providers_siret:
+            additional_claims["siret"] = identity_providers_siret[0]
+
+        return additional_claims
 
     def get_userinfo_claims(self, request):
         """
@@ -214,9 +162,7 @@ class LaSuiteValidator(BaseValidator):
 
         This is overridden to enforce JWT signing, we use `finalize_id_token` like code.
         """
-        claims, _expiration_time = self.get_id_token_dictionary(
-            request.access_token, None, request
-        )
+        claims = super().get_userinfo_claims(request)
 
         header = {
             "typ": "JWT",
