@@ -752,6 +752,38 @@
     {
       "attributes": {
         "consent.screen.text": "",
+        "display.on.consent.screen": "true",
+        "gui.order": "",
+        "include.in.token.scope": "true"
+      },
+      "description": "ProConnect scope",
+      "id": "afd0293e-3f95-41b1-9189-ea2612f03ccd",
+      "name": "siret",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "config": {
+            "access.token.claim": "true",
+            "access.tokenResponse.claim": "false",
+            "claim.name": "siret",
+            "claim.value": "1234567890123",
+            "id.token.claim": "true",
+            "introspection.token.claim": "true",
+            "jsonType.label": "String",
+            "lightweight.claim": "false",
+            "userinfo.token.claim": "true"
+          },
+          "consentRequired": false,
+          "id": "e87a230f-8a5a-42e6-9948-46af86d2c795",
+          "name": "SIRET",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper"
+        }
+      ]
+    },
+    {
+      "attributes": {
+        "consent.screen.text": "",
         "display.on.consent.screen": "false",
         "include.in.token.scope": "false"
       },
@@ -1294,6 +1326,7 @@
         "microprofile-jwt",
         "offline_access",
         "phone",
+        "siret",
         "usual_name"
       ],
       "protocol": "openid-connect",
@@ -1834,6 +1867,7 @@
     "microprofile-jwt",
     "offline_access",
     "phone",
+    "siret",
     "usual_name"
   ],
   "defaultRole": {
