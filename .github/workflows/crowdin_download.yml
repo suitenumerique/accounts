@@ -25,7 +25,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Create empty source files
         run: |
           touch src/backend/locale/django.pot
@@ -33,7 +33,7 @@ jobs:
           touch src/frontend/packages/i18n/locales/accounts/translations-crowdin.json
       # crowdin workflow
       - name: crowdin action
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@52aa776766211d83d975df51f3b9c53c2f8ba35f # v2
         with:
           config: crowdin/config.yml
           upload_sources: false
@@ -53,7 +53,7 @@ jobs:
           CROWDIN_BASE_PATH: "../src/"
       # frontend i18n
       - name: Restore the frontend cache
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: "src/frontend/**/node_modules"
           key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
@@ -63,7 +63,7 @@ jobs:
         run: yarn i18n:deploy
       # Create a new PR
       - name: Create a new Pull Request with new translated strings
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           commit-message: |
             🌐(i18n) update translated strings
