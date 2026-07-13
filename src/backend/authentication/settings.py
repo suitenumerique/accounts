@@ -11,6 +11,10 @@ class AuthenticationSettings:
     LOGIN_REDIRECT_URL = values.Value(None, environ_prefix=None)
     LOGOUT_REDIRECT_URL = values.Value(None, environ_prefix=None)
 
+    SOCIAL_AUTH_REQUIRE_POST = (
+        False  # This will become the default in social-app-django>=6.0.0
+    )
+
     SOCIAL_AUTH_SANITIZE_REDIRECTS = True
     SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = values.ListValue([], environ_prefix=None)
 

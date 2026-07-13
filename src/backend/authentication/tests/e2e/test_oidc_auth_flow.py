@@ -113,19 +113,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     )
 
     # Then we get redirected to the upstream OIDC provider
-    authentication_login_response = client.get(authentication_login_url, follow=False)
-    assertRedirects(
-        authentication_login_response,
-        reverse(
-            "authentication:social:begin",
-            kwargs={"backend": "pro-connect"},
-            query={"next": oauth2_provider_authorize_url},
-        ),
-        fetch_redirect_response=False,
-    )
-
-    oidc_upstream_response = client.get(authentication_login_response.url, follow=False)
-    # We must have been redirected to the upstream OIDC provider
+    oidc_upstream_response = client.get(authentication_login_url, follow=False)
     assert oidc_upstream_response.status_code == 302
     assert oidc_upstream_response.url.startswith(
         settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT

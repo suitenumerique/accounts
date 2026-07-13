@@ -32,9 +32,6 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
 
     def setUp(self) -> None:
         super().setUp()
-        # Clear the backend's cached methods
-        self.backend.oidc_config.invalidate()
-        self.backend.get_jwks_keys.invalidate()
 
         self.user_data_content_type = "application/jwt"
         self.user_data_url = f"{self.issuer}/userinfo"

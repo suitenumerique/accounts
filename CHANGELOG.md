@@ -18,5 +18,6 @@ and this project adheres to
 - ✨(OIDC Provider) Configure and customize the Authorization Server
 - ✨(OIDC Provider) Add a `guest` claim and the `account` scope
 - 🔒(authentication) make the logout view POST-only
+- 👽(authentication) handle Social Auth's login views requiring POST requests
 
 [unreleased]: https://github.com/suitenumerique/docs/compare/main
