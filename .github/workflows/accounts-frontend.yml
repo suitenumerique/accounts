@@ -22,7 +22,7 @@ jobs:
   install-dependencies:
     uses: ./.github/workflows/_dependencies.yml
     with:
-      node-version: '22.x'
+      node-version: "22.x"
       with-front-dependencies-installation: true
 
   test-front:
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24.x"
+          node-version: "22.x"
 
       - name: Restore the frontend cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -61,7 +61,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24.x"
+          node-version: "22.x"
       - name: Restore the frontend cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -105,7 +105,7 @@ jobs:
         if: steps.changes.outputs.lock == 'true' || steps.changes.outputs.app == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24.x"
+          node-version: "22.x"
 
       - name: Check bundle size changes
         if: steps.changes.outputs.lock == 'true' || steps.changes.outputs.app == 'true'
@@ -135,7 +135,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24.x"
+          node-version: "22.x"
       - name: Restore the frontend cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
