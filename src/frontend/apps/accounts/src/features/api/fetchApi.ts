@@ -4,7 +4,7 @@ import { APIError } from "./APIError";
 /**
  * Retrieves the CSRF token from the document's cookies.
  */
-function getCSRFToken() {
+export function getCSRFToken() {
   return document.cookie
     .split(";")
     .filter((cookie) => cookie.trim().startsWith("csrftoken="))

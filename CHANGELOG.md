@@ -17,5 +17,6 @@ and this project adheres to
 - ✨(authentication) Encrypt identity providers' `extra_data`
 - ✨(OIDC Provider) Configure and customize the Authorization Server
 - ✨(OIDC Provider) Add a `guest` claim and the `account` scope
+- 🔒(authentication) make the logout view POST-only
 
 [unreleased]: https://github.com/suitenumerique/docs/compare/main

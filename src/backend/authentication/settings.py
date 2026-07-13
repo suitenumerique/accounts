@@ -8,10 +8,6 @@ class AuthenticationSettings:
     """Authentication settings: configure Django login and Python Social Auth."""
 
     LOGIN_URL = "authentication:login"
-    LOGOUT_URL_ALLOW_GET_METHOD = values.BooleanValue(
-        True,  # rsebille: Remove this once the frontend use POST
-        environ_prefix=None,
-    )
     LOGIN_REDIRECT_URL = values.Value(None, environ_prefix=None)
     LOGOUT_REDIRECT_URL = values.Value(None, environ_prefix=None)
 

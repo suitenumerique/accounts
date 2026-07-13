@@ -6,7 +6,10 @@ from django.urls import reverse
 
 import pytest
 from pytest_django.asserts import assertRedirects
-from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
+from rest_framework.status import (
+    HTTP_403_FORBIDDEN,
+    HTTP_405_METHOD_NOT_ALLOWED,
+)
 
 from core.factories import UserFactory
 
@@ -45,17 +48,18 @@ def test_login_routing_view_redirect(client, query, expected_query):
     )
 
 
-@pytest.mark.parametrize("method", ["GET", "POST"])
-def test_logout_view(settings, client, method):
-    """Test calling our LogoutView."""
+def test_logout_view(settings, client):
+    """Test calling the LogoutView."""
     settings.LOGOUT_REDIRECT_URL = "/example-logout"
+    logout_url = reverse("authentication:logout")
+    login_required_url = reverse("users-me")
     client.force_login(UserFactory())
 
-    assert client.get(reverse("users-me")).status_code == HTTP_200_OK
-    assertRedirects(
-        getattr(client, method.lower())(reverse("authentication:logout")),
-        "/example-logout",
-        fetch_redirect_response=False,
-    )
-    # Check we are indeed log out
-    assert client.get(reverse("users-me")).status_code == HTTP_403_FORBIDDEN
+    # With a GET request we get an error
+    response = client.get(logout_url)
+    assert response.status_code == HTTP_405_METHOD_NOT_ALLOWED
+
+    # with a POST request we should be log out
+    response = client.post(logout_url)
+    assertRedirects(response, "/example-logout", fetch_redirect_response=False)
+    assert client.get(login_required_url).status_code == HTTP_403_FORBIDDEN

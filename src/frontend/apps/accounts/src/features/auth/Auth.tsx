@@ -8,14 +8,10 @@ import { Spinner } from "@gouvfr-lasuite/ui-kit";
 
 import { fetchAPI } from "@/features/api/fetchApi";
 import { User } from "./types";
-import { LOGIN_URL, LOGOUT_URL } from "./conf";
+import { LOGIN_URL } from "./conf";
 
 export const login = () => {
   window.location.replace(LOGIN_URL);
-};
-
-export const logout = () => {
-  window.location.replace(LOGOUT_URL);
 };
 
 interface AuthContextInterface {

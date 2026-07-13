@@ -1,8 +1,6 @@
 """Authentication views"""
 
-from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_not_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -35,19 +33,3 @@ class LoginRoutingView(View):
                 query=query,
             )
         )
-
-
-class LogoutView(auth_views.LogoutView):
-    __doc__ = (
-        auth_views.LogoutView.__doc__
-        + """
-    Can be called with a GET method when `LOGOUT_URL_ALLOW_GET_METHOD=True`.
-    """
-    )
-
-    http_method_names = auth_views.LogoutView.http_method_names + (
-        ["get"] if settings.LOGOUT_URL_ALLOW_GET_METHOD else []
-    )
-
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
