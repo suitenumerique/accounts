@@ -8,5 +8,4 @@ class CoreConfig(AppConfig):
     """Configuration class for the accounts core app."""
 
     name = "core"
-    app_label = "core"
     verbose_name = _("Accounts core application")

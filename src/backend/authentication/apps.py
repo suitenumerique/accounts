@@ -8,5 +8,4 @@ class AuthenticationConfig(AppConfig):
     """Configuration class for the accounts authentication app."""
 
     name = "authentication"
-    app_label = "authentication"
     verbose_name = _("Accounts authentication application")

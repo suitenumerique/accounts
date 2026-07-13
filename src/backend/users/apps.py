@@ -8,5 +8,4 @@ class UsersConfig(AppConfig):
     """Configuration class for the accounts users app."""
 
     name = "users"
-    app_label = "users"
     verbose_name = _("Accounts users application")
