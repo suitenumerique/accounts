@@ -16,5 +16,6 @@ and this project adheres to
 - ✨(authentication) Support multiple identity providers
 - ✨(authentication) Encrypt identity providers' `extra_data`
 - ✨(OIDC Provider) Configure and customize the Authorization Server
+- ✨(OIDC Provider) Add a `guest` claim and the `account` scope
 
 [unreleased]: https://github.com/suitenumerique/docs/compare/main

@@ -111,6 +111,8 @@ class LaSuiteValidator(OIDCValidator):
     """
 
     oidc_claim_scope = OIDCValidator.oidc_claim_scope | {
+        # Claims for "account" scope
+        "guest": "account",
         # Claims for "organization" scope
         "siret": "organization",
     }
@@ -145,6 +147,9 @@ class LaSuiteValidator(OIDCValidator):
                 identity_providers, "email_verified"
             )
         )
+
+        # "account" claims
+        additional_claims["guest"] = False
 
         # "organization" claims
         identity_providers_siret = self._get_claim_from_identity_providers(

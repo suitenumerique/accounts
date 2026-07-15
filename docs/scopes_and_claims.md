@@ -29,5 +29,6 @@ Extend the `OIDCValidator` to add additional claims or modify standard ones.
 | Scope        | Claim          | Type    | Description                                                                                 |
 |--------------|----------------|---------|---------------------------------------------------------------------------------------------|
 | email        | email_verified | boolean | True if _at least one_ of the End-User's identity provider `email_verified` claim is `true` |
+| account      | guest          | boolean | Always `false`. Forward compatibility for organization guests.                              |
 | organization | siret          | string  | [SIRET](https://en.wikipedia.org/wiki/SIRET_code) of the End-User's organization            |
 

@@ -91,6 +91,16 @@ def test_email_scope_for_lasuite():
     assert claims["email_verified"] is True
 
 
+def test_account_scope_for_lasuite():
+    """Test the `account` scope claims for LaSuiteValidator: `guest`."""
+    user = UserFactory()
+    request = _make_request(user, scopes="account")
+    validator = LaSuiteValidator()
+
+    claims = validator.get_oidc_claims(None, None, request)
+    assert claims["guest"] is False
+
+
 def test_organization_scope_for_lasuite():
     """Test the `organization` scope claims for LaSuiteValidator: `siret`."""
     user = UserFactory()

@@ -78,6 +78,7 @@ class OIDCProviderSettings:
             # Internal scopes
             "introspection": "Introspect token scope",
             # LaSuite scopes
+            "account": "Account information",
             "organization": "Organization information",
         },
         environ_name="SCOPES",
