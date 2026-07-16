@@ -208,3 +208,11 @@ class OIDCProviderSettings:
         # rsebille: Disabled while we don't have a frontend page
         config["OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT"] = False
         return config
+
+    # Temporary shenanigans to ease the migration from an upstream OIDC Provider
+    # to the `accounts` project when Resource Servers are involved.
+    OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = values.ListValue(
+        [],
+        environ_name="INTROSPECTION_PSA_BACKEND_FALLBACK",
+        environ_prefix="OAUTH2_PROVIDER",
+    )
