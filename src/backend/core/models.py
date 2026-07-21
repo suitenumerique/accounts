@@ -35,7 +35,7 @@ class BaseModel(models.Model):
         verbose_name=_("id"),
         help_text=_("primary key for the record as UUID"),
         primary_key=True,
-        default=uuid.uuid4,
+        default=uuid.uuid7,
         editable=False,
     )
     created_at = models.DateTimeField(
