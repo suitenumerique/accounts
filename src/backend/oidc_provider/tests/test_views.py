@@ -12,6 +12,7 @@ from oauth2_provider.settings import oauth2_settings
 
 from core.factories import UserFactory
 
+from authentication.backends import ProConnect
 from oidc_provider.factories import (
     CLIENT_SECRET,
     REDIRECT_URI,
@@ -411,3 +412,23 @@ def test_introspect_rejects_unauthenticated_clients(client, token_type):
     assert (
         response.status_code == 403
     )  # Per the RFC6750 section 3.1 it should be a 401...
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_introspect_psa_backend_fallback(responses, settings, client):
+    """When configured the introspect endpoint should call the PSA backend as fallback"""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+    application = SimpleApplicationFactory()
+    expected = {"active": True, "sub": str(uuid.uuid4())}
+    responses.post(
+        f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
+        json=expected,
+    )
+
+    response = client.post(
+        "/api/v1.0/o/introspect/",
+        {"token": str(uuid.uuid4())},  # Unknown token
+        **_build_basic_auth_headers(application),
+    )
+    assert response.status_code == 200
+    assert response.json() == expected

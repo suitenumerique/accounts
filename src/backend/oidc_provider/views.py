@@ -1,10 +1,13 @@
 """Views for OIDC provider."""
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
+import requests
+import social_django.utils
 from oauth2_provider.compat import login_not_required
 from oauth2_provider.models import (
     AccessToken,
@@ -85,6 +88,40 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
             )
         return self.INACTIVE_RESPONSE
 
+    def _get_psa_backend_fallback_response(self, token_value):
+        for backend_name in settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK:
+            backend = social_django.utils.load_strategy(self.request).get_backend(
+                backend_name
+            )
+            introspection_url = backend.get_setting_config(
+                "INTROSPECTION_URL", "introspection_endpoint", ""
+            )
+            if not introspection_url:
+                continue
+
+            client_id, client_secret = backend.get_key_and_secret()
+            response = requests.post(
+                introspection_url,
+                data={
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "token": token_value,
+                },
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
+                },
+                timeout=5,
+            )
+            try:
+                response.raise_for_status()
+            except requests.HTTPError:
+                continue
+            else:
+                return JsonResponse(response.json())
+
+        return None
+
     def post(self, request, *args, **kwargs):
         """
         Get the token from the body form parameters.
@@ -115,6 +152,9 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
                 ]
             case _:
                 return self.INACTIVE_RESPONSE
+
+        if settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK:
+            token_response_functions.append(self._get_psa_backend_fallback_response)
 
         for func in token_response_functions:
             response = func(token)
