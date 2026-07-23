@@ -25,7 +25,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Create empty source files
         run: |
           touch src/backend/locale/django.pot
@@ -33,7 +33,7 @@ jobs:
           touch src/frontend/packages/i18n/locales/accounts/translations-crowdin.json
       # crowdin workflow
       - name: crowdin action
-        uses: crowdin/github-action@52aa776766211d83d975df51f3b9c53c2f8ba35f # v2
+        uses: crowdin/github-action@e0c8f73cdc0fafde9396e056c5038217000a32d1 # v2
         with:
           config: crowdin/config.yml
           upload_sources: false
@@ -53,9 +53,9 @@ jobs:
           CROWDIN_BASE_PATH: "../src/"
       # frontend i18n
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: "22.x"
+          node-version: "24.x"
       - name: Restore the frontend cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
