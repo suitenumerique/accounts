@@ -4,13 +4,10 @@ Test users API endpoints in the accounts core app.
 
 from django.contrib.auth import get_user_model
 
-import pytest
 from rest_framework.test import APIClient
 
 from core import factories
 from core.api import serializers
-
-pytestmark = pytest.mark.django_db
 
 
 def test_api_users_list_anonymous():

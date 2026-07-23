@@ -29,8 +29,6 @@ from oidc_provider.factories import (
 )
 from users.models import User
 
-pytestmark = pytest.mark.django_db
-
 
 @pytest.fixture(name="upstream_oidc_mocks")
 def upstream_oidc_mocks_fixture(settings, responses):

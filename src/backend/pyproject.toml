@@ -136,7 +136,7 @@ sections = { accounts=["core"], django=["django"] }
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*" = ["S", "SLF"]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
     "-v",
     "--cov-report",
@@ -147,4 +147,7 @@ addopts = [
 python_files = [
     "test_*.py",
     "tests.py",
+]
+markers = [
+    "no_django_db: mark tests that should not be marked with django_db.",
 ]

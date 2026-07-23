@@ -13,8 +13,6 @@ from authentication.factories import IdentityProviderUserFactory
 from oidc_provider.factories import SimpleApplicationFactory
 from oidc_provider.validators import LaSuiteValidator, OIDCValidator
 
-pytestmark = pytest.mark.django_db
-
 
 def _make_request(user, scopes="", client=None):
     """Build a minimal OAuth2 request for unit tests."""

@@ -16,8 +16,6 @@ from rest_framework.test import APIClient
 
 from core import factories
 
-pytestmark = pytest.mark.django_db
-
 
 @override_settings(
     API_USERS_SEARCH_QUERY_MIN_LENGTH=6,
@@ -176,6 +174,7 @@ def test_api_config_with_original_theme_customization(is_authenticated, settings
     assert content["theme_customization"] == theme_customization
 
 
+@pytest.mark.no_django_db
 def test_api_config_throttling(settings):
     """Test api config throttling."""
     current_rate = settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["config"]

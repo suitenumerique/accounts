@@ -1,11 +1,7 @@
 """Test user light serializer."""
 
-import pytest
-
 from core import factories
 from core.api.serializers import UserLightSerializer
-
-pytestmark = pytest.mark.django_db
 
 
 def test_user_light_serializer():
