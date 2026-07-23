@@ -10,9 +10,8 @@ from django.test import Client
 
 import pytest
 
-pytestmark = pytest.mark.django_db
 
-
+@pytest.mark.no_django_db
 def test_openapi_client_schema():
     """
     Generated and served OpenAPI client schema should be correct.

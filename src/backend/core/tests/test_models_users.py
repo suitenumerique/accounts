@@ -8,8 +8,6 @@ import pytest
 
 from core import factories
 
-pytestmark = pytest.mark.django_db
-
 
 def test_models_users_str():
     """The str representation should be the email."""

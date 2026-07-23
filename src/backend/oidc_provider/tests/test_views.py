@@ -18,8 +18,6 @@ from oidc_provider.factories import (
     SimpleApplicationFactory,
 )
 
-pytestmark = pytest.mark.django_db
-
 
 def _build_basic_auth_headers(application):
     """Return HTTP Basic Auth headers for the OAuth2 client."""
