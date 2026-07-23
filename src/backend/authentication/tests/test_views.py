@@ -17,8 +17,6 @@ from social_django.utils import load_strategy
 
 from core.factories import UserFactory
 
-pytestmark = pytest.mark.django_db
-
 
 @pytest.fixture(name="upstream_oidc_mocks")
 def upstream_oidc_mocks_fixture(settings, responses):

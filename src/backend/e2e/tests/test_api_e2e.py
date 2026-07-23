@@ -12,8 +12,6 @@ from rest_framework.test import APIClient
 
 import accounts.urls
 
-pytestmark = pytest.mark.django_db
-
 
 def reload_urls():
     """Reload URL patterns after changing LOAD_E2E_URLS."""
