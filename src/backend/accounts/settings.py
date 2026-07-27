@@ -233,7 +233,11 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     ]
 
     AUTHENTICATION_BACKENDS = [
+        # For the Admin, will probably be superseded by AuthRequestBackend at some point
         "django.contrib.auth.backends.ModelBackend",
+        # The project's custom backend which will handle mostly everything
+        "authentication.backends.AuthRequestBackend",
+        # Python Social Auth OIDC Backend for ProConnect
         "authentication.backends.ProConnect",
     ]
 
