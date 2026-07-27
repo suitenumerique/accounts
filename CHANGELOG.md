@@ -21,4 +21,4 @@ and this project adheres to
 - 👽(authentication) handle Social Auth's login views requiring POST requests
 - 🦖(OIDC Provider) make introspection endpoint fall back to PSA backends
 
-[unreleased]: https://github.com/suitenumerique/docs/compare/main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/main
