@@ -49,6 +49,10 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             algorithm="RS256",
         )
 
+        # Clear the backend cache
+        self.backend.oidc_config.invalidate()
+        self.backend.get_jwks_keys.invalidate()
+
     def extra_settings(self):
         settings = super().extra_settings()
         settings.update(

@@ -19,7 +19,7 @@ from core.factories import UserFactory
 
 
 @pytest.fixture(name="upstream_oidc_mocks")
-def upstream_oidc_mocks_fixture(settings, responses):
+def upstream_oidc_mocks_fixture(settings, responses, invalidate_psa_backends_cache):  # pylint: disable=unused-argument
     """Fixture that mock HTTP calls to an upstream OIDC Provider."""
     settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = "http://upstream-oidc.test"
 
