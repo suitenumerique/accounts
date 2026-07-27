@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlparse
 from django.urls import reverse
 
 import pytest
+import requests
 from oauth2_provider.models import AccessToken, Grant, RefreshToken
 from oauth2_provider.settings import oauth2_settings
 
@@ -430,3 +431,44 @@ def test_introspect_psa_backend_fallback(responses, settings, client):
     )
     assert response.status_code == 200
     assert response.json() == expected
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_introspect_psa_backend_fallback_on_http_error(responses, settings, client):
+    """When all configured PSA backends ends with an errors we still should have a response"""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+    application = SimpleApplicationFactory()
+    responses.post(
+        f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
+        status=500,
+    )
+
+    response = client.post(
+        "/api/v1.0/o/introspect/",
+        {"token": str(uuid.uuid4())},  # Unknown token
+        **_build_basic_auth_headers(application),
+    )
+    assert response.status_code == 200
+    assert response.json() == {"active": False}
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_introspect_psa_backend_fallback_on_connection_error(
+    responses, settings, client
+):
+    """When a configured PSA backends ends with a connection related error, the error is raised"""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+    application = SimpleApplicationFactory()
+    responses.post(
+        f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
+        body=requests.ConnectionError("Our princess is in another castle!"),
+    )
+
+    with pytest.raises(
+        requests.ConnectionError, match="Our princess is in another castle!"
+    ):
+        client.post(
+            "/api/v1.0/o/introspect/",
+            {"token": str(uuid.uuid4())},  # Unknown token
+            **_build_basic_auth_headers(application),
+        )
