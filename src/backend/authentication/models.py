@@ -9,13 +9,11 @@ from social_django.storage import DjangoUserMixin
 from core.fields import TypeSafeEncryptedJSONField
 from core.models import BaseModel
 
-from authentication.backends import ProConnect
-
 
 class IdentityProviderName(models.TextChoices):
     """Enumeration of the supported Identity Provider."""
 
-    PRO_CONNECT = ProConnect.name, ProConnect.__name__
+    PRO_CONNECT = "pro-connect", "ProConnect"
 
 
 class IdentityProviderUser(BaseModel, DjangoUserMixin):
