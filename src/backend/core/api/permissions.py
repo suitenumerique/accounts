@@ -13,6 +13,13 @@ class IsAuthenticated(permissions.BasePermission):
         return bool(request.auth) or request.user.is_authenticated
 
 
+class IsNotAuthenticated(IsAuthenticated):
+    """Allow access only to unauthenticated users."""
+
+    def has_permission(self, request, view):
+        return not super().has_permission(request, view)
+
+
 class IsAuthenticatedOrSafe(IsAuthenticated):
     """Allows access to authenticated users (or anonymous users but only on safe methods)."""
 
