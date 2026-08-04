@@ -3,8 +3,11 @@ run-name: Release Chart
 
 on:
   push:
+    branches:
+      - main
     paths:
       - src/helm/accounts/**
+      - ".github/workflows/release-helm-chart.yaml"
 
 jobs:
   release:
