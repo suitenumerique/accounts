@@ -1,6 +1,7 @@
+djangoSaltKey: &djangoSaltKey "lkjsdlushdgfkfjslkdfjslkdjfslkdjf"
 djangoSecretKey: &djangoSecretKey "lkjsdlushdgfkfjslkdfjslkdjfslkdjf"
-djangoSuperUserEmail: admin@example.com
-djangoSuperUserPass: admin
+djangoSuperUserEmail: &djangoSuperUserEmail admin@example.com
+djangoSuperUserPass: &djangoSuperUserPass admin
 oidc:
     clientId: accounts
     clientSecret: ThisIsAnExampleKeyForDevPurposeOnly
@@ -13,36 +14,62 @@ image:
 backend:
   replicas: 1
   envVars:
-    COLLABORATION_SERVER_SECRET: my-secret
-    DJANGO_CSRF_TRUSTED_ORIGINS: https://accounts.127.0.0.1.nip.io
-    DJANGO_CONFIGURATION: Production
+    # /!\ Keys are sorted /!\
+    AWS_S3_ACCESS_KEY_ID: dinum
+    AWS_S3_ENDPOINT_URL: http://dev-backend-minio.accounts.svc.cluster.local:9000
+    AWS_S3_SECRET_ACCESS_KEY: password
+    AWS_STORAGE_BUCKET_NAME: accounts-media-storage
+
+    CACHES_DEFAULT_KEY_PREFIX: "{{ now | unixEpoch }}"
+
+    DB_HOST: dev-backend-postgres
+    DB_NAME:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: database
+    DB_PASSWORD:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: password
+    DB_PORT: 5432
+    DB_USER:
+      secretKeyRef:
+        name: dev-backend-postgres
+        key: username
+
     DJANGO_ALLOWED_HOSTS: accounts.127.0.0.1.nip.io
-    DJANGO_SERVER_TO_SERVER_API_TOKENS: secret-api-key
-    DJANGO_SECRET_KEY: *djangoSecretKey
-    DJANGO_SETTINGS_MODULE: accounts.settings
-    DJANGO_SUPERUSER_PASSWORD: admin
+
+    DJANGO_CELERY_BROKER_URL: redis://user:pass@dev-backend-redis:6379/1
+
+    DJANGO_CONFIGURATION: Production
+
+    DJANGO_CSRF_TRUSTED_ORIGINS: https://accounts.127.0.0.1.nip.io
+
     DJANGO_EMAIL_BRAND_NAME: "La Suite Numérique"
+    DJANGO_EMAIL_FROM: "suitenumerique-accounts@example.com"
     DJANGO_EMAIL_HOST: "mailcatcher"
-    DJANGO_EMAIL_LOGO_IMG: https://accounts.127.0.0.1.nip.io/assets/logo-suite-numerique.png
     DJANGO_EMAIL_PORT: 1025
-    DJANGO_EMAIL_URL_APP: https://accounts.127.0.0.1.nip.io
     DJANGO_EMAIL_USE_SSL: False
-    FRONTEND_SILENT_LOGIN_ENABLED: True
-    LOGGING_LEVEL_HANDLERS_CONSOLE: ERROR
-    LOGGING_LEVEL_LOGGERS_ROOT: INFO
+    DJANGO_EMAIL_USE_TLS: False
+
+    DJANGO_SALT_KEY: *djangoSaltKey
+    DJANGO_SECRET_KEY: *djangoSecretKey
+
+    DJANGO_SETTINGS_MODULE: accounts.settings
+
+    DJANGO_SUPERUSER_EMAIL: *djangoSuperUserEmail
+    DJANGO_SUPERUSER_PASSWORD: *djangoSuperUserPass
+
+    FRONTEND_THEME: dsfr
+
     LOGGING_LEVEL_LOGGERS_APP: INFO
-    OIDC_USERINFO_SHORTNAME_FIELD: "first_name"
-    OIDC_USERINFO_FULLNAME_FIELDS: "name"
-    OIDC_OP_JWKS_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/certs
-    OIDC_OP_AUTHORIZATION_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/auth
-    OIDC_OP_TOKEN_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/token
-    OIDC_OP_USER_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/userinfo
-    OIDC_OP_LOGOUT_ENDPOINT: https://accounts-keycloak.127.0.0.1.nip.io/realms/accounts/protocol/openid-connect/logout
-    OIDC_REDIRECT_ALLOWED_HOSTS: "accounts.127.0.0.1.nip.io"
-    OIDC_RP_CLIENT_ID: accounts
-    OIDC_RP_CLIENT_SECRET: ThisIsAnExampleKeyForDevPurposeOnly
-    OIDC_RP_SIGN_ALGO: RS256
-    OIDC_RP_SCOPES: "openid email profile"
+    LOGGING_LEVEL_LOGGERS_ROOT: INFO
+
+    LOGIN_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
+    LOGOUT_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
+
+    MEDIA_BASE_URL: https://accounts.127.0.0.1.nip.io
+
     OAUTH2_PROVIDER_OIDC_RSA_PRIVATE_KEY: |-
       -----BEGIN RSA PRIVATE KEY-----
       MIIEpQIBAAKCAQEApTqb+jCqIbqGFPkckVSyU71GtCsBXExL54mFO0h8omX1XXHC
@@ -71,34 +98,20 @@ backend:
       GD3YvbdhzFut/hHvOziItiKlH3OZ71368mPAJ1mwoYkEu/AgDT1a8GTDL6rHHe3a
       5Yv1rY2BlssBl6m44PKAHKoOyqGTSd5c+OEHxDbStn/eo+zNxyCh7wc=
       -----END RSA PRIVATE KEY-----
-    LOGIN_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
-    LOGOUT_REDIRECT_URL: https://accounts.127.0.0.1.nip.io
-    DB_HOST: dev-backend-postgres
-    DB_NAME:
-      secretKeyRef:
-        name: dev-backend-postgres
-        key: database
-    DB_USER:
-      secretKeyRef:
-        name: dev-backend-postgres
-        key: username
-    DB_PASSWORD:
-      secretKeyRef:
-        name: dev-backend-postgres
-        key: password
-    DB_PORT: 5432
+
     REDIS_URL: redis://user:pass@dev-backend-redis:6379/1
-    DJANGO_CELERY_BROKER_URL: redis://user:pass@dev-backend-redis:6379/1
-    AWS_S3_ENDPOINT_URL: http://dev-backend-minio.accounts.svc.cluster.local:9000
-    AWS_S3_ACCESS_KEY_ID: dinum
-    AWS_S3_SECRET_ACCESS_KEY: password
-    AWS_STORAGE_BUCKET_NAME: accounts-media-storage
+
+    SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS: accounts.127.0.0.1.nip.io
+    SOCIAL_AUTH_PRO_CONNECT_KEY: ~
+    SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT: https://fca.integ01.dev-agentconnect.fr/api/v2
+    SOCIAL_AUTH_PRO_CONNECT_SECRET: ~
+
     STORAGES_STATICFILES_BACKEND: django.contrib.staticfiles.storage.StaticFilesStorage
-    CACHES_KEY_PREFIX: "{{ now | unixEpoch }}"
+
   django:
     envVars:
-      WEB_CONCURRENCY: 1
       DB_PSYCOPG_POOL_MIN_SIZE: 10
+      WEB_CONCURRENCY: 1
 
   migrate:
     command:
@@ -116,16 +129,6 @@ backend:
         python manage.py migrate --no-input
     restartPolicy: Never
 
-  # command:
-  #   - uvicorn
-  #   - --app-dir=/app
-  #   - --host=0.0.0.0
-  #   - --timeout-graceful-shutdown=300
-  #   - --limit-max-requests=20000
-  #   - --lifespan=off
-  #   - --reload
-  #   - "accounts.asgi:application"
-
   createsuperuser:
     command:
       - "/bin/sh"
@@ -138,31 +141,30 @@ backend:
         done
 
         echo "Database is ready"
-        python manage.py createsuperuser --email admin@example.com --password admin
+        python manage.py createsuperuser --email $DJANGO_SUPERUSER_EMAIL --password $DJANGO_SUPERUSER_PASSWORD
     restartPolicy: Never
 
   themeCustomization:
     enabled: true
     file_content: {{ readFile "./configuration/theme/demo.json" }}
 
-  # Extra volume mounts to manage our local custom CA and avoid to set ssl_verify: false
-  extraVolumeMounts:
-    - name: certs
-      mountPath: /cert/cacert.pem
-      subPath: cacert.pem
+  # FIXME: Extra volume mounts to manage our local custom CA and avoid to set ssl_verify: false
+#  extraVolumeMounts:
+#    - name: certs
+#      mountPath: /cert/cacert.pem
+#      subPath: cacert.pem
 
-  # Extra volumes to manage our local custom CA and avoid to set ssl_verify: false
-  extraVolumes:
-    - name: certs
-      configMap:
-        name: certifi
-        items:
-        - key: cacert.pem
-          path: cacert.pem
+  # FIXME: Extra volumes to manage our local custom CA and avoid to set ssl_verify: false
+#  extraVolumes:
+#    - name: certs
+#      configMap:
+#        name: certifi
+#        items:
+#        - key: cacert.pem
+#          path: cacert.pem
 
 frontend:
   envVars:
-    PORT: 8080
     NEXT_PUBLIC_API_ORIGIN: https://accounts.127.0.0.1.nip.io
 
   replicas: 1
@@ -174,6 +176,9 @@ frontend:
     repository: localhost:5001/accounts-frontend
     pullPolicy: Always
     tag: "latest"
+
+  service:
+    targetPort: 9900
 
   securityContext:
     runAsNonRoot: false
