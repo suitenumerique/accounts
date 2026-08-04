@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  accounts:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-08-04T13:18:36.708233437Z"
+    digest: cb1fae63ef6e36fcf853fef1806daec74c289236c88a394efba55be3ee49f9a0
+    name: accounts
+    type: application
+    urls:
+    - https://suitenumerique.github.io/accounts/accounts-0.0.1.tgz
+    version: 0.0.1
+generated: "2026-08-04T13:18:36.706060223Z"
