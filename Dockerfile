@@ -60,9 +60,6 @@ COPY --from=back-builder /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Copy accounts application (see .dockerignore)
-COPY ./src/backend /app/
-
 # collectstatic
 RUN DJANGO_CONFIGURATION=Build \
   python manage.py collectstatic --noinput
