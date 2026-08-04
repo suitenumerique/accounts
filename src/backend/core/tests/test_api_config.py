@@ -44,9 +44,7 @@ def test_api_config(is_authenticated):
         "CRISP_WEBSITE_ID": "123",
         "ENVIRONMENT": "test",
         "FRONTEND_CSS_URL": "http://testcss/",
-        "FRONTEND_HOMEPAGE_FEATURE_ENABLED": True,
         "FRONTEND_JS_URL": "http://testjs/",
-        "FRONTEND_SILENT_LOGIN_ENABLED": False,
         "FRONTEND_THEME": "test-theme",
         "LANGUAGES": [
             ["en-us", "English"],

@@ -9,5 +9,4 @@ export interface Config {
   FRONTEND_THEME?: string;
   FRONTEND_CSS_URL?: string;
   FRONTEND_JS_URL?: string;
-  FRONTEND_SILENT_LOGIN_ENABLED?: boolean;
 }

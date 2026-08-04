@@ -3,28 +3,18 @@ DJANGO_ALLOWED_HOSTS=*
 DJANGO_SALT_KEY=ThisIsAnExampleSaltForDevPurposeOnly
 DJANGO_SECRET_KEY=ThisIsAnExampleKeyForDevPurposeOnly
 DJANGO_SETTINGS_MODULE=accounts.settings
-DJANGO_SUPERUSER_PASSWORD=admin
 
 # Logging
 # Set to DEBUG level for dev only
-LOGGING_LEVEL_HANDLERS_CONSOLE=INFO
 LOGGING_LEVEL_LOGGERS_APP=INFO
 LOGGING_LEVEL_LOGGERS_ROOT=INFO
 
 # Python
 PYTHONPATH=/app
 
-# accounts settings
-
 # Mail
-DJANGO_EMAIL_BRAND_NAME="La Suite Numérique"
 DJANGO_EMAIL_HOST="mailcatcher"
-DJANGO_EMAIL_LOGO_IMG="http://localhost:9900/assets/logo-suite-numerique.png"
 DJANGO_EMAIL_PORT=1025
-DJANGO_EMAIL_URL_APP="http://localhost:9900"
-
-# Backend url
-ACCOUNTS_BASE_URL="http://localhost:9901"
 
 # Media
 AWS_S3_ACCESS_KEY_ID=accounts
@@ -44,6 +34,7 @@ OAUTH2_PROVIDER_OIDC_ISS_ENDPOINT=http://accounts:8000/api/v1.0/o
 
 # Python Social Auth
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS="localhost:9900,localhost:9903"
+
 SOCIAL_AUTH_PRO_CONNECT_KEY=accounts
 SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT=http://nginx:9903/realms/accounts
 SOCIAL_AUTH_PRO_CONNECT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly

@@ -84,8 +84,7 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     ALLOWED_HOSTS = values.ListValue([])
     SECRET_KEY = SecretFileValue(None)
     SECRET_KEY_FALLBACKS = SecretFileListValue([])
-    SALT_KEY = SecretFileListValue(None)
-    SERVER_TO_SERVER_API_TOKENS = values.ListValue([])
+    SALT_KEY = SecretFileListValue(None)  # django-fernet-encrypted-fields
 
     # Application definition
     ROOT_URLCONF = "accounts.urls"
@@ -334,19 +333,15 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
 
     # Mail
     EMAIL_BACKEND = values.Value("django.core.mail.backends.smtp.EmailBackend")
-    EMAIL_BRAND_NAME = values.Value(None)
     EMAIL_HOST = values.Value(None)
     EMAIL_HOST_USER = values.Value(None)
     EMAIL_HOST_PASSWORD = SecretFileValue(None)
-    EMAIL_LOGO_IMG = values.Value(None)
     EMAIL_PORT = values.PositiveIntegerValue(None)
-    EMAIL_URL_APP = values.Value(None)
     EMAIL_USE_TLS = values.BooleanValue(False)
     EMAIL_USE_SSL = values.BooleanValue(False)
     EMAIL_FROM = values.Value("from@example.com")
 
     AUTH_USER_MODEL = "users.User"
-    INVITATION_VALIDITY_DURATION = 604800  # 7 days, in seconds
 
     # CORS
     CORS_ALLOW_CREDENTIALS = True
@@ -361,26 +356,17 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     FRONTEND_THEME = values.Value(
         None, environ_name="FRONTEND_THEME", environ_prefix=None
     )
-    FRONTEND_HOMEPAGE_FEATURE_ENABLED = values.BooleanValue(
-        default=True,
-        environ_name="FRONTEND_HOMEPAGE_FEATURE_ENABLED",
-        environ_prefix=None,
-    )
     FRONTEND_CSS_URL = values.Value(
         None, environ_name="FRONTEND_CSS_URL", environ_prefix=None
     )
     FRONTEND_JS_URL = values.Value(
         None, environ_name="FRONTEND_JS_URL", environ_prefix=None
     )
-    FRONTEND_SILENT_LOGIN_ENABLED = values.BooleanValue(
-        default=False, environ_name="FRONTEND_SILENT_LOGIN_ENABLED", environ_prefix=None
-    )
     THEME_CUSTOMIZATION_FILE_PATH = values.Value(
         os.path.join(BASE_DIR, "accounts/configuration/theme/default.json"),
         environ_name="THEME_CUSTOMIZATION_FILE_PATH",
         environ_prefix=None,
     )
-
     THEME_CUSTOMIZATION_CACHE_TIMEOUT = values.IntegerValue(
         60 * 60 * 24,
         environ_name="THEME_CUSTOMIZATION_CACHE_TIMEOUT",
