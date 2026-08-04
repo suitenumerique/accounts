@@ -1,11 +1,11 @@
 # Postgresql db container configuration
 POSTGRES_DB=keycloak
-POSTGRES_USER=accounts
 POSTGRES_PASSWORD=pass
+POSTGRES_USER=accounts
 
 # App database configuration
 DB_HOST=kc_postgresql
 DB_NAME=keycloak
-DB_USER=accounts
 DB_PASSWORD=pass
 DB_PORT=5433
+DB_USER=accounts
