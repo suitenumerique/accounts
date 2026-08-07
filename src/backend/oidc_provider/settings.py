@@ -205,7 +205,7 @@ class OIDCProviderSettings:
             for config_key in keys
         }
         config["OIDC_RSA_PRIVATE_KEY"] = self._get_oidc_rsa_private_key()
-        # rsebille: Disabled while we don't have a frontend page
+        # Let django-oauth-toolkit prompt only when the OIDC request requires it.
         config["OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT"] = False
         return config
 

@@ -4,6 +4,8 @@ import base64
 import uuid
 from urllib.parse import parse_qs, urlparse
 
+from django.contrib import auth
+from django.test import override_settings
 from django.urls import reverse
 
 import pytest
@@ -253,6 +255,63 @@ def test_token_rejects_unsupported_grant_type(client):
 
     assert response.status_code == 400
     assert response.json()["error"] == "unsupported_grant_type"
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_redirects_with_supported_query_parameters_when_prompting(client):
+    """A required confirmation should be relayed to the frontend page.
+
+    Prompting the user is required because the connected one is different from the token's one.
+    """
+    application = SimpleApplicationFactory()
+    id_token = _issue_tokens(client, application, UserFactory())["id_token"]
+    client.force_login(
+        UserFactory()
+    )  # Log a different user than the one we issue token for
+
+    expected_params = {
+        "id_token_hint": [id_token],
+        "client_id": [application.client_id],
+        "post_logout_redirect_uri": [application.post_logout_redirect_uris.split()[0]],
+        "state": ["logout-state"],
+    }
+    response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            **expected_params,
+            "logout_hint": "ignored-logout-hint",
+            "ui_locales": "ignored-ui-locales",
+        },
+    )
+
+    assert response.status_code == 302, response.content
+    assert response.url.startswith("https://accounts.example.test/logout?")
+    assert _get_redirect_params(response) == expected_params
+    assert auth.SESSION_KEY in client.session  # User should still be logged in
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_skips_prompt_for_matching_id_token(client):
+    """A matching ID token should keep the toolkit's prompt-free behavior."""
+    application = SimpleApplicationFactory()
+    id_token = _issue_tokens(client, application, UserFactory())["id_token"]
+
+    response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "id_token_hint": id_token,
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": application.post_logout_redirect_uris.split()[
+                0
+            ],
+            "state": "logout-state",
+        },
+    )
+
+    assert response.status_code == 302
+    assert response.url.startswith(application.post_logout_redirect_uris.split()[0])
+    assert _get_redirect_params(response) == {"state": ["logout-state"]}
+    assert auth.SESSION_KEY not in client.session  # User should be logged out
 
 
 def test_revoke_token_revokes_access_tokens(client):

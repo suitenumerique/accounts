@@ -12,6 +12,7 @@ fake = Faker()
 CLIENT_ID = "oidc-test-client"
 CLIENT_SECRET = "oidc-test-secret"  # noqa: S105
 REDIRECT_URI = "https://client.example.test/callback"
+LOGOUT_REDIRECT_URI = "https://client.example.test/logout-callback"
 
 
 class ApplicationFactory(factory.django.DjangoModelFactory):
@@ -45,3 +46,4 @@ class SimpleApplicationFactory(ApplicationFactory):
     client_id = CLIENT_ID
     client_secret = CLIENT_SECRET
     redirect_uris = REDIRECT_URI
+    post_logout_redirect_uris = LOGOUT_REDIRECT_URI

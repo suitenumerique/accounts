@@ -1,14 +1,17 @@
 """Views for OIDC provider."""
 
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
 import requests
 import social_django.utils
 from oauth2_provider.compat import login_not_required
+from oauth2_provider.exceptions import OIDCError
 from oauth2_provider.models import (
     AccessToken,
     RefreshToken,
@@ -16,7 +19,81 @@ from oauth2_provider.models import (
     get_refresh_token_model,
 )
 from oauth2_provider.settings import oauth2_settings
-from oauth2_provider.views import ClientProtectedScopedResourceView
+from oauth2_provider.views import (
+    ClientProtectedScopedResourceView,
+)
+from oauth2_provider.views import (
+    RPInitiatedLogoutView as OAuth2RPInitiatedLogoutView,
+)
+from oauthlib.common import add_params_to_uri
+
+
+@method_decorator(ensure_csrf_cookie, "get")
+class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
+    """
+    Override the default RP-Initiated Logout endpoint behavior.
+    https://openid.net/specs/openid-connect-rpinitiated-1_0.html
+
+    We redirect to frontend URLs instead of internal URLs,
+    for now errors are still displayed by the backend.
+    """
+
+    def get(self, request, *args, **kwargs):
+        """Override oauth2_provider behavior to redirect to our frontend for prompt"""
+
+        id_token_hint = request.GET.get("id_token_hint")
+        client_id = request.GET.get("client_id")
+        post_logout_redirect_uri = request.GET.get("post_logout_redirect_uri")
+        state = request.GET.get("state")
+
+        try:
+            application, token_user = self.validate_logout_request(
+                id_token_hint=id_token_hint,
+                client_id=client_id,
+                post_logout_redirect_uri=post_logout_redirect_uri,
+            )
+        except OIDCError as error:
+            return self.error_response(error)
+
+        if not self.must_prompt(token_user):
+            return self.do_logout(
+                application, post_logout_redirect_uri, state, token_user
+            )
+
+        oidc_data = {
+            "id_token_hint": id_token_hint,
+            "client_id": client_id,
+            "post_logout_redirect_uri": post_logout_redirect_uri,
+            "state": state,
+        }
+
+        return HttpResponseRedirect(
+            add_params_to_uri(
+                urljoin(
+                    settings.LOGOUT_REDIRECT_URL,
+                    "logout",
+                ),
+                {k: v for k, v in oidc_data.items() if v},
+            )
+        )
+
+    def do_logout(
+        self,
+        application=None,
+        post_logout_redirect_uri=None,
+        state=None,
+        token_user=None,
+    ):
+        """Override oauth2_provider behavior to redirect to our frontend on empty redirect URI"""
+
+        response = super().do_logout(
+            application, post_logout_redirect_uri, state, token_user
+        )
+        return (
+            response
+            if post_logout_redirect_uri
+            else HttpResponseRedirect(settings.LOGOUT_REDIRECT_URL)
+        )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
