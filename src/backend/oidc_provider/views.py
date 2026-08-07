@@ -1,8 +1,11 @@
 """Views for OIDC provider."""
 
+from urllib.parse import urlencode, urljoin
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
+from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -16,7 +19,45 @@ from oauth2_provider.models import (
     get_refresh_token_model,
 )
 from oauth2_provider.settings import oauth2_settings
-from oauth2_provider.views import ClientProtectedScopedResourceView
+from oauth2_provider.views import (
+    ClientProtectedScopedResourceView,
+)
+from oauth2_provider.views import (
+    RPInitiatedLogoutView as OAuth2RPInitiatedLogoutView,
+)
+
+LOGOUT_QUERY_PARAMETERS = (
+    "id_token_hint",
+    "client_id",
+    "post_logout_redirect_uri",
+    "state",
+)
+
+
+class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
+    """Render logout confirmations in the frontend application."""
+
+    def render_to_response(self, context, **response_kwargs):
+        """Redirect valid confirmation requests and keep toolkit error rendering."""
+        form = context.get("form")
+        if form is None:
+            return super().render_to_response(context, **response_kwargs)
+
+        query_parameters = {
+            parameter: value
+            for parameter in LOGOUT_QUERY_PARAMETERS
+            if (value := form.initial.get(parameter)) is not None
+        }
+        frontend_logout_url = urljoin(
+            f"{settings.LOGOUT_REDIRECT_URL.rstrip('/')}/",
+            "logout/",
+        )
+        query_string = urlencode(query_parameters)
+        if query_string:
+            frontend_logout_url = f"{frontend_logout_url}?{query_string}"
+
+        get_token(self.request)
+        return HttpResponseRedirect(frontend_logout_url)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

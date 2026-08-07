@@ -4,6 +4,7 @@ import base64
 import uuid
 from urllib.parse import parse_qs, urlparse
 
+from django.test import Client, override_settings
 from django.urls import reverse
 
 import pytest
@@ -19,6 +20,8 @@ from oidc_provider.factories import (
     REDIRECT_URI,
     SimpleApplicationFactory,
 )
+
+POST_LOGOUT_REDIRECT_URI = "https://client.example.test/logout-callback"
 
 
 def _build_basic_auth_headers(application):
@@ -253,6 +256,121 @@ def test_token_rejects_unsupported_grant_type(client):
 
     assert response.status_code == 400
     assert response.json()["error"] == "unsupported_grant_type"
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_confirmation_redirects_to_frontend_with_supported_params(client):
+    """A required confirmation should be relayed to the frontend page."""
+    application = SimpleApplicationFactory(
+        post_logout_redirect_uris=POST_LOGOUT_REDIRECT_URI
+    )
+    id_token = _issue_tokens(client, application, UserFactory())["id_token"]
+    client.force_login(UserFactory())
+
+    response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "id_token_hint": id_token,
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": POST_LOGOUT_REDIRECT_URI,
+            "state": "logout-state",
+            "logout_hint": "ignored-logout-hint",
+            "ui_locales": "fr",
+        },
+    )
+
+    assert response.status_code == 302
+    redirect_url = urlparse(response["Location"])
+    assert redirect_url.scheme == "https"
+    assert redirect_url.netloc == "accounts.example.test"
+    assert redirect_url.path == "/logout/"
+    assert parse_qs(redirect_url.query) == {
+        "id_token_hint": [id_token],
+        "client_id": [application.client_id],
+        "post_logout_redirect_uri": [POST_LOGOUT_REDIRECT_URI],
+        "state": ["logout-state"],
+    }
+    assert response.cookies["csrftoken"].value
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_skips_confirmation_for_matching_id_token(client):
+    """A matching ID token should keep the toolkit's prompt-free behavior."""
+    application = SimpleApplicationFactory(
+        post_logout_redirect_uris=POST_LOGOUT_REDIRECT_URI
+    )
+    user = UserFactory()
+    id_token = _issue_tokens(client, application, user)["id_token"]
+
+    response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "id_token_hint": id_token,
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": POST_LOGOUT_REDIRECT_URI,
+            "state": "logout-state",
+        },
+    )
+
+    assert response.status_code == 302
+    assert response["Location"].startswith(POST_LOGOUT_REDIRECT_URI)
+    assert _get_redirect_params(response) == {"state": ["logout-state"]}
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_confirmation_post_logs_out_and_preserves_state():
+    """The frontend form POST should use the toolkit's validated logout flow."""
+    client = Client(enforce_csrf_checks=True)
+    application = SimpleApplicationFactory(
+        post_logout_redirect_uris=POST_LOGOUT_REDIRECT_URI
+    )
+    client.force_login(UserFactory())
+
+    confirmation_response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": POST_LOGOUT_REDIRECT_URI,
+            "state": "logout-state",
+        },
+    )
+    csrf_token = confirmation_response.cookies["csrftoken"].value
+
+    response = client.post(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "csrfmiddlewaretoken": csrf_token,
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": POST_LOGOUT_REDIRECT_URI,
+            "state": "logout-state",
+            "allow": "true",
+        },
+    )
+
+    assert response.status_code == 302
+    assert response["Location"].startswith(POST_LOGOUT_REDIRECT_URI)
+    assert _get_redirect_params(response) == {"state": ["logout-state"]}
+    assert "_auth_user_id" not in client.session
+
+
+@override_settings(LOGOUT_REDIRECT_URL="https://accounts.example.test")
+def test_logout_rejects_non_registered_post_logout_redirect_uri(client):
+    """An invalid post-logout URI must not reach the frontend confirmation."""
+    application = SimpleApplicationFactory(
+        post_logout_redirect_uris=POST_LOGOUT_REDIRECT_URI
+    )
+    client.force_login(UserFactory())
+
+    response = client.get(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "client_id": application.client_id,
+            "post_logout_redirect_uri": "https://attacker.example.test/callback",
+        },
+    )
+
+    assert response.status_code == 400
+    assert not response.has_header("Location")
 
 
 def test_revoke_token_revokes_access_tokens(client):
