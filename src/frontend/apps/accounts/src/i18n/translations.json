@@ -3,13 +3,19 @@
     "translation": {
       "Welcome on LaSuite Account": "Welcome on LaSuite Account",
       "Login": "Login",
-      "Logout": "Logout"
+      "Logout": "Logout",
+      "Do you want to sign out?": "Do you want to sign out?",
+      "Confirm sign out": "Confirm sign out",
+      "Cancel": "Cancel"
     }
   },
   "fr": {
     "translation": {
       "Login": "Connexion",
-      "Logout": "Déconnexion"
+      "Logout": "Déconnexion",
+      "Do you want to sign out?": "Voulez-vous vous déconnecter ?",
+      "Confirm sign out": "Confirmer la déconnexion",
+      "Cancel": "Annuler"
     }
   }
 }

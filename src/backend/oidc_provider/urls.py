@@ -9,6 +9,12 @@ from . import views
 app_name = "oidc_provider"
 
 urlpatterns = [
+    # Replace oauth2_provider's confirmation template with the frontend page
+    path(
+        "logout/",
+        views.RPInitiatedLogoutView.as_view(),
+        name="rp-initiated-logout",
+    ),
     # Override oauth2_provider's IntrospectTokenView
     path("introspect/", views.IntrospectTokenView.as_view(), name="introspect"),
     # Include the default oauth2_provider URLs for other endpoints but without the management views

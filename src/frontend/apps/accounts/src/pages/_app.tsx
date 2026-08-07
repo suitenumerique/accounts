@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import type { NextPage } from "next";
 import { CunninghamProvider } from "@gouvfr-lasuite/ui-kit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -23,6 +24,14 @@ export interface AppContextType {
   setTheme: (theme: string) => void;
 }
 
+type AccountsPage = NextPage & {
+  isStandalonePage?: boolean;
+};
+
+type AccountsAppProps = AppProps & {
+  Component: AccountsPage;
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const useAppContext = () => {
@@ -33,7 +42,7 @@ export const useAppContext = () => {
   return context;
 };
 
-export default function MyApp(props: AppProps) {
+export default function MyApp(props: AccountsAppProps) {
   const [theme, setTheme] = useState<string>("dsfr-light");
 
   return (
@@ -45,9 +54,10 @@ export default function MyApp(props: AppProps) {
   );
 }
 
-function MyAppInner({ Component, pageProps }: AppProps) {
+function MyAppInner({ Component, pageProps }: AccountsAppProps) {
   const locale = useLocales();
   const { theme } = useAppContext();
+  const page = <Component {...pageProps} />;
 
   return (
     <>
@@ -57,11 +67,13 @@ function MyAppInner({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <CunninghamProvider currentLocale={locale} theme={theme}>
-        <ConfigProvider>
-          <Auth>
-            <Component {...pageProps} />
-          </Auth>
-        </ConfigProvider>
+        {Component.isStandalonePage ? (
+          page
+        ) : (
+          <ConfigProvider>
+            <Auth>{page}</Auth>
+          </ConfigProvider>
+        )}
       </CunninghamProvider>
     </>
   );
