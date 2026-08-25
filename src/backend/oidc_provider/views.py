@@ -216,7 +216,7 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
             # every error except the authorization one's.
             return self.INACTIVE_RESPONSE
 
-        match request.POST.get("token_hint", "access_token"):
+        match request.POST.get("token_type_hint", "access_token"):
             case "access_token":
                 token_response_functions = [
                     self._get_access_token_response,

@@ -435,6 +435,22 @@ def test_introspect_returns_inactive_for_unknown_token(client):
     assert response.json() == {"active": False}
 
 
+@pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
+def test_introspect_returns_inactive_for_unknown_token_type_hint(client, token_type):
+    """Unknown token type hint should be reported as inactive."""
+    application = SimpleApplicationFactory()
+    user = UserFactory()
+    tokens = _issue_tokens(client, application, user)
+
+    response = client.post(
+        "/api/v1.0/o/introspect/",
+        {"token": tokens[token_type], "token_type_hint": "do_not_exists"},
+        **_build_basic_auth_headers(application),
+    )
+    assert response.status_code == 200
+    assert response.json() == {"active": False}
+
+
 @pytest.mark.parametrize(
     "token_type,token_model",
     [
