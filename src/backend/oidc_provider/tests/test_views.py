@@ -16,6 +16,7 @@ from oauth2_provider.settings import oauth2_settings
 from core.factories import UserFactory
 
 from authentication.backends import ProConnect
+from authentication.factories import IdentityProviderUserFactory
 from oidc_provider.factories import (
     CLIENT_SECRET,
     REDIRECT_URI,
@@ -490,13 +491,24 @@ def test_introspect_rejects_unauthenticated_clients(client, token_type):
 
 @pytest.mark.usefixtures("upstream_oidc_mocks")
 def test_introspect_psa_backend_fallback(responses, settings, client):
-    """When configured the introspect endpoint should call the PSA backend as fallback"""
+    """When configured the introspect endpoint should rewrite the PSA backend response"""
     settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK_PASSTHROUGH_SCOPES = [
+        "keep_it",
+        "keep_it_too",
+    ]
+
     application = SimpleApplicationFactory()
-    expected = {"active": True, "sub": str(uuid.uuid4())}
+    idp_user = IdentityProviderUserFactory(provider=ProConnect.name)
     responses.post(
         f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
-        json=expected,
+        json={
+            "active": True,
+            "sub": idp_user.uid,
+            "scope": "removed keep_it also_removed keep_it_too",
+            "client_id": "the-client-id",
+            "aud": "the-audience",
+        },
     )
 
     response = client.post(
@@ -505,7 +517,38 @@ def test_introspect_psa_backend_fallback(responses, settings, client):
         **_build_basic_auth_headers(application),
     )
     assert response.status_code == 200
-    assert response.json() == expected
+    assert response.json() == {
+        "active": True,
+        "sub": idp_user.user.sub,
+        "scope": "keep_it keep_it_too",
+        "client_id": "the-client-id",
+        "aud": "the-audience",
+    }
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_introspect_psa_backend_fallback_when_the_sub_is_unknown(
+    responses, settings, client
+):
+    """When we can't find a user matching the fallback's sub it should not be forwarded"""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+
+    application = SimpleApplicationFactory()
+    responses.post(
+        f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
+        json={
+            "active": True,
+            "sub": str(uuid.uuid4()),
+        },
+    )
+
+    response = client.post(
+        "/api/v1.0/o/introspect/",
+        {"token": str(uuid.uuid4())},  # Unknown token
+        **_build_basic_auth_headers(application),
+    )
+    assert response.status_code == 200
+    assert response.json() == {"active": True}
 
 
 @pytest.mark.usefixtures("upstream_oidc_mocks")

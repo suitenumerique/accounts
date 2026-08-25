@@ -216,3 +216,10 @@ class OIDCProviderSettings:
         environ_name="INTROSPECTION_PSA_BACKEND_FALLBACK",
         environ_prefix="OAUTH2_PROVIDER",
     )
+    OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK_PASSTHROUGH_SCOPES = (
+        values.ListValue(
+            ["openid"],
+            environ_name="INTROSPECTION_PSA_BACKEND_FALLBACK_PASSTHROUGH_SCOPES",
+            environ_prefix="OAUTH2_PROVIDER",
+        )
+    )

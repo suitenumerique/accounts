@@ -90,4 +90,39 @@ If you plan to introspect tokens you will need the `introspection` scope:
 OIDC_RP_SCOPES="openid introspection"
 ```
 
-The URL should be something like `http://accounts:8000/api/v1.0/o/introspect`.
+The URL should be something like `http://accounts:8000/api/v1.0/o/introspect/`.
+
+
+### Resource server
+
+To ease migration, and if it is configured, when introspecting a token not issued by _accounts_ 
+the endpoint will call the configured upstream Identity Providers.
+Note that the response will be modified according to those rules:
+
+```json
+{
+   "active": "copied as is",
+   "sub": "changed to match the accounts sub",
+   "scope": "filtered against a whitelist",
+   "client_id": "copied as is",
+   "aud": "copied as is"
+}
+```
+
+#### lasuite.oidc_resource_server.backend.ResourceServerBackend
+
+Not much need to be changed:
+
+```python
+OIDC_OP_URL="http://accounts:8000/api/v1.0/o"
+OIDC_RS_CLIENT_ID="new-client-id"  # Same as OIDC_RP_CLIENT_ID
+OIDC_RS_CLIENT_SECRET="new-client-secret"  # Same as OIDC_RP_CLIENT_SECRET
+OIDC_RS_ALLOWED_AUDIENCES="..."  # should be unchanged, they can be ProConnect and/or accounts values
+```
+
+If something other than `openid` is used in `OIDC_RS_SCOPES` then the desired scopes need to be added to the 
+`OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK_PASSTHROUGH_SCOPES` list of the accounts instance.
+
+#### lasuite.oidc_resource_server.backend.JWTResourceServerBackend
+
+> ⚠️ **Warning** Not yet supported

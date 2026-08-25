@@ -27,6 +27,8 @@ from oauth2_provider.views import (
 )
 from oauthlib.common import add_params_to_uri
 
+from authentication.models import IdentityProviderUser
+
 
 @method_decorator(ensure_csrf_cookie, "get")
 class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
@@ -195,7 +197,33 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
             except requests.HTTPError:
                 continue
             else:
-                return JsonResponse(response.json())
+                introspection_response = response.json()
+                if introspection_response.get("active") is not True:
+                    return self.INACTIVE_RESPONSE
+
+                # Copy some values as is:
+                #  - `active` will should be true
+                #  - `client_id` and `aud` can be used to limit access or permissions
+                rewritten_response = {
+                    k: v
+                    for k, v in introspection_response.items()
+                    if k in {"active", "client_id", "aud"}
+                }
+                # Translate the backend's sub to the accounts' sub
+                if subject := introspection_response.get("sub"):
+                    if social_auth := IdentityProviderUser.get_social_auth(
+                        provider=backend.name, uid=subject
+                    ):
+                        rewritten_response["sub"] = social_auth.user.sub
+                # Limit which scope are forwarded as is, we don't necessarily have the same ones
+                if scope := introspection_response.get("scope"):
+                    rewritten_response["scope"] = " ".join(
+                        s
+                        for s in scope.split(" ")
+                        if s
+                        in settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK_PASSTHROUGH_SCOPES  # pylint: disable=line-too-long
+                    )
+                return JsonResponse(rewritten_response)
 
         return None
 
