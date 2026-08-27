@@ -161,11 +161,11 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
 
     # The user must now be authenticated in the session
     user = User.objects.get()
-    assert user.sub == sub
+    assert user.sub != sub
     assert user.email == "testuser@example.com"
     assert user.short_name == "Test"
     assert user.full_name == "Test User"
-    assert user.identity_providers.get(provider="pro-connect").extra_data == {
+    assert user.identity_providers.get(provider="pro-connect", uid=sub).extra_data == {
         "access_token": "upstream-access-token",
         "auth_time": int(user.last_login.timestamp()),
         "email": "testuser@example.com",
