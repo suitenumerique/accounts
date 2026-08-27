@@ -26,7 +26,8 @@ class AuthenticationSettings:
 
     SOCIAL_AUTH_STRATEGY = "authentication.social_auth.OptionalURLSettingStrategy"
     SOCIAL_AUTH_STORAGE = "authentication.social_auth.AccountsDjangoStorage"
-    SOCIAL_AUTH_USER_FIELDS = ["email", "sub"]
+    SOCIAL_AUTH_USER_FIELDS = ["email"]
+    SOCIAL_AUTH_PROTECTED_USER_FIELDS = ["sub"]
 
     SOCIAL_AUTH_PIPELINE = (
         # Get the information we can about the user and return it in a simple

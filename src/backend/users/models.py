@@ -2,6 +2,7 @@
 Declare and configure the models for the accounts users application
 """
 
+import uuid
 from logging import getLogger
 
 from django.conf import settings
@@ -13,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from timezone_field import TimeZoneField
 
 from core import models as core_models
-from core.validators import sub_validator
+from core.validators import sub_validator, uuid_validator
 
 logger = getLogger(__name__)
 
@@ -73,10 +74,9 @@ class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin
         _("sub"),
         help_text=_("Required. 255 characters or fewer. ASCII characters only."),
         max_length=255,
-        validators=[sub_validator],
+        validators=[sub_validator, uuid_validator],
         unique=True,
-        blank=True,
-        null=True,
+        default=uuid.uuid4,
     )
 
     full_name = models.CharField(_("full name"), max_length=100, default="", blank=True)

@@ -2,6 +2,8 @@
 Unit tests for the User model
 """
 
+import contextlib
+
 from django.core.exceptions import ValidationError
 
 import pytest
@@ -23,22 +25,27 @@ def test_models_users_id_unique():
 
 
 @pytest.mark.parametrize(
-    "sub,is_valid",
+    "sub,expected",
     [
-        ("valid_sub.@+-:=/", True),
-        ("invalid süb", False),
-        (12345, True),
+        pytest.param(
+            "325956d6-5de0-4c16-815e-54e9c4dbbc27", contextlib.nullcontext(), id="valid"
+        ),
+        pytest.param(
+            "invalid süb",
+            pytest.raises(
+                ValidationError,
+                match="Enter a valid sub. This value should be ASCII only.",
+            ),
+            id="ascii-only",
+        ),
+        pytest.param(
+            12345,
+            pytest.raises(ValidationError, match="Enter a valid UUID."),
+            id="uuid-only",
+        ),
     ],
 )
-def test_models_users_sub_validator(sub, is_valid):
+def test_models_users_sub_validators(sub, expected):
     """The "sub" field should be validated."""
-    user = factories.UserFactory()
-    user.sub = sub
-    if is_valid:
-        user.full_clean()
-    else:
-        with pytest.raises(
-            ValidationError,
-            match=("Enter a valid sub. This value should be ASCII only."),
-        ):
-            user.full_clean()
+    with expected:
+        factories.UserFactory(sub=sub)

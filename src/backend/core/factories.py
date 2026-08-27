@@ -20,7 +20,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         # Skip postgeneration save, no save is made in the postgeneration methods.
         skip_postgeneration_save = True
 
-    sub = factory.Sequence(lambda n: f"user{n!s}")
+    sub = factory.Faker("uuid4")
     email = factory.Faker("email")
     full_name = factory.Faker("name")
     short_name = factory.Faker("first_name")
