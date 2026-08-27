@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 👔(authentication) update the email on IdP connection
+
 ## [v0.5.0] - 2026-11-10
 
 ### Added

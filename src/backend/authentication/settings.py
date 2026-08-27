@@ -88,3 +88,17 @@ class AuthenticationSettings:
     # Scopes requested in addition to the backend default ones. ProConnect rejects
     # the whole authorization request if one of them is not allowed for the client.
     SOCIAL_AUTH_PRO_CONNECT_SCOPE = values.ListValue([], environ_prefix=None)
+    SOCIAL_AUTH_PRO_CONNECT_NO_DEFAULT_PROTECTED_USER_FIELDS = True
+    SOCIAL_AUTH_PRO_CONNECT_PROTECTED_USER_FIELDS = (
+        SOCIAL_AUTH_PROTECTED_USER_FIELDS
+        + [
+            # Copied from social_core.pipeline.user.user_details to allow `email` mutation
+            "username",
+            "id",
+            "pk",
+            "password",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        ]
+    )
