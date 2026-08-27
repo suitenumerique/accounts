@@ -12,6 +12,7 @@ and this project adheres to
 - ✨(authentication) support multiple identity providers
 - ✨(OIDC Provider) configure and customize the Authorization Server
 - ✨(OIDC Provider) add a `guest` claim and the `account` scope
+- 👔(authentication) update the email on IdP connection
 
 ### Changed
 

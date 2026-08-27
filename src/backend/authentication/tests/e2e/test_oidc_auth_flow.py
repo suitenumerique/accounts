@@ -21,6 +21,7 @@ from pytest_django.asserts import assertRedirects
 
 from core.factories import UserFactory
 
+from authentication.factories import IdentityProviderUserFactory
 from oidc_provider.factories import (
     CLIENT_ID,
     CLIENT_SECRET,
@@ -31,7 +32,7 @@ from users.models import User
 
 
 @pytest.fixture(name="upstream_oidc_mocks")
-def upstream_oidc_mocks_fixture(settings, responses):
+def upstream_oidc_mocks_fixture(settings, responses, invalidate_psa_backends_cache):  # pylint: disable=unused-argument
     """Fixture that mock HTTP calls to an upstream OIDC Provider."""
     settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = "http://upstream-oidc.test"
     settings.SOCIAL_AUTH_PRO_CONNECT_KEY = "accounts-rp"
@@ -211,6 +212,122 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "http://upstream-oidc.test/.well-known/openid-configuration",
         "http://upstream-oidc.test/token/",
     ]
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_full_oidc_auth_flow_associated_user(settings, client):  # pylint: disable=too-many-locals
+    """
+    Verify the complete end-to-end OIDC authentication flow for an already associated user.
+
+    Scenario:
+    1. The product sends the user to Accounts's authorization endpoint.
+    2. Accounts redirects the user to the upstream OIDC provider.
+    3. The upstream OIDC provider calls back Accounts with an authorization code.
+    """
+    SimpleApplicationFactory()
+    idp_user = IdentityProviderUserFactory()
+    expected_user_info = UserFactory.build(sub=idp_user.uid)
+    expected_user_usual_name = expected_user_info.full_name.replace(
+        expected_user_info.short_name, ""
+    ).strip()
+
+    # ---- Step 1: The product sends the user to Accounts's authorization endpoint
+    oauth2_provider_authorize_url = reverse(
+        "oauth2_provider:authorize",
+        query={
+            "response_type": "code",
+            "client_id": CLIENT_ID,
+            "redirect_uri": REDIRECT_URI,
+            "scope": "openid email",
+        },
+    )
+    oauth2_provider_authorize_response = client.get(oauth2_provider_authorize_url)
+
+    # ---- Step 2: Accounts redirects the user to the upstream OIDC provider
+    authentication_login_url = reverse(
+        "authentication:login", query={"next": oauth2_provider_authorize_url}
+    )
+    assertRedirects(
+        oauth2_provider_authorize_response,
+        authentication_login_url,
+        fetch_redirect_response=False,
+    )
+
+    oidc_upstream_response = client.get(authentication_login_url, follow=False)
+    assert oidc_upstream_response.status_code == 302
+    assert oidc_upstream_response.url.startswith(
+        settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT
+    )
+
+    # ---- Step 3: The upstream OIDC provider calls back Accounts with an authorization code
+    callback_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+    assert callback_params["client_id"] == settings.SOCIAL_AUTH_PRO_CONNECT_KEY
+    assert callback_params["redirect_uri"] == urljoin(
+        "http://testserver",
+        reverse("authentication:social:complete", kwargs={"backend": "pro-connect"}),
+    )
+    assert callback_params["scope"] == "openid email given_name usual_name siret"
+
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
+            return_value={
+                "sub": expected_user_info.sub,
+                "email": expected_user_info.email,
+            },
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": expected_user_info.sub,
+                "email": expected_user_info.email,
+                "given_name": expected_user_info.short_name,
+                "usual_name": expected_user_usual_name,
+                "siret": "1234567890123",
+            },
+        ),
+    ):
+        callback_response = client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": callback_params["state"]},
+            follow=False,
+        )
+
+    # Accounts must redirect after successful authentication
+    assertRedirects(
+        callback_response, oauth2_provider_authorize_url, fetch_redirect_response=False
+    )
+
+    # The user must now be authenticated in the session
+    user = User.objects.get()
+    # sub must not change
+    assert user.sub == idp_user.user.sub
+    assert user.sub != expected_user_info.sub
+    # email should be updated
+    assert user.email == expected_user_info.email
+    # short_name and full_name as well
+    assert user.short_name == expected_user_info.short_name
+    assert (
+        user.full_name == f"{expected_user_info.short_name} {expected_user_usual_name}"
+    )
+
+    assert user.identity_providers.get(
+        provider="pro-connect", uid=expected_user_info.sub
+    ).extra_data == {
+        "access_token": "upstream-access-token",
+        "auth_time": int(user.last_login.timestamp()),
+        "email": expected_user_info.email,
+        "email_verified": None,
+        "given_name": expected_user_info.short_name,
+        "id_token": "upstream-id-token",
+        "refresh_token": "upstream-refresh-token",
+        "siret": "1234567890123",
+        "sub": expected_user_info.sub,
+        "token_type": "Bearer",
+        "usual_name": expected_user_usual_name,
+    }
 
 
 def test_oidc_auth_flow_existing_session_no_upstream_call(responses, settings, client):
