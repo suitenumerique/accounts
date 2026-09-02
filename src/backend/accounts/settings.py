@@ -85,6 +85,7 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     SECRET_KEY = SecretFileValue(None)
     SECRET_KEY_FALLBACKS = SecretFileListValue([])
     SALT_KEY = SecretFileListValue(None)  # django-fernet-encrypted-fields
+    SESSION_STATE_KEY_LENGTH = values.PositiveIntegerValue(32)
 
     # Application definition
     ROOT_URLCONF = "accounts.urls"
