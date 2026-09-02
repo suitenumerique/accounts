@@ -41,7 +41,7 @@ dependencies = [
     "django-storages[s3]==1.14.6",
     "django-timezone-field>=5.1",
     "django<6.0.0",
-    "djangorestframework==3.17.1",
+    "djangorestframework==3.17.2",
     "drf_spectacular==0.30.0",
     "dockerflow==2026.3.4",
     "easy_thumbnails==2.10.1",
