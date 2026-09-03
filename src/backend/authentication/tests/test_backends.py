@@ -10,6 +10,8 @@ from social_core.tests.backends import open_id_connect
 from social_core.tests.backends.oauth import BaseAuthUrlTestMixin
 from social_core.utils import get_querystring, parse_qs
 
+from core.utils.urls import get_query_params
+
 
 class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
     """Test the ProConnect backend with Python Social Auth testing utilities."""
@@ -27,6 +29,7 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             "userinfo_endpoint": f"{issuer}/userinfo",
             "revocation_endpoint": f"{issuer}/token/revocation",
             "jwks_uri": f"{issuer}/jwks",
+            "end_session_endpoint": f"{issuer}/logout",
         }
     )
 
@@ -76,6 +79,9 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
         self.assertEqual(
             self.backend.access_token_url(), "https://pro.connect.fr/token"
         )
+        self.assertEqual(
+            self.backend.end_session_url(), "https://pro.connect.fr/logout"
+        )
 
     def test_pkce_can_be_enabled_by_setting(self) -> None:
         """Test the backend when USE_PKCE=True."""
@@ -119,3 +125,25 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
     def test_everything_works(self) -> None:
         """Test a complete login."""
         self.do_login()
+
+    def test_build_rp_initiated_logout_url(self) -> None:
+        """Test the RP-initiated logout URL construction"""
+
+        # Without any arguments
+        self.assertEqual(
+            self.backend.build_rp_initiated_logout_url(),
+            f"https://pro.connect.fr/logout?client_id={self.client_key}",
+        )
+        # With all arguments
+        params = {
+            "id_token_hint": "id_token_hint",
+            "logout_hint": "logout_hint",
+            "client_id": "client_id",
+            "post_logout_redirect_uri": "post_logout_redirect_uri",
+            "state": "state",
+            "ui_locales": "ui_locales",
+        }
+        self.assertDictEqual(
+            get_query_params(self.backend.build_rp_initiated_logout_url(**params)),
+            params,
+        )

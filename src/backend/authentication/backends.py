@@ -7,8 +7,47 @@ from jwt import (
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.exceptions import AuthTokenError
 
+from core.utils.urls import add_query_params
 
-class ProConnect(OpenIdConnectAuth):
+
+class OpenIdConnectRPInitiatedLogoutMixin:
+    """Mixin to support RP-initiated logout for ``OpenIdConnectAuth`` backends."""
+
+    END_SESSION_URL = ""
+
+    def end_session_url(self) -> str:
+        """Return the base URL for RP-initiated logout"""
+
+        return self.get_setting_config(
+            "END_SESSION_URL", "end_session_endpoint", self.END_SESSION_URL
+        )
+
+    # pylint: disable=too-many-arguments
+    def build_rp_initiated_logout_url(  # noqa: PLR0913
+        self,
+        *,
+        id_token_hint=None,
+        logout_hint=None,
+        client_id=None,
+        post_logout_redirect_uri=None,
+        state=None,
+        ui_locales=None,
+    ):
+        """Return the URL to call to initiate a logout from the RP"""
+        return add_query_params(
+            self.end_session_url(),
+            {
+                "id_token_hint": id_token_hint,
+                "logout_hint": logout_hint,
+                "client_id": client_id or self.setting("KEY"),
+                "post_logout_redirect_uri": post_logout_redirect_uri,
+                "state": state,
+                "ui_locales": ui_locales,
+            },
+        )
+
+
+class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
     """A ProConnect backend, based on OpenIdConnectAuth which handle user info as JWT"""
 
     name = "pro-connect"
