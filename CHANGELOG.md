@@ -8,6 +8,7 @@ and this project adheres to
 
 ### Added
 
+- 💄(frontend) add intermediate login page
 - ✨(frontend) init the frontend app (webapp + e2e)
 - ✨(authentication) support multiple identity providers
 - ✨(OIDC Provider) configure and customize the Authorization Server

@@ -3,6 +3,10 @@
     "translation": {
       "Welcome on LaSuite Account": "Welcome on LaSuite Account",
       "Login": "Login",
+      "Sign in to LaSuite": "Sign in to LaSuite",
+      "Email address": "Email address",
+      "Type your ProConnect address to continue.": "Type your ProConnect address to continue.",
+      "Sign in": "Sign in",
       "Logout": "Logout",
       "Do you want to sign out?": "Do you want to sign out?",
       "Confirm sign out": "Confirm sign out",
@@ -12,6 +16,10 @@
   "fr": {
     "translation": {
       "Login": "Connexion",
+      "Sign in to LaSuite": "Connexion à LaSuite",
+      "Email address": "Adresse e-mail",
+      "Type your ProConnect address to continue.": "Saisissez votre adresse ProConnect pour continuer.",
+      "Sign in": "Se connecter",
       "Logout": "Déconnexion",
       "Do you want to sign out?": "Voulez-vous vous déconnecter ?",
       "Confirm sign out": "Confirmer la déconnexion",

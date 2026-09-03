@@ -1,0 +1,25 @@
+@mixin auth-page-background {
+  .c__main-layout {
+    background:
+      linear-gradient(
+        51deg,
+        var(
+            --c--contextuals--background--semantic--contextual--transparent,
+            transparent
+          )
+          66.39%,
+        var(--c--contextuals--background--semantic--error--tertiary) 111.18%
+      ),
+      linear-gradient(
+        166deg,
+        var(
+            --c--contextuals--background--semantic--contextual--transparent,
+            transparent
+          )
+          46.92%,
+        var(--c--contextuals--background--palette--brand--tertiary) 126.35%
+      ),
+      linear-gradient(312deg, rgba(255, 255, 255, 0) 37.29%, #edf0ff 135.42%),
+      var(--c--contextuals--background--surface--secondary);
+  }
+}
