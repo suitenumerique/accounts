@@ -6,12 +6,9 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeaderLayout } from '@/components/Layout/AppHeaderLayout';
 import { getCSRFToken } from '@/features/api/fetchApi';
-import { OIDC_LOGOUT_URL } from '@/features/auth/conf';
+import { LOGOUT_URL } from '@/features/auth/conf';
 
 const LOGOUT_QUERY_PARAMETERS = [
-  'id_token_hint',
-  'client_id',
-  'post_logout_redirect_uri',
   'state',
 ] as const;
 
@@ -48,7 +45,7 @@ export default function LogoutPage() {
         <div className="logout-page__canvas">
           <form
             className="logout-page__form"
-            action={OIDC_LOGOUT_URL}
+            action={LOGOUT_URL}
             method="post"
             onSubmit={handleSubmit}
             aria-busy={isSubmitting}
@@ -86,7 +83,6 @@ export default function LogoutPage() {
                   />
                 );
               })}
-            <input type="hidden" name="allow" value="true" />
 
             <div className="logout-page__actions">
               <Button

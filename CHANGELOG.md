@@ -24,5 +24,6 @@ and this project adheres to
 - 🦖(OIDC Provider) make introspection endpoint fall back to PSA backends
 - ✨(OIDC Provider) relay RP-Initiated logout confirmation to the frontend
 - 🏗️ (authentication) generate our own `sub`
+- ✨(auth) also logout from the upstream OIDC Provider when logging out
 
 [unreleased]: https://github.com/suitenumerique/accounts/compare/main

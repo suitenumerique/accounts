@@ -1,10 +1,9 @@
 """Views for OIDC provider."""
 
-from urllib.parse import urljoin
-
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
@@ -12,6 +11,7 @@ import requests
 import social_django.utils
 from oauth2_provider.compat import login_not_required
 from oauth2_provider.exceptions import OIDCError
+from oauth2_provider.http import OAuth2ResponseRedirect
 from oauth2_provider.models import (
     AccessToken,
     RefreshToken,
@@ -25,12 +25,14 @@ from oauth2_provider.views import (
 from oauth2_provider.views import (
     RPInitiatedLogoutView as OAuth2RPInitiatedLogoutView,
 )
-from oauthlib.common import add_params_to_uri
+
+from core.utils.state import set_state
+from core.utils.urls import add_query_params
 
 from authentication.models import IdentityProviderUser
 
 
-@method_decorator(ensure_csrf_cookie, "get")
+@method_decorator([ensure_csrf_cookie], "dispatch")
 class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
     """
     Override the default RP-Initiated Logout endpoint behavior.
@@ -41,7 +43,7 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
     """
 
     def get(self, request, *args, **kwargs):
-        """Override oauth2_provider behavior to redirect to our frontend for prompt"""
+        """Override oauth2_provider behavior to handle everything in our logout endpoint"""
 
         id_token_hint = request.GET.get("id_token_hint")
         client_id = request.GET.get("client_id")
@@ -57,44 +59,30 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
         except OIDCError as error:
             return self.error_response(error)
 
-        if not self.must_prompt(token_user):
-            return self.do_logout(
-                application, post_logout_redirect_uri, state, token_user
+        state_data = {}
+        # Build final post_logout_redirect_uri
+        if post_logout_redirect_uri:
+            if state:
+                post_logout_redirect_uri = add_query_params(
+                    post_logout_redirect_uri, {"state": state}
+                )
+            response = OAuth2ResponseRedirect(
+                post_logout_redirect_uri, application.get_allowed_schemes()
             )
+            if not request.user.is_authenticated:
+                return response
+            state_data["post_logout_redirect_uri"] = response.url
 
-        oidc_data = {
-            "id_token_hint": id_token_hint,
-            "client_id": client_id,
-            "post_logout_redirect_uri": post_logout_redirect_uri,
-            "state": state,
-        }
-
-        return HttpResponseRedirect(
-            add_params_to_uri(
-                urljoin(
-                    settings.LOGOUT_REDIRECT_URL,
-                    "logout",
-                ),
-                {k: v for k, v in oidc_data.items() if v},
-            )
-        )
-
-    def do_logout(
-        self,
-        application=None,
-        post_logout_redirect_uri=None,
-        state=None,
-        token_user=None,
-    ):
-        """Override oauth2_provider behavior to redirect to our frontend on empty redirect URI"""
-
-        response = super().do_logout(
-            application, post_logout_redirect_uri, state, token_user
-        )
-        return (
-            response
-            if post_logout_redirect_uri
-            else HttpResponseRedirect(settings.LOGOUT_REDIRECT_URL)
+        state_key = set_state(request.session, data=state_data)
+        prompt = "none" if not self.must_prompt(token_user) else "consent"
+        return OAuth2ResponseRedirect(
+            request.build_absolute_uri(
+                reverse(
+                    "authentication:logout",
+                    query={"state": state_key, "prompt": prompt},
+                )
+            ),
+            application.get_allowed_schemes(),
         )
 
 
