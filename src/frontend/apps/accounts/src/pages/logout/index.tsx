@@ -1,17 +1,12 @@
 import { FormEvent, useState } from 'react';
-import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Button } from '@gouvfr-lasuite/cunningham-react';
 import { useTranslation } from 'react-i18next';
 
+import { AppHeaderLayout } from '@/components/layout/AppHeaderLayout';
 import { getCSRFToken } from '@/features/api/fetchApi';
 import { OIDC_LOGOUT_URL } from '@/features/auth/conf';
-
-const MainLayout = dynamic(
-  () => import('@gouvfr-lasuite/ui-kit').then((module) => module.MainLayout),
-  { ssr: false },
-);
 
 const LOGOUT_QUERY_PARAMETERS = [
   'id_token_hint',
@@ -27,25 +22,6 @@ const getQueryValue = (value: string | string[] | undefined) => {
 
   return value;
 };
-
-const LaSuiteLogo = () => (
-  <span className="logout-page__logo" role="img" aria-label="La Suite">
-    <img
-      className="logout-page__logo-wordmark"
-      src="/assets/lasuite-logo-wordmark.svg"
-      alt=""
-      width="88"
-      height="27"
-    />
-    <img
-      className="logout-page__logo-mark"
-      src="/assets/lasuite-logo-mark.svg"
-      alt=""
-      width="15"
-      height="17"
-    />
-  </span>
-);
 
 export default function LogoutPage() {
   const { t } = useTranslation();
@@ -68,7 +44,7 @@ export default function LogoutPage() {
       <Head>
         <title>{t('Do you want to sign out?')} | La Suite</title>
       </Head>
-      <MainLayout icon={<LaSuiteLogo />} hideLeftPanelOnDesktop>
+      <AppHeaderLayout>
         <div className="logout-page__canvas">
           <form
             className="logout-page__form"
@@ -132,7 +108,7 @@ export default function LogoutPage() {
             </div>
           </form>
         </div>
-      </MainLayout>
+      </AppHeaderLayout>
     </div>
   );
 }
