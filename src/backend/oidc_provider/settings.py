@@ -207,6 +207,9 @@ class OIDCProviderSettings:
         config["OIDC_RSA_PRIVATE_KEY"] = self._get_oidc_rsa_private_key()
         # Let django-oauth-toolkit prompt only when the OIDC request requires it.
         config["OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT"] = False
+        # Disable tokens deletion on RP logout until we implement Back-Channel Logout,
+        # otherwise we start having desynchronized session states between RPs and the OP.
+        config["OIDC_RP_INITIATED_LOGOUT_DELETE_TOKENS"] = False
         return config
 
     # Temporary shenanigans to ease the migration from an upstream OIDC Provider
