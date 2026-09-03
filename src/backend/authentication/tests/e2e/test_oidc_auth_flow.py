@@ -11,7 +11,7 @@ These tests verify that:
 
 import re
 from unittest import mock
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import urljoin, urlparse
 
 from django.http import QueryDict
 from django.urls import reverse
@@ -20,6 +20,7 @@ import pytest
 from pytest_django.asserts import assertRedirects
 
 from core.factories import UserFactory
+from core.utils.urls import get_query_params
 
 from oidc_provider.factories import (
     CLIENT_ID,
@@ -253,12 +254,11 @@ def test_oidc_auth_flow_existing_session_no_upstream_call(responses, settings, c
     )
 
     # Extract the authorization code
-    parsed_final = urlparse(final_url)
-    final_params = parse_qs(parsed_final.query)
+    final_params = get_query_params(final_url)
     assert "code" in final_params, (
         "An authorization code must be present in the redirect to the product"
     )
-    authorization_code = final_params["code"][0]
+    authorization_code = final_params["code"]
 
     # ---- Step 2: The product exchanges the code for tokens ----
     token_response = client.post(

@@ -2,7 +2,6 @@
 
 import base64
 import uuid
-from urllib.parse import parse_qs, urlparse
 
 from django.contrib import auth
 from django.test import override_settings
@@ -14,6 +13,7 @@ from oauth2_provider.models import AccessToken, Grant, RefreshToken
 from oauth2_provider.settings import oauth2_settings
 
 from core.factories import UserFactory
+from core.utils.urls import get_query_params
 
 from authentication.backends import ProConnect
 from authentication.factories import IdentityProviderUserFactory
@@ -44,11 +44,6 @@ def _build_authorize_params(application, **overrides):
     return params
 
 
-def _get_redirect_params(response):
-    """Extract query parameters from a redirect response."""
-    return parse_qs(urlparse(response["Location"]).query)
-
-
 def _authorize(client, application, user, **overrides):
     """Perform an authorization request for a logged-in user."""
     client.force_login(user)
@@ -65,9 +60,7 @@ def _get_authorization_code(client, application, user, **overrides):
     assert response.status_code == 302
     assert response["Location"].startswith(REDIRECT_URI)
 
-    params = _get_redirect_params(response)
-    assert "code" in params
-    return params["code"][0]
+    return get_query_params(response.url)["code"]
 
 
 def _exchange_code(client, application, code, **overrides):
@@ -120,9 +113,9 @@ def test_authorize_with_prompt_none_redirects_with_login_required_error(
     assert response.status_code == 302
     assert response["Location"].startswith(REDIRECT_URI)
 
-    params = _get_redirect_params(response)
-    assert params["error"] == ["login_required"]
-    assert params["state"] == ["silent-state"]
+    params = get_query_params(response.url)
+    assert params["error"] == "login_required"
+    assert params["state"] == "silent-state"
 
 
 def test_authorize_returns_authorization_code_for_authenticated_user(
@@ -136,11 +129,11 @@ def test_authorize_returns_authorization_code_for_authenticated_user(
     assert response.status_code == 302
     assert response["Location"].startswith(REDIRECT_URI)
 
-    params = _get_redirect_params(response)
-    code = params["code"][0]
-
-    assert params["state"] == ["roundtrip-state"]
-    assert Grant.objects.filter(code=code, application=application, user=user).exists()
+    params = get_query_params(response.url)
+    assert params["state"] == "roundtrip-state"
+    assert Grant.objects.filter(
+        code=params["code"], application=application, user=user
+    ).exists()
 
 
 def test_authorize_rejects_unknown_client_id(client):
@@ -271,10 +264,10 @@ def test_logout_redirects_with_supported_query_parameters_when_prompting(client)
     )  # Log a different user than the one we issue token for
 
     expected_params = {
-        "id_token_hint": [id_token],
-        "client_id": [application.client_id],
-        "post_logout_redirect_uri": [application.post_logout_redirect_uris.split()[0]],
-        "state": ["logout-state"],
+        "id_token_hint": id_token,
+        "client_id": application.client_id,
+        "post_logout_redirect_uri": application.post_logout_redirect_uris.split()[0],
+        "state": "logout-state",
     }
     response = client.get(
         reverse("oauth2_provider:rp-initiated-logout"),
@@ -287,7 +280,7 @@ def test_logout_redirects_with_supported_query_parameters_when_prompting(client)
 
     assert response.status_code == 302, response.content
     assert response.url.startswith("https://accounts.example.test/logout?")
-    assert _get_redirect_params(response) == expected_params
+    assert get_query_params(response.url) == expected_params
     assert auth.SESSION_KEY in client.session  # User should still be logged in
 
 
@@ -311,7 +304,7 @@ def test_logout_skips_prompt_for_matching_id_token(client):
 
     assert response.status_code == 302
     assert response.url.startswith(application.post_logout_redirect_uris.split()[0])
-    assert _get_redirect_params(response) == {"state": ["logout-state"]}
+    assert get_query_params(response.url) == {"state": "logout-state"}
     assert auth.SESSION_KEY not in client.session  # User should be logged out
 
 
