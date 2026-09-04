@@ -10,8 +10,26 @@ import { fetchAPI } from "@/features/api/fetchApi";
 import { User } from "./types";
 import { LOGIN_URL } from "./conf";
 
-export const login = () => {
-  window.location.replace(LOGIN_URL);
+export const buildLoginUrl = (email?: string) => {
+  const url = new URL(LOGIN_URL);
+
+  if (email) {
+    url.searchParams.set('login_hint', email);
+  }
+
+  if (typeof window !== 'undefined') {
+    const next = new URLSearchParams(window.location.search).get('next');
+
+    if (next) {
+      url.searchParams.set('next', next);
+    }
+  }
+
+  return url.toString();
+};
+
+export const login = (email?: string) => {
+  window.location.replace(buildLoginUrl(email));
 };
 
 interface AuthContextInterface {

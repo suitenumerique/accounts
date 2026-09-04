@@ -63,7 +63,7 @@ function MyAppInner({ Component, pageProps }: AccountsAppProps) {
     <>
       <Head>
         <title>La Suite Account</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <CunninghamProvider currentLocale={locale} theme={theme}>

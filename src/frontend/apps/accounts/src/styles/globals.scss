@@ -2,7 +2,11 @@
 @use "@gouvfr-lasuite/ui-kit/style";
 @use "./cunningham-tokens.css";
 @use "./../pages/index.scss" as *;
-@use "./../pages/logout.scss" as *;
+@use "./../components/Logo/LaSuiteLogo.scss" as *;
+@use "./../components/Layout/AppHeaderLayout.scss" as *;
+@use "./../components/AppFooter/AppFooter.scss" as *;
+@use "./../pages/login/index.scss" as *;
+@use "./../pages/logout/index.scss" as *;
 
 body {
   margin: 0;

@@ -1,0 +1,15 @@
+.suite__footer {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suite__footer__gaufre,
+.suite__footer__help {
+  display: flex;
+  align-items: center;
+}
