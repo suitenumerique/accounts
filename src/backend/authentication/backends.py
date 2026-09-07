@@ -29,6 +29,12 @@ class ProConnect(OpenIdConnectAuth):
         "siret",
     ]
 
+    def auth_params(self, state=None):
+        params = super().auth_params(state)
+        if login_hint := self.data.get("login_hint"):
+            params.setdefault("login_hint", login_hint)
+        return params
+
     def user_data(self, access_token: str, *args, **kwargs):
         """Decode the JWT returned by ProConnect as user info"""
 
