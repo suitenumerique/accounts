@@ -584,9 +584,14 @@ class Test(Base):
         "django.contrib.auth.hashers.MD5PasswordHasher",
     ]
     USE_SWAGGER = True
-    # Static files are not used in the test environment
-    # Tests are raising warnings because the /data/static directory does not exist
-    STATIC_ROOT = None
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(True)
 

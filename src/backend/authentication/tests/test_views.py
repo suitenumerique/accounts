@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from django.urls import reverse
 
 import pytest
-from pytest_django.asserts import assertRedirects
+from pytest_django.asserts import assertRedirects  # pylint: disable=no-name-in-module
 from rest_framework.status import (
     HTTP_302_FOUND,
     HTTP_403_FORBIDDEN,

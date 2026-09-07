@@ -95,7 +95,7 @@ class OIDCValidator(OAuth2Validator):
             - OpenIDConnectImplicit
             - OpenIDConnectHybrid
         """
-        return request.user.is_authenticated
+        return request.user and request.user.is_authenticated
 
     def introspect_token(self, *args, **kwargs):
         # `django-oauth-toolkit` doesn't use the validator in its

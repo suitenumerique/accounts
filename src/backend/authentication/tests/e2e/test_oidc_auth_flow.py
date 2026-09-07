@@ -17,7 +17,7 @@ from django.http import QueryDict
 from django.urls import reverse
 
 import pytest
-from pytest_django.asserts import assertRedirects
+from pytest_django.asserts import assertRedirects  # pylint: disable=no-name-in-module
 
 from core.factories import UserFactory
 
