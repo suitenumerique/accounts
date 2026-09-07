@@ -14,7 +14,7 @@
     "test": "echo \"No unit tests in this app — end-to-end tests live in apps/e2e\" && exit 0"
   },
   "engines": {
-    "node": ">=22.0.0 <25.0.0",
+    "node": "22",
     "yarn": "1.22.22"
   },
   "dependencies": {

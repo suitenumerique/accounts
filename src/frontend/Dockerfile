@@ -1,6 +1,6 @@
 ARG FRONTEND_IMAGE=frontend-build-output
 
-FROM node:24-alpine AS frontend-deps
+FROM node:22-alpine AS frontend-deps
 
 # Upgrade system packages to install security updates
 RUN apk update && \

@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=22.0.0 <25.0.0",
+    "node": "22",
     "yarn": "1.22.22"
   },
   "scripts": {
