@@ -1,6 +1,6 @@
 # Django accounts
-ARG PYTHON_VERSION=3.14.4
-ARG UV_VERSION=0.11.8
+ARG PYTHON_VERSION=3.14.7
+ARG UV_VERSION=0.12.10
 ARG NODE_VERSION=24
 
 # ---- Workaround: variable expansion is not supported for --from ----
