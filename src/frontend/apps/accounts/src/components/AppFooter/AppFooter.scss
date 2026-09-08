@@ -12,4 +12,39 @@
 .suite__footer__help {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.suite__footer__gaufre .c__button,
+.suite__footer__help .c__button,
+.suite__footer__help .c__help-menu__trigger,
+.suite__footer__help .c__dropdown-menu-trigger {
+  display: inline-flex !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  border: 0 !important;
+  color: var(--c--contextuals--content--semantic--neutral--tertiary);
+}
+
+.suite__footer__gaufre .c__button .material-icons,
+.suite__footer__help .c__button .material-icons,
+.suite__footer__help .c__help-menu__trigger .material-icons,
+.suite__footer__help .c__dropdown-menu-trigger .material-icons {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.app-help-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }

@@ -8,6 +8,7 @@
 @use "./../components/AppHelpMenu/AppHelpMenu.scss" as *;
 @use "./../pages/login/index.scss" as *;
 @use "./../pages/logout/index.scss" as *;
+@use "./../features/account/AccountPage.scss" as *;
 
 body {
   margin: 0;
@@ -16,3 +17,26 @@ body {
 * {
   box-sizing: border-box;
 }
+
+
+.c__field__footer {
+  padding-left: 0;
+}
+
+.c__input__label {
+  color: var(--c--contextuals--content--semantic--neutral--primary);
+}
+
+.c__input__wrapper.c__input__wrapper--disabled {
+  background: var(--c--contextuals--background--semantic--disabled--secondary);
+  color: var(--c--contextuals--content--semantic--disabled--primary);
+}
+
+.c__dropdown-menu-trigger {
+  border: 1px solid var(--c--contextuals--border--surface--primary);
+  border-radius: 4px;
+  .c__language-picker__label {
+    color: var(--c--contextuals--content--semantic--neutral--primary);
+  }
+}
+

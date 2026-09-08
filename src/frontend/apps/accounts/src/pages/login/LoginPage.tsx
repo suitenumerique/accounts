@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import Head from 'next/head';
-import { Button } from '@gouvfr-lasuite/cunningham-react';
+import { Button, Input } from '@gouvfr-lasuite/cunningham-react';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeaderLayout } from '@/components/Layout/AppHeaderLayout';
@@ -42,12 +42,9 @@ export default function LoginPage() {
             <h1>{t('Sign in to LaSuite')}</h1>
 
             <div className="login-page__field">
-              <label className="login-page__label" htmlFor="login-email">
-                {t('Email address')}
-              </label>
-              <input
-                id="login-email"
-                className="login-page__input"
+              <Input
+                label={t('Email address')}
+                variant="classic"
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -56,10 +53,9 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 disabled={isSubmitting}
+                fullWidth
+                text={t('Type your ProConnect address to continue.')}
               />
-              <p className="login-page__hint">
-                {t('Type your ProConnect address to continue.')}
-              </p>
             </div>
 
             <div className="login-page__actions">

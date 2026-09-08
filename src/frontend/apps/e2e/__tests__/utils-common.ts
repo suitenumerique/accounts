@@ -14,8 +14,10 @@ const ROOT_PATH = path.join(__dirname, "/../../../../..");
  *   user-e2e-<browser> / password-e2e-<browser>
  */
 export const keycloakSignIn = async (page: Page, browserName: string) => {
-  // From the home page, go to Keycloak.
-  await page.getByRole("button", { name: "Login" }).click();
+  // Intermediate login page: email + Sign in, then Keycloak.
+  const email = `user-e2e-${browserName}@accounts.test`;
+  await page.getByRole("textbox", { name: "Email address" }).fill(email);
+  await page.getByRole("button", { name: "Sign in" }).click();
 
   // We are now on the Keycloak login form of the `accounts` realm.
   await expect(page.locator("#username")).toBeVisible();

@@ -10,7 +10,27 @@
       "Logout": "Logout",
       "Do you want to sign out?": "Do you want to sign out?",
       "Confirm sign out": "Confirm sign out",
-      "Cancel": "Cancel"
+      "Cancel": "Cancel",
+      "Back": "Back",
+      "My account": "My account",
+      "Personal information": "Personal information",
+      "Security and sign-in": "Security and sign-in",
+      "View your personal information. Your name and email address are managed by": "View your personal information. Your name and email address are managed by",
+      "Identity": "Identity",
+      "Name": "Name",
+      "Email": "Email",
+      "Managed by ProConnect": "Managed by ProConnect",
+      "Language": "Language",
+      "Display language": "Display language",
+      "Choose the language used on this page.": "Choose the language used on this page.",
+      "Manage how you sign in to LaSuite.": "Manage how you sign in to LaSuite.",
+      "Manage how you sign in and protect your account.": "Manage how you sign in and protect your account.",
+      "Sign-in provider": "Sign-in provider",
+      "Manage": "Manage",
+      "Sign-in security": "Sign-in security",
+      "Password": "Password",
+      "Two-step verification": "Two-step verification",
+      "Managed by your sign-in provider": "Managed by your sign-in provider"
     }
   },
   "fr": {
@@ -23,7 +43,27 @@
       "Logout": "Déconnexion",
       "Do you want to sign out?": "Voulez-vous vous déconnecter ?",
       "Confirm sign out": "Confirmer la déconnexion",
-      "Cancel": "Annuler"
+      "Cancel": "Annuler",
+      "Back": "Retour",
+      "My account": "Mon compte",
+      "Personal information": "Informations personnelles",
+      "Security and sign-in": "Sécurité et connexion",
+      "View your personal information. Your name and email address are managed by": "Consultez vos informations personnelles. Votre nom et votre adresse e-mail sont gérés par",
+      "Identity": "Identité",
+      "Name": "Nom",
+      "Email": "E-mail",
+      "Managed by ProConnect": "Géré par ProConnect",
+      "Language": "Langue",
+      "Display language": "Langue d'affichage",
+      "Choose the language used on this page.": "Choisissez la langue utilisée sur cette page.",
+      "Manage how you sign in to LaSuite.": "Gérez votre connexion à LaSuite.",
+      "Manage how you sign in and protect your account.": "Gérez votre connexion et protégez votre compte.",
+      "Sign-in provider": "Fournisseur de connexion",
+      "Manage": "Gérer",
+      "Sign-in security": "Sécurité de connexion",
+      "Password": "Mot de passe",
+      "Two-step verification": "Vérification en deux étapes",
+      "Managed by your sign-in provider": "Géré par votre fournisseur de connexion"
     }
   }
 }

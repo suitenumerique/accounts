@@ -13,19 +13,39 @@ type AppHeaderLayoutProps = {
   children: ReactNode;
   className?: string;
   hideLeftPanelOnDesktop?: boolean;
+  leftPanelContent?: ReactNode;
   logo?: ReactNode;
+  showMenuToggle?: boolean;
+  isLeftPanelOpen?: boolean;
+  setIsLeftPanelOpen?: (isLeftPanelOpen: boolean) => void;
 };
 
 export const AppHeaderLayout = ({
   children,
   className,
   hideLeftPanelOnDesktop = true,
+  leftPanelContent,
   logo = <LaSuiteLogo />,
+  showMenuToggle = false,
+  isLeftPanelOpen,
+  setIsLeftPanelOpen,
 }: AppHeaderLayoutProps) => (
   <div
-    className={['app-header-layout', className].filter(Boolean).join(' ')}
+    className={[
+      'app-header-layout',
+      showMenuToggle && 'app-header-layout--with-menu-toggle',
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ')}
   >
-    <MainLayout icon={logo} hideLeftPanelOnDesktop={hideLeftPanelOnDesktop}>
+    <MainLayout
+      icon={logo}
+      hideLeftPanelOnDesktop={hideLeftPanelOnDesktop}
+      leftPanelContent={leftPanelContent}
+      isLeftPanelOpen={isLeftPanelOpen}
+      setIsLeftPanelOpen={setIsLeftPanelOpen}
+    >
       {children}
     </MainLayout>
     <AppFooter />

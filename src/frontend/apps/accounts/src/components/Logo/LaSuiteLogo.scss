@@ -1,12 +1,22 @@
 .app-logo {
-  position: relative;
-  display: block;
-  width: 102px;
-  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.app-logo__wordmark,
-.app-logo__mark {
-  position: absolute;
+.app-logo--wordmark {
+  width: 132px;
+  height: 50px;
+}
+
+.app-logo--mark {
+  width: 32px;
+  height: 32px;
+}
+
+.app-logo__image {
   display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

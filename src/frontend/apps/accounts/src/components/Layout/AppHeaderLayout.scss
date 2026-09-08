@@ -21,6 +21,10 @@
     display: none;
   }
 
+  &--with-menu-toggle .c__header__toggle-menu {
+    display: flex;
+  }
+
   .c__main-layout__content {
     margin-top: 56px;
   }
