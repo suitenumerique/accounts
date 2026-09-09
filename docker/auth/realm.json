@@ -1288,7 +1288,7 @@
         "display.on.consent.screen": "false",
         "oauth2.device.authorization.grant.enabled": "false",
         "oidc.ciba.grant.enabled": "false",
-        "post.logout.redirect.uris": "http://localhost:8070/*##http://localhost:3200/*##http://localhost:9900/*",
+        "post.logout.redirect.uris": "http://localhost:8070/*##http://localhost:3200/*##http://localhost:9900/*##http://localhost:9901/*",
         "realm_client": "false",
         "require.pushed.authorization.requests": "false",
         "tls-client-certificate-bound-access-tokens": "false",
