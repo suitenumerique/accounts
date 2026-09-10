@@ -81,3 +81,18 @@ class AuthenticationSettings:
     SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_JWKS_URI = values.Value(environ_prefix=None)
+
+    SOCIAL_AUTH_PRO_CONNECT_NO_DEFAULT_PROTECTED_USER_FIELDS = True
+    SOCIAL_AUTH_PRO_CONNECT_PROTECTED_USER_FIELDS = (
+        SOCIAL_AUTH_PROTECTED_USER_FIELDS
+        + [
+            # Copied from social_core.pipeline.user.user_details to allow `email` mutation
+            "username",
+            "id",
+            "pk",
+            "password",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        ]
+    )
