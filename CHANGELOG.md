@@ -26,4 +26,9 @@ and this project adheres to
 - 🏗️ (authentication) generate our own `sub`
 - ✨(auth) also logout from the upstream OIDC Provider when logging out
 
+
+### Fixed
+
+- 🩹(frontend) enable trailingSlash to fix static export routes
+
 [unreleased]: https://github.com/suitenumerique/accounts/compare/main
