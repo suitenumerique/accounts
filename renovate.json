@@ -29,7 +29,7 @@
       "groupName": "allowed django versions",
       "matchManagers": ["pep621"],
       "matchPackageNames": ["django"],
-      "allowedVersions": "<6.1.0"
+      "allowedVersions": "<6.2.0"
     },
     {
       "groupName": "allowed celery versions",
