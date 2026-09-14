@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 
 import requests
 import social_django.utils
@@ -32,7 +32,7 @@ from core.utils.urls import add_query_params
 from authentication.models import IdentityProviderUser
 
 
-@method_decorator([ensure_csrf_cookie], "dispatch")
+@method_decorator([csrf_exempt], "dispatch")
 class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
     """
     Override the default RP-Initiated Logout endpoint behavior.
@@ -43,12 +43,21 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
     """
 
     def get(self, request, *args, **kwargs):
-        """Override oauth2_provider behavior to handle everything in our logout endpoint"""
+        """Handle GET request, as required by the RFC"""
 
-        id_token_hint = request.GET.get("id_token_hint")
-        client_id = request.GET.get("client_id")
-        post_logout_redirect_uri = request.GET.get("post_logout_redirect_uri")
-        state = request.GET.get("state")
+        return self.relying_party_initiated_logout(request.GET)
+
+    def post(self, request, *args, **kwargs):
+        """Handle POST request, unlike oauth2_provider, as required by the RFC"""
+
+        return self.relying_party_initiated_logout(request.POST)
+
+    def relying_party_initiated_logout(self, request_data):
+        """Override oauth2_provider behavior to handle everything in our logout endpoint"""
+        id_token_hint = request_data.get("id_token_hint")
+        client_id = request_data.get("client_id")
+        post_logout_redirect_uri = request_data.get("post_logout_redirect_uri")
+        state = request_data.get("state")
 
         try:
             application, token_user = self.validate_logout_request(
@@ -69,14 +78,14 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
             response = OAuth2ResponseRedirect(
                 post_logout_redirect_uri, application.get_allowed_schemes()
             )
-            if not request.user.is_authenticated:
+            if not self.request.user.is_authenticated:
                 return response
             state_data["post_logout_redirect_uri"] = response.url
 
-        state_key = set_state(request.session, data=state_data)
+        state_key = set_state(self.request.session, data=state_data)
         prompt = "none" if not self.must_prompt(token_user) else "consent"
         return OAuth2ResponseRedirect(
-            request.build_absolute_uri(
+            self.request.build_absolute_uri(
                 reverse(
                     "authentication:logout",
                     query={"state": state_key, "prompt": prompt},
