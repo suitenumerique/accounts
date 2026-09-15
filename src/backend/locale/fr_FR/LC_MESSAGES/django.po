@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-28 12:23+0000\n"
-"PO-Revision-Date: 2026-04-30 07:50\n"
+"POT-Creation-Date: 2026-09-09 08:46+0000\n"
+"PO-Revision-Date: 2026-09-15 09:53\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,121 +17,65 @@ msgstr ""
 "X-Crowdin-File: backend-accounts.pot\n"
 "X-Crowdin-File-ID: 46\n"
 
-#: core/admin.py:26
-msgid "Personal info"
-msgstr "Infos Personnelles"
+#: authentication/apps.py:11
+msgid "Accounts authentication application"
+msgstr "Application d'authentification des comptes"
 
-#: core/admin.py:40
-msgid "Permissions"
-msgstr "Permissions"
-
-#: core/admin.py:52
-msgid "Important dates"
-msgstr "Dates importantes"
-
-#: core/apps.py:12
-msgid "Accounts core application"
-msgstr "Noyau d'application Accounts"
-
-#: core/models.py:40
-msgid "id"
-msgstr "identifiant/id"
-
-#: core/models.py:41
-msgid "primary key for the record as UUID"
-msgstr "clé primaire pour l'enregistrement en tant que UUID"
-
-#: core/models.py:47
-msgid "created on"
-msgstr "créé le"
-
-#: core/models.py:48
-msgid "date and time at which a record was created"
-msgstr "date et heure de création de l'enregistrement"
-
-#: core/models.py:53
-msgid "updated on"
-msgstr "mis à jour le"
-
-#: core/models.py:54
-msgid "date and time at which a record was last updated"
-msgstr "date et heure de la dernière mise à jour de l'enregistrement"
-
-#: core/models.py:90
-msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
-msgstr "Nous n'avons pas pu trouver un utilisateur avec ce sous-groupe mais l'e-mail est déjà associé à un utilisateur enregistré."
-
-#: core/models.py:101
-msgid "sub"
-msgstr "sous-groupe"
-
-#: core/models.py:102
-msgid "Required. 255 characters or fewer. ASCII characters only."
-msgstr "Obligatoire. 255 caractères ou moins. Caractères ASCII uniquement."
-
-#: core/models.py:110
-msgid "full name"
-msgstr "nom complet"
-
-#: core/models.py:112
-msgid "short name"
-msgstr "nom court"
-
-#: core/models.py:115
-msgid "identity email address"
-msgstr "adresse e-mail d'identité"
-
-#: core/models.py:120
-msgid "admin email address"
-msgstr "adresse e-mail de l'administrateur"
-
-#: core/models.py:127
-msgid "language"
-msgstr "langue"
-
-#: core/models.py:128
-msgid "The language in which the user wants to see the interface."
-msgstr "La langue dans laquelle l'utilisateur veut voir l'interface."
-
-#: core/models.py:136
-msgid "The timezone in which the user wants to see times."
-msgstr "Le fuseau horaire dans lequel l'utilisateur souhaite voir les heures."
-
-#: core/models.py:139
-msgid "device"
-msgstr "appareil"
-
-#: core/models.py:141
-msgid "Whether the user is a device or a real user."
-msgstr "Si l'utilisateur est un appareil ou un utilisateur réel."
-
-#: core/models.py:144
-msgid "staff status"
-msgstr "statut d'équipe"
-
-#: core/models.py:146
-msgid "Whether the user can log into this admin site."
-msgstr "Si l'utilisateur peut se connecter à ce site d'administration."
-
-#: core/models.py:149
-msgid "active"
-msgstr "actif"
-
-#: core/models.py:152
-msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
-msgstr "Si cet utilisateur doit être traité comme actif. Désélectionnez ceci au lieu de supprimer des comptes."
-
-#: core/models.py:158
-msgid "Additional information about the user."
-msgstr "Informations supplémentaires sur l'utilisateur."
-
-#: core/models.py:168
+#: authentication/models.py:28 users/models.py:133
 msgid "user"
 msgstr "utilisateur"
 
-#: core/models.py:169
-msgid "users"
-msgstr "utilisateurs"
+#: authentication/models.py:31
+msgid "identity provider"
+msgstr "fournisseur d'identité"
+
+#: authentication/models.py:33
+msgid "identity provider user id"
+msgstr "identifiant de l'utilisateur du fournisseur d'identité"
+
+#: core/admin.py:22 users/admin.py:30
+msgid "Personal info"
+msgstr "Infos Personnelles"
+
+#: core/admin.py:36 users/admin.py:41
+msgid "Permissions"
+msgstr "Permissions"
+
+#: core/admin.py:48 users/admin.py:53
+msgid "Important dates"
+msgstr "Dates importantes"
+
+#: core/apps.py:11
+msgid "Accounts core application"
+msgstr "Noyau d'application Accounts"
+
+#: core/models.py:35
+msgid "id"
+msgstr "identifiant/id"
+
+#: core/models.py:36
+msgid "primary key for the record as UUID"
+msgstr "clé primaire pour l'enregistrement en tant que UUID"
+
+#: core/models.py:42
+msgid "created on"
+msgstr "créé le"
+
+#: core/models.py:43
+msgid "date and time at which a record was created"
+msgstr "date et heure de création de l'enregistrement"
+
+#: core/models.py:48
+msgid "updated on"
+msgstr "mis à jour le"
+
+#: core/models.py:49
+msgid "date and time at which a record was last updated"
+msgstr "date et heure de la dernière mise à jour de l'enregistrement"
+
+#: core/models.py:85
+msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
+msgstr "Nous n'avons pas pu trouver un utilisateur avec ce sub mais l'e-mail est déjà associé à un utilisateur enregistré."
 
 #: core/templates/mail/html/template.html:153
 #: core/templates/mail/text/template.txt:3
@@ -148,4 +92,68 @@ msgstr " LaSuite, votre espace collaboratif. "
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Proposé par %(brandname)s "
+
+#: users/apps.py:11
+msgid "Accounts users application"
+msgstr "Application de gestion des comptes utilisateurs"
+
+#: users/models.py:74
+msgid "sub"
+msgstr "sub"
+
+#: users/models.py:75
+msgid "Required. 255 characters or fewer. ASCII characters only."
+msgstr "Obligatoire. 255 caractères ou moins. Caractères ASCII uniquement."
+
+#: users/models.py:82
+msgid "full name"
+msgstr "nom complet"
+
+#: users/models.py:84
+msgid "short name"
+msgstr "nom court"
+
+#: users/models.py:90
+msgid "email address"
+msgstr "adresse e-mail"
+
+#: users/models.py:96
+msgid "language"
+msgstr "langue"
+
+#: users/models.py:97
+msgid "The language in which the user wants to see the interface."
+msgstr "La langue dans laquelle l'utilisateur veut voir l'interface."
+
+#: users/models.py:105
+msgid "The timezone in which the user wants to see times."
+msgstr "Le fuseau horaire dans lequel l'utilisateur souhaite voir les heures."
+
+#: users/models.py:108
+msgid "device"
+msgstr "appareil"
+
+#: users/models.py:110
+msgid "Whether the user is a device or a real user."
+msgstr "Si l'utilisateur est un appareil ou un utilisateur réel."
+
+#: users/models.py:113
+msgid "staff status"
+msgstr "statut d'équipe"
+
+#: users/models.py:115
+msgid "Whether the user can log into this admin site."
+msgstr "Si l'utilisateur peut se connecter à ce site d'administration."
+
+#: users/models.py:118
+msgid "active"
+msgstr "actif"
+
+#: users/models.py:121
+msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
+msgstr "Si cet utilisateur doit être traité comme actif. Désélectionnez ceci au lieu de supprimer des comptes."
+
+#: users/models.py:134
+msgid "users"
+msgstr "utilisateurs"
 
