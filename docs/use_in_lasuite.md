@@ -66,6 +66,11 @@ OIDC_OP_LOGOUT_ENDPOINT="http://localhost:9901/api/v1.0/o/logout/"
 OIDC_RP_CLIENT_ID="new-client-id"  # i.e: `my-account-app`
 OIDC_RP_CLIENT_SECRET="new-client-secret"
 OIDC_RP_SIGN_ALGO="RS256"  # should be unchanged
+
+# sub **will** changes so we need email fallback and `sub` field mutability enabled.
+# This is currently the "default" but "Explicit is better than implicit".
+OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION=True
+OIDC_USER_SUB_FIELD_IMMUTABLE=False
 ```
 
 For scopes, replace `given_name` and `usual_name` by `profile`:
