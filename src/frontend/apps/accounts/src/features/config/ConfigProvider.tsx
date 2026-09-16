@@ -26,11 +26,8 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const { setTheme } = useAppContext();
 
   useEffect(() => {
-    setTheme(
-      typeof config?.FRONTEND_THEME === "string"
-        ? config.FRONTEND_THEME
-        : "dsfr-light",
-    );
+    const theme = config?.FRONTEND_THEME;
+    setTheme(theme ? `${theme}-light` : "default");
   }, [config?.FRONTEND_THEME, setTheme]);
 
   if (!config) {

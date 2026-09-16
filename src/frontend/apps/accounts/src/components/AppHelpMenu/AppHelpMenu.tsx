@@ -2,13 +2,11 @@
 
 import { HelpMenu } from '@gouvfr-lasuite/ui-kit';
 
-const DOCUMENTATION_URL = '';
-const CONTACT_EMAIL = '';
+const CONTACT_EMAIL = 'support-lasuite@numerique.gouv.fr';
 
 export const AppHelpMenu = () => (
   <div className="app-help-menu">
     <HelpMenu
-      documentationUrl={DOCUMENTATION_URL}
       onContactUs={() => {
         window.location.href = `mailto:${CONTACT_EMAIL}`;
       }}

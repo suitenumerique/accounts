@@ -43,7 +43,7 @@ export const useAppContext = () => {
 };
 
 export default function MyApp(props: AccountsAppProps) {
-  const [theme, setTheme] = useState<string>("dsfr-light");
+  const [theme, setTheme] = useState<string>("default");
 
   return (
     <AppContext.Provider value={{ theme, setTheme }}>

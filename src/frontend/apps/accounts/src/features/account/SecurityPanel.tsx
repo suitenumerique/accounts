@@ -3,7 +3,7 @@
 import { Button } from '@gouvfr-lasuite/cunningham-react';
 import { useTranslation } from 'react-i18next';
 
-const PROCONNECT_URL = 'https://www.proconnect.gouv.fr/';
+const PROCONNECT_URL = 'https://www.proconnect.gouv.fr/mon-compte';
 
 const ExternalLinkIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">

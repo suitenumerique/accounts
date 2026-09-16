@@ -1,7 +1,7 @@
 import AccountPage from '@/features/account/AccountPage';
 import { useAuth } from '@/features/auth/Auth';
 
-import LoginPage from './login/LoginPage';
+import LoginPage from './login';
 
 export default function HomePage() {
   const { user } = useAuth();

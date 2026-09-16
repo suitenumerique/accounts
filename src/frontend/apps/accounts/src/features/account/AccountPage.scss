@@ -341,9 +341,9 @@
 
 @media (min-width: 1024px) {
   .account-layout {
-    max-width: 750px;
+    max-width: 850px;
     margin-inline: auto;
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr);
   }
 
   .account-page__content {

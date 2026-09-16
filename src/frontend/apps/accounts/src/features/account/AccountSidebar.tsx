@@ -54,7 +54,7 @@ export const AccountSidebar = ({
           aria-current={activeSection === 'personal' ? 'page' : undefined}
         >
           <PersonalInformationIcon />
-          <span>{t('Personal information')}</span>
+          <span>{t('Personal informations')}</span>
         </button>
 
         <button

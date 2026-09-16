@@ -108,5 +108,3 @@ export default function LogoutPage() {
     </div>
   );
 }
-
-LogoutPage.isStandalonePage = true;

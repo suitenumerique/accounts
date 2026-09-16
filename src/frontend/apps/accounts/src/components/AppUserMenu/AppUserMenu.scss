@@ -1,0 +1,12 @@
+.app-user-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.user-menu__actions .c__language-picker,
+.user-menu__actions .c__dropdown-menu-trigger {
+  border: none;
+}

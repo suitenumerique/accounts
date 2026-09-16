@@ -15,7 +15,7 @@ import { useConfig } from '@/features/config/ConfigProvider';
 //   { ssr: false },
 // );
 
-const PROCONNECT_URL = 'https://www.proconnect.gouv.fr/';
+const PROCONNECT_URL = 'https://www.proconnect.gouv.fr/mon-compte';
 
 type PersonalInformationPanelProps = {
   user: User;
@@ -32,7 +32,7 @@ export const PersonalInformationPanel = ({
   return (
     <section className="account-panel">
       <header className="account-panel__header">
-        <h1>{t('Personal information')}</h1>
+        <h1>{t('Personal informations')}</h1>
         <p>
           {t('View your personal information. Your name and email address are managed by')}{' '}
           <a
