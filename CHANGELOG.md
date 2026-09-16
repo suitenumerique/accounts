@@ -30,6 +30,7 @@ and this project adheres to
 
 ### Fixed
 
+- 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
 [unreleased]: https://github.com/suitenumerique/accounts/compare/main

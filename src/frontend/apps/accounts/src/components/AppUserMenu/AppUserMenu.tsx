@@ -24,7 +24,6 @@ const LanguagePicker = dynamic(
 const LANGUAGES = [
   { label: 'Français', shortLabel: 'FR', value: 'fr-FR' },
   { label: 'English', shortLabel: 'EN', value: 'en-US' },
-  { label: 'Deutsch', shortLabel: 'DE', value: 'de-DE' },
 ] as const;
 
 export const AppUserMenu = () => {
