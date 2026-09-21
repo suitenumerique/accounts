@@ -1,5 +1,7 @@
 """Accounts's custom backends for Python Social Auth"""
 
+import json
+
 import jwt
 from jwt import (
     PyJWTError,
@@ -72,6 +74,17 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
         params = super().auth_params(state)
         if login_hint := self.data.get("login_hint"):
             params.setdefault("login_hint", login_hint)
+        if acr_values := self.setting("ACR_VALUES"):
+            claims = json.loads(params.get("claims") or "{}")
+            claims.setdefault("id_token", {})
+            claims["id_token"].setdefault(
+                "acr",
+                {
+                    "essential": False,
+                    "values": acr_values.split(" "),
+                },
+            )
+            params["claims"] = json.dumps(claims)
         return params
 
     def user_data(self, access_token: str, *args, **kwargs):

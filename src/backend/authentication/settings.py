@@ -81,3 +81,7 @@ class AuthenticationSettings:
     SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL = values.Value(environ_prefix=None)
     SOCIAL_AUTH_PRO_CONNECT_JWKS_URI = values.Value(environ_prefix=None)
+
+    SOCIAL_AUTH_PRO_CONNECT_ACR_VALUES = values.Value(
+        default="eidas1", environ_prefix=None
+    )

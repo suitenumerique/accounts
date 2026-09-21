@@ -147,3 +147,21 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             get_query_params(self.backend.build_rp_initiated_logout_url(**params)),
             params,
         )
+
+    def test_acr_values_auth_params(self):
+        """Test ACR_VALUES are also requested as individual claims"""
+        self.strategy.set_settings(
+            {
+                **self.extra_settings(),
+                f"SOCIAL_AUTH_{self.name}_ACR_VALUES": "acr1 acr2",
+            }
+        )
+
+        params = self.backend.auth_params()
+        self.assertEqual(params["acr_values"], "acr1 acr2")
+        self.assertEqual(
+            params["claims"],
+            json.dumps(
+                {"id_token": {"acr": {"essential": False, "values": ["acr1", "acr2"]}}}
+            ),
+        )
