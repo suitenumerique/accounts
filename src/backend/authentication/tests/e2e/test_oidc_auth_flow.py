@@ -133,6 +133,8 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
             "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
             return_value={
                 "sub": sub,
+                "iss": "",
+                "aud": "",
                 "email": "testuser@example.com",
             },
         ),
@@ -167,6 +169,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     assert user.short_name == "Test"
     assert user.full_name == "Test User"
     assert user.identity_providers.get(provider="pro-connect", uid=sub).extra_data == {
+        "_oidc_id_token_context": {"aud": "", "iss": "", "sub": "test-user-sub-123"},
         "access_token": "upstream-access-token",
         "auth_time": int(user.last_login.timestamp()),
         "email": "testuser@example.com",
