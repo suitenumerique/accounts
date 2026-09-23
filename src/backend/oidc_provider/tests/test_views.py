@@ -477,8 +477,9 @@ def test_introspect_returns_active_metadata_for_valid_token(
     assert response.json() == expected
 
 
-def test_introspect_returns_inactive_for_unknown_token(client):
+def test_introspect_returns_inactive_for_unknown_token(settings, client):
     """Unknown tokens should be reported as inactive."""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = []
     application = SimpleApplicationFactory()
 
     response = client.post(
@@ -513,8 +514,11 @@ def test_introspect_returns_inactive_for_unknown_token_type_hint(client, token_t
         pytest.param("refresh_token", RefreshToken, id="refresh_token"),
     ],
 )
-def test_introspect_returns_inactive_for_revoked_token(client, token_type, token_model):
+def test_introspect_returns_inactive_for_revoked_token(
+    settings, client, token_type, token_model
+):
     """A revoked token should no longer be reported as active."""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = []
     application = SimpleApplicationFactory()
     user = UserFactory()
     tokens = _issue_tokens(client, application, user)
