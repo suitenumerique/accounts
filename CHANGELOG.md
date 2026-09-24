@@ -6,6 +6,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [v0.1.0] - 2026-09-24
+
 ### Added
 - 💄(frontend) add userMenu on footer
 - 💄(frontend) add profile home page
@@ -33,4 +35,5 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.1.0...main
+[v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
