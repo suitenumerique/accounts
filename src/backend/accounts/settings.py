@@ -14,6 +14,7 @@ import os
 import tomllib
 from socket import gethostbyname, gethostname
 
+import posthog
 import sentry_sdk
 from configurations import Configuration, values
 from csp.constants import NONE
@@ -231,6 +232,7 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
         "dockerflow.django.middleware.DockerflowMiddleware",
         "csp.middleware.CSPMiddleware",
         "social_django.middleware.SocialAuthExceptionMiddleware",
+        "posthog.integrations.django.PosthogContextMiddleware",
     ]
 
     AUTHENTICATION_BACKENDS = [
@@ -381,6 +383,9 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     POSTHOG_KEY = values.DictValue(
         None, environ_name="POSTHOG_KEY", environ_prefix=None
     )
+    POSTHOG_MW_CAPTURE_EXCEPTIONS = values.BooleanValue(
+        False, environ_name="POSTHOG_MW_CAPTURE_EXCEPTIONS", environ_prefix=None
+    )
 
     # Crisp
     CRISP_WEBSITE_ID = values.Value(
@@ -522,6 +527,10 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
             # Ignore the logs added by the DockerflowMiddleware
             ignore_logger("request.summary")
 
+        if cls.POSTHOG_KEY:
+            posthog.api_key = cls.POSTHOG_KEY["id"]
+            posthog.host = cls.POSTHOG_KEY["host"]
+
 
 class Build(Base):
     """Settings used when the application is built.
@@ -597,6 +606,7 @@ class Test(Base):
         },
     }
 
+    POSTHOG_KEY = None
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(True)
 
     # Empty Python Social Auth URLs to force consistent tests results when running them locally

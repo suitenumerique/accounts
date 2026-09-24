@@ -22,6 +22,7 @@ from oauth2_provider.models import (
 from oauth2_provider.settings import oauth2_settings
 from social_core.actions import do_auth
 
+from core.utils import analytics
 from core.utils.state import get_state, set_state, state_exists
 from core.utils.urls import add_query_params
 
@@ -37,6 +38,7 @@ class LoginRoutingView(View):
 
     def get(self, request, *args, **kwargs):
         """First implementation is just a redirect to the only configured IdP (ProConnect)."""
+        analytics.capture_event("auth:log-in")
         backend = backends.ProConnect.name
         # The builtin view `social_django.views.auth` will become POST-only
         # so a `HttpResponseRedirect()` even with `preserve_request=True`
@@ -71,6 +73,7 @@ class LogoutView(View):
         backend = social_django.utils.load_strategy(request).get_backend(
             idp_user.provider
         )
+
         return backend.build_rp_initiated_logout_url(
             id_token_hint=idp_user.extra_data.get("id_token"),
             post_logout_redirect_uri=request.build_absolute_uri(
@@ -176,6 +179,7 @@ class LogoutEndView(View):
         self.oauth2_provider_rp_initiated_logout(request.user)
         auth_logout(request)
 
+        analytics.capture_event("auth:log-out")
         # Redirect to target page once the session has been cleared.
         return HttpResponseRedirect(
             state.get("post_logout_redirect_uri") or settings.LOGOUT_REDIRECT_URL

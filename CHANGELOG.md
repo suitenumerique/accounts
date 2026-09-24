@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- 📈(backend) track login, logout, and some OIDC events
+
 ## [v0.1.0] - 2026-09-24
 
 ### Added
