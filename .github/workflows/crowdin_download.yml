@@ -10,77 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  install-dependencies:
-    uses: ./.github/workflows/_dependencies.yml
-    with:
-      node-version: "22.x"
-      with-front-dependencies-installation: true
-
-  synchronize-with-crowdin:
-    needs: install-dependencies
-    runs-on: ubuntu-latest
-
+  download:
     permissions:
       contents: write
       pull-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Create empty source files
-        run: |
-          touch src/backend/locale/django.pot
-          mkdir -p src/frontend/packages/i18n/locales/accounts/
-          touch src/frontend/packages/i18n/locales/accounts/translations-crowdin.json
-      # crowdin workflow
-      - name: crowdin action
-        uses: crowdin/github-action@e4a6c1338b4063c77d46a81875265f9e8bd76f95 # v3
-        with:
-          config: crowdin/config.yml
-          upload_sources: false
-          upload_translations: false
-          download_translations: true
-          create_pull_request: false
-          push_translations: false
-          push_sources: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # A numeric ID, found at https://crowdin.com/project/<projectName>/tools/api
-          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
-
-          # Visit https://crowdin.com/settings#api-key to create this token
-          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
-
-          CROWDIN_BASE_PATH: "../src/"
-      # frontend i18n
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: "22.x"
-      - name: Restore the frontend cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: "src/frontend/**/node_modules"
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
-          fail-on-cache-miss: true
-      - name: generate translations files
-        working-directory: src/frontend
-        run: yarn i18n:deploy
-      # Create a new PR
-      - name: Create a new Pull Request with new translated strings
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
-        with:
-          commit-message: |
-            🌐(i18n) update translated strings
-
-            Update translated files with new translations
-          title: 🌐(i18n) update translated strings
-          body: |
-            ## Purpose
-
-            update translated strings
-
-            ## Proposal
-
-            - [x]  update translated strings
-          branch: i18n/update-translations
-          labels: i18n
+    uses: suitenumerique/ci/.github/workflows/_crowdin-download.yml@ca6401ac83e981e5b0a94f06f68baaa6e6d0a436 # v0.0.1
+    secrets:
+      CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+      CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
