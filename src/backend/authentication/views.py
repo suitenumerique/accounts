@@ -38,7 +38,9 @@ class LoginRoutingView(View):
 
     def get(self, request, *args, **kwargs):
         """First implementation is just a redirect to the only configured IdP (ProConnect)."""
-        analytics.capture_event("auth:log-in")
+        analytics.capture_event(
+            "auth:log-in", properties={"login_hint": request.GET.get("login_hint")}
+        )
         backend = backends.ProConnect.name
         # The builtin view `social_django.views.auth` will become POST-only
         # so a `HttpResponseRedirect()` even with `preserve_request=True`
@@ -172,6 +174,7 @@ class LogoutEndView(View):
         state_key = request.GET.get("state")
         if not state_exists(request.session, state_key):
             return HttpResponseRedirect(settings.FRONTEND_LOGOUT_URL)
+        analytics.capture_event("auth:log-out")
 
         # Retrieve the state before the session is flushed
         state = get_state(request.session, state_key)
@@ -179,7 +182,6 @@ class LogoutEndView(View):
         self.oauth2_provider_rp_initiated_logout(request.user)
         auth_logout(request)
 
-        analytics.capture_event("auth:log-out")
         # Redirect to target page once the session has been cleared.
         return HttpResponseRedirect(
             state.get("post_logout_redirect_uri") or settings.LOGOUT_REDIRECT_URL
