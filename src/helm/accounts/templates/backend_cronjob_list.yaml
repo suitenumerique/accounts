@@ -23,6 +23,9 @@ items:
           template:
             metadata:
               name: {{ $fullName }}-{{ .name }}
+              labels:
+                cronjob-name: {{ .name }}
+                {{- include "accounts.common.labels" (list $ $component) | nindent 16 }}
             spec:
               {{- if $.Values.image.credentials }}
               imagePullSecrets:
@@ -42,9 +45,9 @@ items:
                   env:
                     {{- $envVars | indent 22 }}
                   {{- end }}
-                  {{- if .Values.backend.envFrom }}
+                  {{- if $.Values.backend.envFrom }}
                   envFrom:
-                    {{- toYaml .Values.backend.envFrom | nindent 22 }}
+                    {{- toYaml $.Values.backend.envFrom | nindent 22 }}
                   {{- end }}
                   {{- with $.Values.backend.securityContext }}
                   securityContext:

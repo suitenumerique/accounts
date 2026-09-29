@@ -237,8 +237,25 @@ backend:
   #       - "/bin/sh"
   #       - "-c"
   #       - python manage.py flush --no-input
-  ## @param backend.cronjobs Cronjob name, schedule, command
-  cronjobs: []
+  ## @param backend.cronjobs[0].name Name of the CronJob
+  ## @param backend.cronjobs[0].schedule Schedule in cron format
+  ## @param backend.cronjobs[0].command The bash command to execute in the CronJob
+  ## @param backend.cronjobs[1].name Name of the CronJob
+  ## @param backend.cronjobs[1].schedule Schedule in cron format
+  ## @param backend.cronjobs[1].command The bash command to execute in the CronJob
+  cronjobs:
+    - name: clearsessions
+      schedule: "0 1 * * *"
+      command:
+        - "/bin/sh"
+        - "-c"
+        - "python manage.py clearsessions"
+    - name: cleartokens
+      schedule: "0 2 * * *"
+      command:
+        - "/bin/sh"
+        - "-c"
+        - "python manage.py cleartokens"
 
   ## @param backend.probes.liveness.path [nullable] Configure path for backend HTTP liveness probe
   ## @param backend.probes.liveness.targetPort [nullable] Configure port for backend HTTP liveness probe
