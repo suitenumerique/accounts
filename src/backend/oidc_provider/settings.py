@@ -93,7 +93,7 @@ class OIDCProviderSettings:
     # By default, only http and https are allowed, but you can add custom schemes
     # if needed (e.g., for mobile applications).
     _OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES = values.ListValue(
-        default=["http", "https"],
+        default=["https"],
         environ_name="ALLOWED_REDIRECT_URI_SCHEMES",
         environ_prefix="OAUTH2_PROVIDER",
     )
@@ -210,6 +210,30 @@ class OIDCProviderSettings:
         # Disable tokens deletion on RP logout until we implement Back-Channel Logout,
         # otherwise we start having desynchronized session states between RPs and the OP.
         config["OIDC_RP_INITIATED_LOGOUT_DELETE_TOKENS"] = False
+        # Setup RFC 9700: BCP 240: Best Current Practice for OAuth 2.0 Security
+        # https://www.rfc-editor.org/info/rfc9700/
+        config.update(
+            {
+                # RFC 9700 gates (default False today; will default True in 4.0)
+                "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,
+                "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,
+                "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,
+                "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,
+                "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,
+                # Canonical settings whose defaults also change in 4.0
+                "REFRESH_TOKEN_REUSE_PROTECTION": True,
+                # Config-validation gates: turn any remaining insecure value of the
+                # settings above (plus ALLOW_URI_WILDCARDS / PKCE_REQUIRED) into a
+                # `check --deploy` error instead of a warning
+                "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN": True,
+                "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
+                "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": self._OAUTH2_PROVIDER_PKCE_REQUIRED,
+                # We probably should enable this one to stop storing tokens in
+                # cleartext but this means we can only access tokens by their
+                # hash value which currently breaks the introspection.
+                "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": False,
+            }
+        )
         return config
 
     # Temporary shenanigans to ease the migration from an upstream OIDC Provider

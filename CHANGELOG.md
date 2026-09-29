@@ -10,6 +10,7 @@ and this project adheres to
 
 - 📈(backend) track login, logout, and some OIDC events
 - 📈(backend) track django's auth events
+- 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice
 
 ## [v0.1.0] - 2026-09-24
 

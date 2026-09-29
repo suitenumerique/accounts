@@ -43,6 +43,13 @@ def _build_authorize_params(application, **overrides):
         "scope": "openid email",
         "state": "test-state",
     }
+    if oauth2_settings.PKCE_REQUIRED:
+        params.update(
+            {
+                "code_challenge_method": "S256",
+                "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            }
+        )
     params.update(overrides)
     return params
 
@@ -75,6 +82,8 @@ def _exchange_code(client, application, code, **overrides):
         "client_id": application.client_id,
         "client_secret": CLIENT_SECRET,
     }
+    if oauth2_settings.PKCE_REQUIRED:
+        payload["code_verifier"] = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
     payload.update(overrides)
     return client.post(reverse("oauth2_provider:token"), payload)
 

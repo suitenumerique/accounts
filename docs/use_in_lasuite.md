@@ -67,6 +67,10 @@ OIDC_RP_CLIENT_ID="new-client-id"  # i.e: `my-account-app`
 OIDC_RP_CLIENT_SECRET="new-client-secret"
 OIDC_RP_SIGN_ALGO="RS256"  # should be unchanged
 
+# Proactively enable PKCE as this will become required at some point
+OIDC_USE_PKCE=True
+OIDC_PKCE_CODE_CHALLENGE_METHOD="S256"  # Default for mozilla-django-oidc
+
 # sub **will** changes so we need email fallback and `sub` field mutability enabled.
 # This is currently the "default" but "Explicit is better than implicit".
 OIDC_FALLBACK_TO_EMAIL_FOR_IDENTIFICATION=True

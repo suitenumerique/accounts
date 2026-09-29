@@ -585,6 +585,8 @@ class Development(Base):
         },
     }
 
+    _OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES = ["http", "https"]
+
     def __init__(self):
         # pylint: disable=invalid-name
         self.INSTALLED_APPS += ["django_extensions", "drf_spectacular_sidecar", "e2e"]
@@ -608,6 +610,8 @@ class Test(Base):
 
     POSTHOG_KEY = None
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(True)
+
+    _OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES = ["http", "https"]
 
     # Empty Python Social Auth URLs to force consistent tests results when running them locally
     SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT = ""
