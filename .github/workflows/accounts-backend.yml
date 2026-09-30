@@ -9,7 +9,6 @@ on:
       - "src/backend/**"
       - "src/mail/**"
       - ".github/workflows/accounts-backend.yml"
-      - ".github/workflows/_dependencies.yml"
 
 permissions:
   contents: read
@@ -19,37 +18,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  install-dependencies:
-    uses: ./.github/workflows/_dependencies.yml
-    with:
-      with-build_mails: true
-
   lint-back:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/backend
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Install Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
-        with:
-          python-version-file: "src/backend/pyproject.toml"
-      - name: Install uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-      - name: Install development dependencies
-        run: uv sync --locked --no-install-project --dev
-      - name: Check code formatting with ruff
-        run: uv run ruff format . --diff
-      - name: Lint code with ruff
-        run: uv run ruff check .
-      - name: Lint code with pylint
-        run: uv run pylint .
+    permissions:
+      contents: read
+    uses: suitenumerique/ci/.github/workflows/_python-lint.yml@ca6401ac83e981e5b0a94f06f68baaa6e6d0a436 # v0.0.1
+    with:
+      working_directory: src/backend
+      uv_sync_args: --locked --dev
+      pylint_targets: .
 
   test-back:
     runs-on: ubuntu-latest
-    needs: install-dependencies
 
     defaults:
       run:
@@ -91,13 +70,8 @@ jobs:
           sudo mkdir -p /data/media && \
           sudo mkdir -p /data/static
 
-      - name: Restore the mail templates
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        id: mail-templates
-        with:
-          path: "src/backend/core/templates/mail"
-          key: mail-templates-${{ hashFiles('src/mail/mjml') }}
-          fail-on-cache-miss: true
+      - name: Build or restore the mail templates
+        uses: suitenumerique/ci/actions/mail-templates@ca6401ac83e981e5b0a94f06f68baaa6e6d0a436 # v0.0.1
 
       - name: Start MinIO
         run: |

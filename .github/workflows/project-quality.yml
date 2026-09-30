@@ -1,4 +1,5 @@
 name: Project quality Workflow
+
 on:
   pull_request:
 
@@ -10,53 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-git:
-    runs-on: ubuntu-slim
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-      - name: show
-        run: git log origin/${{ github.event.pull_request.base.ref }}..HEAD
-      - name: Enforce absence of print statements in code
-        if: always()
-        run: |
-          ! git diff origin/${{ github.event.pull_request.base.ref }}..HEAD -- src/backend ':(exclude)**/git.yml' | grep -E '^\+.*\bprint\('
-      - name: Check absence of fixup or squash commits
-        if: always()
-        run: |
-          ! git log --format=%s origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -E '^(fixup!|squash!)'
-      - name: Lint commit messages added to main
-        if: always()
-        run: |
-          pip install --user requests gitlint
-          ~/.local/bin/gitlint --commits origin/${{ github.event.pull_request.base.ref }}..HEAD
-
-  lint-spell-mistakes:
-    runs-on: ubuntu-slim
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Install codespell
-        run: pip install --user codespell
-      - name: Check for typos
-        run: |
-          codespell \
-            --check-filenames \
-            --ignore-words-list "Dokument,afterAll,excpt,statics" \
-            --skip "./git/" \
-            --skip "**/*.pdf" \
-            --skip "**/*.po" \
-            --skip "**/*.pot" \
-            --skip "**/*.json" \
-            --skip "**/uv.lock" \
-            --skip "**/yarn.lock"
-
-  check-shell-scripts:
-    runs-on: ubuntu-slim
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Check shell scripts
-        run: find . -type f -name '*.sh' -exec shellcheck --external-sources {} +
+  quality:
+    permissions:
+      contents: read
+    uses: suitenumerique/ci/.github/workflows/_project-quality.yml@ca6401ac83e981e5b0a94f06f68baaa6e6d0a436 # v0.0.1
+    with:
+      print_check_paths: src/backend
+      codespell_ignore_words: "Dokument,afterAll,excpt,statics"
