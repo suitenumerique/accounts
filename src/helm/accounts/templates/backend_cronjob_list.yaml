@@ -2,6 +2,7 @@
 {{- $envVars := include "accounts.common.env" (list . .Values.backend) -}}
 {{- $fullName := include "accounts.backend.fullname" . -}}
 {{- $component := "backend" -}}
+{{- $subcomponent := "job" -}}
 apiVersion: batch/v1
 kind: CronJobList
 items:
@@ -12,7 +13,7 @@ items:
       name: {{ $fullName }}-{{ .name }}
       namespace: {{ $.Release.Namespace | quote }}
       labels:
-        {{- include "accounts.common.labels" (list $ $component) | nindent 8 }}
+        {{- include "accounts.common.labels" (list $ $component $subcomponent) | nindent 8 }}
     spec:
       schedule: {{ .schedule }}
       concurrencyPolicy: {{ .concurrencyPolicy | default "Forbid" }}
@@ -25,7 +26,7 @@ items:
               name: {{ $fullName }}-{{ .name }}
               labels:
                 cronjob-name: {{ .name }}
-                {{- include "accounts.common.labels" (list $ $component) | nindent 16 }}
+                {{- include "accounts.common.labels" (list $ $component $subcomponent) | nindent 16 }}
             spec:
               {{- if $.Values.image.credentials }}
               imagePullSecrets:
