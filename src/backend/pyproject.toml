@@ -23,7 +23,7 @@ description = "Accounts is a Django project that provides a simple account manag
 keywords = ["Django", "Contacts", "Templates", "RBAC"]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.14.8"
 dependencies = [
     "beautifulsoup4==4.15.0",
     "boto3==1.43.103",
@@ -39,8 +39,8 @@ dependencies = [
     "django-parler==2.4",
     "django-redis==7.0.0",
     "django-storages[s3]==1.14.6",
-    "django-timezone-field>=5.1",
-    "django<6.2.0",
+    "django-timezone-field==7.2.2",
+    "django==6.1.1",
     "djangorestframework==3.18.1",
     "drf_spectacular==0.30.0",
     "dockerflow==2026.3.4",
@@ -53,9 +53,9 @@ dependencies = [
     "psycopg[binary]==3.3.6",
     "PyJWT==2.15.0",
     "python-magic==0.4.27",
-    "redis<6.0.0",
+    "redis==5.2.1",
     "requests==2.34.2",
-    "sentry-sdk==2.70.0",
+    "sentry-sdk==2.71.0",
     "social-auth-app-django==6.0.1",
     "whitenoise==6.12.0",
     "django-fernet-encrypted-fields==0.4.0",
@@ -79,7 +79,7 @@ dev = [
     "locust==2.46.6",
     "pyfakefs==6.2.0",
     "pylint-django==2.8.0",
-    "pylint<4.0.0",
+    "pylint==3.3.9",
     "pytest-cov==7.1.0",
     "pytest-django[django]==4.14.0",
     "pytest==9.1.1",
@@ -88,7 +88,7 @@ dev = [
     "responses==0.26.3",
     "ruff==0.16.9",
     "types-requests==2.33.0.20260906",
-    "pytest-responses>=0.6.0",
+    "pytest-responses==0.6.0",
 ]
 
 [tool.setuptools]
