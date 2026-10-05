@@ -2,10 +2,6 @@
   "extends": ["github>numerique-gouv/renovate-configuration"],
   "dependencyDashboard": true,
   "labels": ["dependencies", "noChangeLog", "automated"],
-  "schedule": ["before 7am on monday"],
-  "prCreation": "not-pending",
-  "rebaseWhen": "conflicted",
-  "updateNotScheduled": false,
   "packageRules": [
     {
       "enabled": false,
