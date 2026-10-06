@@ -22,12 +22,7 @@ class AuthenticationConfig(AppConfig):
             ),
             weak=False,
         )
-        user_logged_in.connect(
-            functools.partial(
-                signals.django_auth_capture_event, event_name="django:user_logged_in"
-            ),
-            weak=False,
-        )
+        user_logged_in.connect(signals.django_user_logged_in_capture_event)
         user_logged_out.connect(
             functools.partial(
                 signals.django_auth_capture_event, event_name="django:user_logged_out"

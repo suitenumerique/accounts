@@ -11,7 +11,7 @@ from jwcrypto import jwt
 from oauth2_provider.models import AbstractApplication
 from oauth2_provider.oauth2_validators import OAuth2Validator
 
-from authentication.models import IdentityProviderUser
+from authentication.utils import get_claim_from_identity_providers
 
 
 class OIDCValidator(OAuth2Validator):
@@ -117,15 +117,6 @@ class LaSuiteValidator(OIDCValidator):
         "siret": "organization",
     }
 
-    def _get_claim_from_identity_providers(
-        self, identity_providers: list[IdentityProviderUser], claim
-    ):
-        return [
-            s.extra_data[claim]
-            for s in identity_providers
-            if s.extra_data.get(claim) is not None
-        ]
-
     def get_additional_claims(self, request):
         """
         Generate additional claims to be included in the token.
@@ -143,16 +134,14 @@ class LaSuiteValidator(OIDCValidator):
 
         # "email" claims
         additional_claims["email_verified"] |= any(
-            self._get_claim_from_identity_providers(
-                identity_providers, "email_verified"
-            )
+            get_claim_from_identity_providers(identity_providers, "email_verified")
         )
 
         # "account" claims
         additional_claims["guest"] = False
 
         # "organization" claims
-        identity_providers_siret = self._get_claim_from_identity_providers(
+        identity_providers_siret = get_claim_from_identity_providers(
             identity_providers, "siret"
         )
         if identity_providers_siret:
