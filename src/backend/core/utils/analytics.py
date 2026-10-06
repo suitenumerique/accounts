@@ -19,4 +19,7 @@ def capture_event(
     if not settings.POSTHOG_KEY:
         return
 
+    properties = properties if isinstance(properties, dict) else {}
+    properties.setdefault("environment", settings.ENVIRONMENT)
+    properties.setdefault("release", settings.RELEASE)
     posthog.capture(str(event), distinct_id=distinct_id, properties=properties)
