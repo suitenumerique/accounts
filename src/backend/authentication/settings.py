@@ -56,6 +56,8 @@ class AuthenticationSettings:
         "social_core.pipeline.social_auth.load_extra_data",
         # Update the user record with any changed info from the auth service.
         "social_core.pipeline.user.user_details",
+        # Capture analytics events once everything was done.
+        "authentication.social_auth.capture_events",
     )
     SOCIAL_AUTH_DISCONNECT_PIPELINE = (
         # Verifies that the social association can be disconnected from the current
