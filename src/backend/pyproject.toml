@@ -98,6 +98,9 @@ zip-safe = true
 [tool.distutils.bdist_wheel]
 universal = true
 
+[tool.uv]
+prerelease = "explicit"
+
 [tool.ruff]
 exclude = [
     ".git",
