@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-09 08:46+0000\n"
-"PO-Revision-Date: 2026-09-15 09:53\n"
+"POT-Creation-Date: 2026-09-29 09:00+0000\n"
+"PO-Revision-Date: 2026-10-07 14:05\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Crowdin-File: backend-accounts.pot\n"
 "X-Crowdin-File-ID: 46\n"
 
-#: authentication/apps.py:11
+#: authentication/apps.py:16
 msgid "Accounts authentication application"
 msgstr ""
 
@@ -92,6 +92,10 @@ msgstr " LaSuite, Ihr gemeinsamer Ort. "
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Erstellt von %(brandname)s "
+
+#: oidc_provider/apps.py:15
+msgid "Accounts OIDC Provider application"
+msgstr ""
 
 #: users/apps.py:11
 msgid "Accounts users application"
