@@ -6,6 +6,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-10-07
+
 ### Added
 
 - 📈(backend) track login, logout, and some OIDC events
@@ -42,5 +44,6 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.1.0...main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.0...main
+[v0.2.0]: https://github.com/suitenumerique/accounts/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
