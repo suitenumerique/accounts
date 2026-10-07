@@ -9,7 +9,7 @@ and this project adheres to
 ## [v0.2.0] - 2026-10-07
 
 ### Added
-
+- ✨(login) brand header and login by product
 - 📈(backend) track login, logout, and some OIDC events
 - 📈(backend) track django's auth events
 - 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice

@@ -1,28 +1,35 @@
+import { getProduct, type ProductId } from '@/features/product/products';
+
 type LaSuiteLogoProps = {
-  variant?: 'wordmark' | 'mark';
   className?: string;
+  product?: ProductId | string | null;
 };
 
+const DEFAULT_LOGO = {
+  src: '/assets/lasuite-logomark.svg',
+  width: 130,
+  height: 40,
+} as const;
+
 export const LaSuiteLogo = ({
-  variant = 'wordmark',
-  className,
+  className = '',
+  product: productId,
 }: LaSuiteLogoProps) => {
-  const isMark = variant === 'mark';
+  const product = getProduct(productId);
+  const isDefault = !product;
 
   return (
     <span
-      className={['app-logo', `app-logo--${variant}`, className]
-        .filter(Boolean)
-        .join(' ')}
+      className={`app-logo${isDefault ? ' app-logo--default' : ''} ${className}`.trim()}
       role="img"
-      aria-label="La Suite"
+      aria-label={product?.label ?? 'La Suite'}
     >
       <img
         className="app-logo__image"
-        src={isMark ? '/assets/lasuite-mark.svg' : '/assets/lasuite-logomark.svg'}
+        src={product?.logo ?? DEFAULT_LOGO.src}
         alt=""
-        width={isMark ? 32 : 130}
-        height={isMark ? 32 : 40}
+        width={isDefault ? DEFAULT_LOGO.width : undefined}
+        height={isDefault ? DEFAULT_LOGO.height : 40}
       />
     </span>
   );

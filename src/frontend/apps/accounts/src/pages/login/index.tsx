@@ -5,11 +5,17 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeaderLayout } from '@/components/Layout/AppHeaderLayout';
 import { login } from '@/features/auth/Auth';
+import { useProduct } from '@/features/product/useProduct';
 
 export default function LoginPage() {
   const { t } = useTranslation();
+  const { product } = useProduct();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const title = t('Sign in to LaSuite', {
+    product: product ? ` ${product.label}` : '',
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,7 +26,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <Head>
-        <title>{t('Sign in to LaSuite')}</title>
+        <title>{title}</title>
       </Head>
       <AppHeaderLayout>
         <div className="login-page__canvas">
@@ -39,7 +45,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <h1>{t('Sign in to LaSuite')}</h1>
+            <h1>{title}</h1>
 
             <div className="login-page__field">
               <Input

@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { AppFooter } from '@/components/AppFooter/AppFooter';
 import { AppHeaderLayout } from '@/components/Layout/AppHeaderLayout';
 import { LaSuiteLogo } from '@/components/Logo/LaSuiteLogo';
+import type { ProductId } from '@/features/product/products';
+import { useProduct } from '@/features/product/useProduct';
 
 type AccountLayoutProps = {
   sidebar: ReactNode;
@@ -14,6 +16,7 @@ type AccountLayoutProps = {
   isMobile?: boolean;
   onBack?: () => void;
   showBack?: boolean;
+  product?: ProductId | string | null;
 };
 
 export const AccountLayout = ({
@@ -23,8 +26,10 @@ export const AccountLayout = ({
   isMobile = false,
   onBack,
   showBack = false,
+  product,
 }: AccountLayoutProps) => {
   const { t } = useTranslation();
+  const { productId } = useProduct(product);
 
   const body = (
     <div
@@ -45,7 +50,8 @@ export const AccountLayout = ({
       <AppHeaderLayout
         className="account-page__layout"
         hideLeftPanelOnDesktop
-        logo={<LaSuiteLogo variant="wordmark" />}
+        product={productId}
+        logo={<LaSuiteLogo product={productId} />}
       >
         {body}
       </AppHeaderLayout>
@@ -70,7 +76,10 @@ export const AccountLayout = ({
           ) : (
             <span className="account-header__spacer" aria-hidden="true" />
           )}
-          <LaSuiteLogo variant="mark" className="account-header__logo" />
+          <LaSuiteLogo
+            product={productId}
+            className="account-header__logo"
+          />
           <span className="account-header__spacer" aria-hidden="true" />
         </div>
       </header>

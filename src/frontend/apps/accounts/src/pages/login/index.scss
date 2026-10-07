@@ -28,6 +28,7 @@
     font-weight: 700;
     line-height: 40px;
     text-align: center;
+    white-space: nowrap;
   }
 
   .c__button,
@@ -66,6 +67,8 @@
   .login-page__form h1 {
     font-size: 28px;
     line-height: 36px;
+    white-space: normal;
+    text-wrap: balance;
   }
 }
 
