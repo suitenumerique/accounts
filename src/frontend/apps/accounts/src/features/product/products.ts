@@ -35,6 +35,10 @@ export const PRODUCTS = {
     label: 'Visio',
     logo: '/images/visio.svg',
   },
+  projets: {
+    label: 'Projets',
+    logo: '/images/projets.svg',
+  },
 } as const;
 
 export type ProductId = keyof typeof PRODUCTS;

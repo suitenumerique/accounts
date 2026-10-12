@@ -6,10 +6,9 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [v0.2.0] - 2026-10-07
-
 ### Added
-- ✨(login) brand header and login by product
+- ✨(login) add "Projets" logo
+- ✨(login) brand header login by product
 - 📈(backend) track login, logout, and some OIDC events
 - 📈(backend) track django's auth events
 - 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice
@@ -44,6 +43,5 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.0...main
-[v0.2.0]: https://github.com/suitenumerique/accounts/compare/v0.1.0...v0.2.0
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.1.0...main
 [v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
