@@ -26,7 +26,7 @@ readme = "README.md"
 requires-python = "==3.14.8"
 dependencies = [
     "beautifulsoup4==4.15.0",
-    "boto3==1.43.108",
+    "boto3==1.43.112",
     "Brotli==1.2.0",
     "celery[redis]==5.6.3",
     "django-configurations==2.5.1",
@@ -41,8 +41,8 @@ dependencies = [
     "django-redis==7.0.0",
     "django-storages[s3]==1.14.6",
     "django-timezone-field==7.2.2",
-    "django==6.1.1",
-    "djangorestframework==3.18.1",
+    "django==6.1.2",
+    "djangorestframework==3.18.3",
     "dockerflow==2026.3.4",
     "drf_spectacular==0.30.0",
     "easy_thumbnails==2.10.1",
@@ -51,14 +51,14 @@ dependencies = [
     "jsonschema==4.26.0",
     "lxml==6.1.3",
     "nested-multipart-parser==1.6.0",
-    "posthog==7.63.0",
+    "posthog==7.68.0",
     "psycopg[binary]==3.3.6",
     "PyJWT==2.15.1",
     "python-magic==0.4.27",
     "redis==5.3.1",
     "requests==2.34.2",
-    "sentry-sdk==2.71.0",
-    "social-auth-app-django==6.1.0",
+    "sentry-sdk==2.72.0",
+    "social-auth-app-django==7.2.0",
     "whitenoise==6.12.0",
 ]
 
@@ -79,7 +79,7 @@ dev = [
     "locust==2.46.7",
     "pyfakefs==6.2.0",
     "pylint-django==2.8.0",
-    "pylint==4.1.2",
+    "pylint==4.1.3",
     "pytest-cov==7.1.0",
     "pytest-django[django]==4.14.0",
     "pytest-icdiff==0.9",
@@ -87,8 +87,8 @@ dev = [
     "pytest-xdist==3.8.0",
     "pytest==9.1.1",
     "responses==0.26.3",
-    "ruff==0.16.10",
-    "types-requests==2.33.0.20260906",
+    "ruff==0.17.0",
+    "types-requests==2.33.0.20261006",
 ]
 
 [tool.setuptools]
