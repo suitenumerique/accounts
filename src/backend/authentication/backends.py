@@ -2,12 +2,7 @@
 
 import json
 
-import jwt
-from jwt import (
-    PyJWTError,
-)
 from social_core.backends.open_id_connect import OpenIdConnectAuth
-from social_core.exceptions import AuthTokenError
 
 from core.utils.urls import add_query_params
 
@@ -95,21 +90,7 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
             headers={"Authorization": f"Bearer {access_token}"},
         ).content.decode("utf-8")
 
-        key = self.find_valid_key(user_info_jwt)
-        if not key:
-            raise AuthTokenError(self, "Signature verification failed")
-
-        try:
-            user_info = jwt.decode(
-                user_info_jwt,
-                jwt.PyJWK(key).key,
-                algorithms=self.setting("JWT_ALGORITHMS", self.JWT_ALGORITHMS),
-                audience=self.get_key_and_secret()[0],
-                issuer=self.id_token_issuer(),
-            )
-        except PyJWTError as error:
-            raise AuthTokenError(self, str(error)) from error
-
+        user_info = self.decode_and_validate_id_token(user_info_jwt, access_token)
         return self.validate_userinfo_sub(user_info)
 
     def get_user_details(self, response):

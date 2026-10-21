@@ -25,5 +25,5 @@ def invalidate_psa_backends_cache_fixture():
     # The strategy and the storage don't really matter because the cache key
     # is computed with `(this.__class__, args, tuple(sorted(kwargs.items())))`
     backend = authentication.backends.ProConnect()
-    backend.oidc_config.invalidate()
-    backend.get_jwks_keys.invalidate()
+    backend.get_openid_configuration.invalidate()
+    backend.get_jwks_keys_for_uri.invalidate()

@@ -30,6 +30,7 @@ class IdentityProviderUser(BaseModel, DjangoUserMixin):
     provider = models.CharField(
         choices=IdentityProviderName.choices, verbose_name=_("identity provider")
     )
+    id_key = models.CharField(default="", blank=True)
     uid = models.CharField(db_index=True, verbose_name=_("identity provider user id"))
     extra_data = TypeSafeEncryptedJSONField(default=dict, blank=True)
 
@@ -48,13 +49,8 @@ class IdentityProviderUser(BaseModel, DjangoUserMixin):
         return str(self.user)
 
     @classmethod
-    def get_social_auth(cls, provider: str, uid: str | int):
-        if not isinstance(uid, str):
-            uid = str(uid)
-        try:
-            return cls.objects.select_related("user").get(provider=provider, uid=uid)
-        except cls.DoesNotExist:
-            return None
+    def _manager(cls):
+        return super()._manager().select_related("user")
 
     @classmethod
     def username_max_length(cls):
