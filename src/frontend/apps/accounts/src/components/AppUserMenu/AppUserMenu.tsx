@@ -44,7 +44,7 @@ export const AppUserMenu = () => {
           full_name: user.full_name || undefined,
         }}
         logout={() => {
-          void router.push('/logout');
+          void router.push('/logout/');
         }}
         // termOfServiceUrl={TERM_OF_SERVICE_URL}
         withMobileView={false}
