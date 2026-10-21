@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛(auth) fix crash on failed login to the Django admin
+
 ## [v0.2.0] - 2026-10-07
 
 ### Added

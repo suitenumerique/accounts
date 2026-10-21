@@ -3,7 +3,7 @@
 from core.utils import analytics
 
 
-def django_auth_capture_event(*, event_name, user, **kwargs):
+def django_auth_capture_event(*, event_name, user=None, **kwargs):
     """Signal receiver to capture events of django.contrib.auth"""
     analytics.capture_event(
         event_name,
