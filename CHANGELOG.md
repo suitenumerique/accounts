@@ -22,6 +22,9 @@ and this project adheres to
 - 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice
 - 📈(auth) track accounts creation and association
 
+### Fixed
+- 🐛(auth) fix crash on failed login to the Django admin
+
 ## [v0.1.0] - 2026-09-24
 
 ### Added
