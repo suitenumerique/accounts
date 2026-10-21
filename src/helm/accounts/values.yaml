@@ -243,6 +243,9 @@ backend:
   ## @param backend.cronjobs[1].name Name of the CronJob
   ## @param backend.cronjobs[1].schedule Schedule in cron format
   ## @param backend.cronjobs[1].command The bash command to execute in the CronJob
+  ## @param backend.cronjobs[2].name Name of the CronJob
+  ## @param backend.cronjobs[2].schedule Schedule in cron format
+  ## @param backend.cronjobs[2].command The bash command to execute in the CronJob
   cronjobs:
     - name: clearsessions
       schedule: "0 1 * * *"
@@ -256,6 +259,12 @@ backend:
         - "/bin/sh"
         - "-c"
         - "python manage.py cleartokens"
+    - name: clearsocial
+      schedule: "0 3 * * *"
+      command:
+        - "/bin/sh"
+        - "-c"
+        - "python manage.py clearsocial"
 
   ## @param backend.probes.liveness.path [nullable] Configure path for backend HTTP liveness probe
   ## @param backend.probes.liveness.targetPort [nullable] Configure port for backend HTTP liveness probe
