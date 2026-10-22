@@ -353,7 +353,9 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     CORS_ALLOWED_ORIGIN_REGEXES = values.ListValue([])
 
     # Sentry
-    SENTRY_DSN = values.Value(None, environ_name="SENTRY_DSN", environ_prefix=None)
+    SENTRY_DSN = values.Value(None, environ_prefix=None)
+    SENTRY_TRACES_SAMPLE_RATE = values.FloatValue(0.0, environ_prefix=None)
+    SENTRY_PROFILES_SAMPLE_RATE = values.FloatValue(1.0, environ_prefix=None)
 
     # Frontend
     FRONTEND_THEME = values.Value(
@@ -521,6 +523,12 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
                 environment=cls.__name__.lower(),
                 release=get_release(),
                 integrations=[DjangoIntegration()],
+                # Set traces_sample_rate to 1.0 to capture 100% of transactions for tracing.
+                traces_sample_rate=cls.SENTRY_TRACES_SAMPLE_RATE,
+                # To collect profiles for all profile sessions, set to 1.0.
+                profiles_sample_rate=cls.SENTRY_PROFILES_SAMPLE_RATE,
+                # Profiles will be automatically collected while there is an active span.
+                profile_lifecycle="trace",
             )
             sentry_sdk.set_tag("application", "backend")
 
