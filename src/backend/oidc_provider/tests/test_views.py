@@ -302,6 +302,69 @@ def test_logout_redirects_with_supported_query_parameters_when_prompting(
     }
 
 
+@pytest.mark.parametrize("authenticated", [False, True])
+@pytest.mark.parametrize("http_method", ["get", "post"])
+def test_logout_redirects_to_prompt_on_unknown_id_token(
+    client, authenticated, http_method
+):
+    """Prompt the user when receiving an unknown (AKA invalid) id_token."""
+    if authenticated:
+        client.force_login(UserFactory())
+    application = SimpleApplicationFactory()
+    post_logout_redirect_uri = application.post_logout_redirect_uris.split()[0]
+
+    response = getattr(client, http_method)(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "id_token_hint": "whatever",
+            "post_logout_redirect_uri": post_logout_redirect_uri,
+            "state": "logout-state",
+        },
+    )
+
+    assert response.status_code == 302, response.content
+    assert response.url.startswith(
+        urljoin("http://testserver", reverse("authentication:logout"))
+    )
+    query_params = get_query_params(response.url)
+    assert set(query_params.keys()) == {"prompt", "state"}
+    assert query_params["prompt"] == "consent"
+    assert query_params["state"] != "logout-state"
+    assert get_state(client.session, query_params["state"]) == {
+        "post_logout_redirect_uri": f"{post_logout_redirect_uri}?state=logout-state",
+    }
+
+
+@pytest.mark.parametrize("authenticated", [False, True])
+@pytest.mark.parametrize("http_method", ["get", "post"])
+def test_logout_ignore_unknown_post_logout_redirect_uri_on_unknown_id_token(
+    client, authenticated, http_method
+):
+    """Ignore the `post_logout_redirect_uri` parameter when it doesn't match a known one."""
+    if authenticated:
+        client.force_login(UserFactory())
+    application = SimpleApplicationFactory()
+    post_logout_redirect_uri = application.post_logout_redirect_uris.split()[0]
+
+    response = getattr(client, http_method)(
+        reverse("oauth2_provider:rp-initiated-logout"),
+        {
+            "id_token_hint": "whatever",
+            "post_logout_redirect_uri": post_logout_redirect_uri + "/extra",
+        },
+    )
+
+    assert response.status_code == 302, response.content
+    assert response.url.startswith(
+        urljoin("http://testserver", reverse("authentication:logout"))
+    )
+    query_params = get_query_params(response.url)
+    assert set(query_params.keys()) == {"prompt", "state"}
+    assert query_params["prompt"] == "consent"
+    assert query_params["state"] != "logout-state"
+    assert get_state(client.session, query_params["state"]) == {}
+
+
 @pytest.mark.parametrize("http_method", ["get", "post"])
 def test_logout_skips_prompt_for_matching_id_token(client, http_method):
     """A matching ID token should keep the toolkit's prompt-free behavior."""
