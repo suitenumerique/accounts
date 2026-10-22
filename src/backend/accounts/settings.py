@@ -21,6 +21,7 @@ from csp.constants import NONE
 from lasuite.configuration.values import SecretFileValue
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import ignore_logger
+from sentry_sdk.integrations.redis import RedisIntegration
 
 from core.configuration.values import SecretFileListValue
 
@@ -522,7 +523,17 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
                 dsn=cls.SENTRY_DSN,
                 environment=cls.__name__.lower(),
                 release=get_release(),
-                integrations=[DjangoIntegration()],
+                integrations=[
+                    DjangoIntegration(
+                        middleware_spans=True,
+                        signals_spans=True,
+                        cache_spans=True,
+                        db_transaction_spans=True,
+                    ),
+                    RedisIntegration(
+                        cache_prefixes=[cls.CACHES["default"].get("KEY_PREFIX", "")]
+                    ),
+                ],
                 # Set traces_sample_rate to 1.0 to capture 100% of transactions for tracing.
                 traces_sample_rate=cls.SENTRY_TRACES_SAMPLE_RATE,
                 # To collect profiles for all profile sessions, set to 1.0.
