@@ -1,5 +1,7 @@
 """Views for OIDC provider."""
 
+import logging
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -10,10 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 import social_django.utils
 from oauth2_provider.compat import login_not_required
-from oauth2_provider.exceptions import OIDCError
+from oauth2_provider.exceptions import InvalidIDTokenError, OIDCError
 from oauth2_provider.http import OAuth2ResponseRedirect
 from oauth2_provider.models import (
     AccessToken,
+    Application,
     RefreshToken,
     get_access_token_model,
     get_refresh_token_model,
@@ -30,6 +33,8 @@ from core.utils.state import set_state
 from core.utils.urls import add_query_params
 
 from authentication.models import IdentityProviderUser
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator([csrf_exempt], "dispatch")
@@ -59,31 +64,50 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
         post_logout_redirect_uri = request_data.get("post_logout_redirect_uri")
         state = request_data.get("state")
 
+        state_data = {}
         try:
             application, token_user = self.validate_logout_request(
                 id_token_hint=id_token_hint,
                 client_id=client_id,
                 post_logout_redirect_uri=post_logout_redirect_uri,
             )
+        except InvalidIDTokenError as error:
+            # Don't break, but still log, on invalid id_token, the specifications
+            # allow to continue the logout process as long as we prompt the user about it.
+            logger.exception(error.description)
+            prompt = "consent"
+            allowed_schemes = oauth2_settings.ALLOWED_REDIRECT_URI_SCHEMES
+            if post_logout_redirect_uri:
+                # XXX(rsebille): We probably should ignore the `post_logout_redirect_uri` in this
+                # case as we can't *properly* validate it, but we also don't want to prevent
+                # users to log out and create an error because of an unknown token.
+                for application in Application.objects.all():
+                    if application.post_logout_redirect_uri_allowed(
+                        post_logout_redirect_uri
+                    ):
+                        break
+                else:
+                    # The URI doesn't match any of the configured application so
+                    # ignore it to prevent an open redirect vulnerability.
+                    post_logout_redirect_uri = None
         except OIDCError as error:
             return self.error_response(error)
+        else:
+            prompt = "none" if not self.must_prompt(token_user) else "consent"
+            allowed_schemes = application.get_allowed_schemes()
 
-        state_data = {}
         # Build final post_logout_redirect_uri
         if post_logout_redirect_uri:
             if state:
                 post_logout_redirect_uri = add_query_params(
                     post_logout_redirect_uri, {"state": state}
                 )
-            response = OAuth2ResponseRedirect(
-                post_logout_redirect_uri, application.get_allowed_schemes()
-            )
-            if not self.request.user.is_authenticated:
+            response = OAuth2ResponseRedirect(post_logout_redirect_uri, allowed_schemes)
+            if not self.request.user.is_authenticated and prompt == "none":
                 return response
             state_data["post_logout_redirect_uri"] = response.url
 
         state_key = set_state(self.request.session, data=state_data)
-        prompt = "none" if not self.must_prompt(token_user) else "consent"
         return OAuth2ResponseRedirect(
             self.request.build_absolute_uri(
                 reverse(
@@ -91,7 +115,7 @@ class RPInitiatedLogoutView(OAuth2RPInitiatedLogoutView):
                     query={"state": state_key, "prompt": prompt},
                 )
             ),
-            application.get_allowed_schemes(),
+            allowed_schemes,
         )
 
 

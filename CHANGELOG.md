@@ -9,6 +9,7 @@ and this project adheres to
 ### Fixed
 
 - 🐛(auth) fix crash on failed login to the Django admin
+- 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
 
 ## [v0.2.0] - 2026-10-07
 
