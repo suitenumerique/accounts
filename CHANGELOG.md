@@ -10,6 +10,10 @@ and this project adheres to
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
 
+### Fixed
+- ✅(users) pin logged-in user name to fix flaky search API tests
+- ✅(auth) fix flaky `auth_time` assertion in OIDC e2e test
+
 ## [v0.2.0] - 2026-10-07
 
 ### Added

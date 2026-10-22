@@ -171,7 +171,9 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     assert user.identity_providers.get(provider="pro-connect", uid=sub).extra_data == {
         "_oidc_id_token_context": {"aud": "", "iss": "", "sub": "test-user-sub-123"},
         "access_token": "upstream-access-token",
-        "auth_time": int(user.last_login.timestamp()),
+        # `auth_time` and `last_login` are computed at different moments and may
+        # straddle a second boundary.
+        "auth_time": pytest.approx(user.last_login.timestamp(), abs=1),
         "email": "testuser@example.com",
         "email_verified": None,
         "given_name": "Test",
