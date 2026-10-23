@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 
 from core import admin as core_admin
 
+from authentication.admin import IdentityProviderUserInline
+
 from . import models
 
 USER_FIELDS_NOT_IMPLEMENTED = {"admin_email"}
@@ -52,6 +54,7 @@ class UserAdmin(core_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("created_at", "updated_at")}),
     )
+    inlines = (IdentityProviderUserInline,)
     list_display = tuple(
         f
         for f in core_admin.UserAdmin.list_display
