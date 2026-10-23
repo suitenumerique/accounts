@@ -9,6 +9,7 @@ and this project adheres to
 ### Added
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
+- 📈(auth) request ProConnect `roles` scope and track public agent roles
 
 ## [v0.2.0] - 2026-10-07
 
