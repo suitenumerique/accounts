@@ -10,6 +10,9 @@ and this project adheres to
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
 
+### Fixed
+- 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
+
 ## [v0.2.0] - 2026-10-07
 
 ### Added
