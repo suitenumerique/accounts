@@ -120,7 +120,7 @@ def test_api_users_list_query_full_name():
     Authenticated users should be able to list users and filter by full name.
     Only results with a Trigram similarity greater than 0.2 with the query should be returned.
     """
-    user = factories.UserFactory(email="user@example.com")
+    user = factories.UserFactory(email="user@example.com", full_name="Jane Smith")
 
     client = APIClient()
     client.force_login(user)
@@ -165,7 +165,7 @@ def test_api_users_list_query_accented_full_name():
     Authenticated users should be able to list users and filter by full name with accents.
     Only results with a Trigram similarity greater than 0.2 with the query should be returned.
     """
-    user = factories.UserFactory(email="user@example.com")
+    user = factories.UserFactory(email="user@example.com", full_name="Jane Smith")
 
     client = APIClient()
     client.force_login(user)
@@ -205,7 +205,7 @@ def test_api_users_list_limit(settings):
     Authenticated users should be able to list users and the number of results
     should be limited to API_USERS_LIST_LIMIT (by default 5).
     """
-    user = factories.UserFactory(email="user@example.com")
+    user = factories.UserFactory(email="user@example.com", full_name="Jane Smith")
 
     client = APIClient()
     client.force_login(user)
@@ -317,7 +317,7 @@ def test_api_users_list_query_long_queries():
 
 def test_api_users_list_query_inactive():
     """Inactive users should not be listed."""
-    user = factories.UserFactory(email="user@example.com")
+    user = factories.UserFactory(email="user@example.com", full_name="Jane Smith")
     client = APIClient()
     client.force_login(user)
 
