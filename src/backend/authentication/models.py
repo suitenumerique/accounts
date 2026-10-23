@@ -46,7 +46,7 @@ class IdentityProviderUser(BaseModel, DjangoUserMixin):
         ]
 
     def __str__(self):
-        return str(self.user)
+        return f"{self.get_provider_display()} - {self.uid}"
 
     @classmethod
     def _manager(cls):

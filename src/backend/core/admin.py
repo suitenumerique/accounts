@@ -4,6 +4,26 @@ from django.contrib.auth import admin as auth_admin
 from django.utils.translation import gettext_lazy as _
 
 
+class ReadOnlyAdminMixin:
+    """Make a `ModelAdmin` or an `InlineModelAdmin` read-only.
+
+    Every displayed field is read-only and nothing can be added nor changed.
+    Deletion is left to the admin class.
+    """
+
+    def get_readonly_fields(self, request, obj=None):  # pylint: disable=unused-argument
+        """Make every displayed field read-only."""
+        return self.fields or ()
+
+    def has_add_permission(self, request, obj=None):  # pylint: disable=unused-argument
+        """Forbid adding objects."""
+        return False
+
+    def has_change_permission(self, request, obj=None):  # pylint: disable=unused-argument
+        """Forbid changing objects."""
+        return False
+
+
 class UserAdmin(auth_admin.UserAdmin):
     """Admin class for the User model"""
 
