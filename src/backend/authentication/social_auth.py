@@ -32,10 +32,21 @@ def capture_events(
     **kwargs,
 ):
     """Pipeline function to capture analytics events."""
-    user, is_new, new_association = (
+    user, social, is_new, new_association = (
         kwargs["user"],
+        kwargs["social"],
         kwargs["is_new"],
         kwargs["new_association"],
+    )
+    analytics.capture_event(
+        "identity_provider:data",
+        distinct_id=str(user.pk),
+        properties={
+            "backend": social.provider,
+            "backend_sub": social.uid,
+            "backend_roles": social.extra_data.get("roles"),
+            "backend_siret": social.extra_data.get("siret"),
+        },
     )
     if not any([is_new, new_association]):
         return None
@@ -61,8 +72,8 @@ def capture_events(
             "account:associated",
             distinct_id=str(user.pk),
             properties={
-                "backend": kwargs["social"].provider,
-                "backend_sub": kwargs["social"].uid,
+                "backend": social.provider,
+                "backend_sub": social.uid,
                 **person_properties,
                 "$set": person_properties,
             },

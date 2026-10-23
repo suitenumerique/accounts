@@ -22,6 +22,7 @@ from pytest_django.asserts import assertRedirects  # pylint: disable=no-name-in-
 from core.factories import UserFactory
 from core.utils.urls import get_query_params
 
+from authentication.factories import IdentityProviderUserFactory
 from oidc_provider.factories import (
     CLIENT_ID,
     CLIENT_SECRET,
@@ -79,13 +80,16 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     2. Accounts redirects the user to the upstream OIDC provider.
     3. The upstream OIDC provider calls back Accounts with a code.
     4. Accounts exchanges the code for tokens (HTTP call to the upstream OIDC provider).
-    5. Accounts creates the user and establishes a session.
+    5. Accounts creates the user, establishes a session and sends events to PostHog.
     6. Accounts redirects the user to the product with an authorization code.
     7. The product exchanges this code for tokens from Accounts.
 
     Asserts that the upstream OIDC provider is contacted at least once (token +
-    userinfo) and that a user is created in the database.
+    userinfo), that a user is created in the database and that PostHog receives
+    the identity provider data, the account creation and association,
+    and the login events.
     """
+    settings.POSTHOG_KEY = {"id": "posthog-key", "host": "https://posthog.test"}
     SimpleApplicationFactory()
     sub = "test-user-sub-123"
 
@@ -125,7 +129,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "http://testserver",
         reverse("authentication:social:complete", kwargs={"backend": "pro-connect"}),
     )
-    assert callback_params["scope"] == "openid email given_name usual_name siret"
+    assert callback_params["scope"] == "openid email given_name usual_name siret roles"
 
     # ---- Step 2: The upstream OIDC provider calls back Accounts with an authorization code ----
     with (
@@ -146,8 +150,10 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
                 "given_name": "Test",
                 "usual_name": "User",
                 "siret": "1234567890123",
+                "roles": ["agent_public", "agent_public_etat"],
             },
         ),
+        mock.patch("posthog.capture") as posthog_capture_mock,
     ):
         callback_response = client.get(
             reverse(
@@ -179,11 +185,65 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "given_name": "Test",
         "id_token": "upstream-id-token",
         "refresh_token": "upstream-refresh-token",
+        "roles": ["agent_public", "agent_public_etat"],
         "siret": "1234567890123",
         "sub": "test-user-sub-123",
         "token_type": "Bearer",
         "usual_name": "User",
     }
+
+    # The events sent to PostHog
+    person_properties = {
+        "sub": str(user.sub),
+        "email": "testuser@example.com",
+        "siret": ["1234567890123"],
+    }
+    common_properties = {
+        "environment": settings.ENVIRONMENT,
+        "release": settings.RELEASE,
+    }
+    assert posthog_capture_mock.call_args_list == [
+        mock.call(
+            "identity_provider:data",
+            distinct_id=str(user.pk),
+            properties={
+                "backend": "pro-connect",
+                "backend_sub": sub,
+                "backend_roles": ["agent_public", "agent_public_etat"],
+                "backend_siret": "1234567890123",
+                **common_properties,
+            },
+        ),
+        mock.call(
+            "account:created",
+            distinct_id=str(user.pk),
+            properties={
+                **person_properties,
+                "$set": person_properties,
+                **common_properties,
+            },
+        ),
+        mock.call(
+            "account:associated",
+            distinct_id=str(user.pk),
+            properties={
+                "backend": "pro-connect",
+                "backend_sub": sub,
+                **person_properties,
+                "$set": person_properties,
+                **common_properties,
+            },
+        ),
+        mock.call(
+            "django:user_logged_in",
+            distinct_id=str(user.pk),
+            properties={
+                **person_properties,
+                "$set": person_properties,
+                **common_properties,
+            },
+        ),
+    ]
 
     # Follow the post-login redirect chain until we find the redirect to the product
     follow_response = client.get(callback_response.url, follow=True)
@@ -292,3 +352,100 @@ def test_oidc_auth_flow_existing_session_no_upstream_call(responses, settings, c
         "The upstream OIDC provider MUST NOT be contacted when the user already has "
         f"an active session. Detected calls: {[c.request.url for c in upstream_calls]}"
     )
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_existing_user_roles_updated(settings, client):
+    """
+    Verify that the roles of an existing user are updated and sent to PostHog
+    when they sign in again with the upstream OIDC provider.
+
+    Scenario:
+    1. A user already signed in with the upstream OIDC provider, with the
+       `agent_public` role.
+    2. Accounts redirects the user to the upstream OIDC provider.
+    3. The upstream OIDC provider calls back Accounts, now with no role.
+    4. Accounts updates the stored roles and sends them to PostHog.
+
+    Asserts that an empty roles array is stored and sent as an empty array, and that no
+    account creation nor association event is sent.
+    """
+    settings.POSTHOG_KEY = {"id": "posthog-key", "host": "https://posthog.test"}
+    sub = "test-user-sub-123"
+    identity_provider = IdentityProviderUserFactory(
+        id_key="sub", uid=sub, extra_data={"sub": sub, "roles": ["agent_public"]}
+    )
+    user = identity_provider.user
+
+    # ---- Step 1: Accounts redirects the user to the upstream OIDC provider ----
+    oidc_upstream_response = client.get(reverse("authentication:login"), follow=False)
+    callback_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+
+    # ---- Step 2: The upstream OIDC provider calls back Accounts with no role ----
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
+            return_value={
+                "sub": sub,
+                "iss": "",
+                "aud": "",
+                "email": user.email,
+            },
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": sub,
+                "email": user.email,
+                "given_name": "Test",
+                "usual_name": "User",
+                "siret": "1234567890123",
+                "roles": [],
+            },
+        ),
+        mock.patch("posthog.capture") as posthog_capture_mock,
+    ):
+        client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": callback_params["state"]},
+            follow=False,
+        )
+
+    # The stored roles are updated
+    identity_provider.refresh_from_db()
+    assert identity_provider.extra_data["roles"] == []
+
+    # The events sent to PostHog
+    person_properties = {
+        "sub": str(user.sub),
+        "email": user.email,
+        "siret": ["1234567890123"],
+    }
+    common_properties = {
+        "environment": settings.ENVIRONMENT,
+        "release": settings.RELEASE,
+    }
+    assert posthog_capture_mock.call_args_list == [
+        mock.call(
+            "identity_provider:data",
+            distinct_id=str(user.pk),
+            properties={
+                "backend": "pro-connect",
+                "backend_sub": sub,
+                "backend_roles": [],
+                "backend_siret": "1234567890123",
+                **common_properties,
+            },
+        ),
+        mock.call(
+            "django:user_logged_in",
+            distinct_id=str(user.pk),
+            properties={
+                **person_properties,
+                "$set": person_properties,
+                **common_properties,
+            },
+        ),
+    ]

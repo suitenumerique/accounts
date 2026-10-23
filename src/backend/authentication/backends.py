@@ -50,7 +50,7 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
     name = "pro-connect"
 
     # ProConnect split the `profile` scope into 2: `given_name` and `usual_name`
-    DEFAULT_SCOPE = ["openid", "email", "given_name", "usual_name", "siret"]
+    DEFAULT_SCOPE = ["openid", "email", "given_name", "usual_name", "siret", "roles"]
     FIRST_NAME_KEY = "given_name"
     LAST_NAME_KEY = "usual_name"
 
@@ -63,6 +63,7 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
         "given_name",
         "usual_name",
         "siret",
+        "roles",
     ]
 
     def auth_params(self, state=None):
