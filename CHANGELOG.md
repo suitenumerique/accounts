@@ -13,6 +13,7 @@ and this project adheres to
 - 📈(backend) track django's auth events
 - 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice
 - 📈(auth) track accounts creation and association
+- ✨(support) add contact modal from HelpMenu
 
 ## [v0.1.0] - 2026-09-24
 
