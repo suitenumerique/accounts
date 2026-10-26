@@ -173,7 +173,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "access_token": "upstream-access-token",
         # `auth_time` and `last_login` are computed at different moments and may
         # straddle a second boundary.
-        "auth_time": pytest.approx(user.last_login.timestamp(), abs=1),
+        "auth_time": pytest.approx(int(user.last_login.timestamp()), abs=1),
         "email": "testuser@example.com",
         "email_verified": None,
         "given_name": "Test",
