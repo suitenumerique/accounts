@@ -7,27 +7,29 @@ and this project adheres to
 ## [Unreleased]
 
 ### Added
+
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
 
 ### Fixed
+
 - ✅(users) pin logged-in user name to fix flaky search API tests
 - ✅(auth) fix flaky `auth_time` assertion in OIDC e2e test
+- 🐛(auth) fix crash on failed login to the Django admin
 
 ## [v0.2.0] - 2026-10-07
 
 ### Added
+
 - 📈(backend) track login, logout, and some OIDC events
 - 📈(backend) track django's auth events
 - 🔒(OP) Enable most of the RFC 9700 Security Best Current Practice
 - 📈(auth) track accounts creation and association
 
-### Fixed
-- 🐛(auth) fix crash on failed login to the Django admin
-
 ## [v0.1.0] - 2026-09-24
 
 ### Added
+
 - 💄(frontend) add userMenu on footer
 - 💄(frontend) add profile home page
 - 💄(frontend) add intermediate login page
@@ -47,7 +49,6 @@ and this project adheres to
 - ✨(OIDC Provider) relay RP-Initiated logout confirmation to the frontend
 - 🏗️ (authentication) generate our own `sub`
 - ✨(auth) also logout from the upstream OIDC Provider when logging out
-
 
 ### Fixed
 
