@@ -6,6 +6,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [v0.2.1] - 2026-10-26
+
 ### Fixed
 
 - 🐛(auth) fix crash on failed login to the Django admin
@@ -49,6 +51,7 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.0...main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.1...main
+[v0.2.1]: https://github.com/suitenumerique/accounts/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/suitenumerique/accounts/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
