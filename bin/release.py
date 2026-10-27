@@ -1,6 +1,7 @@
 # pylint: disable=line-too-long
 
 import datetime
+import difflib
 import os
 import re
 import subprocess
@@ -9,11 +10,32 @@ import sys
 RELEASE_KINDS = {'p': 'patch', 'm': 'minor', 'mj': 'major'}
 VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 REPOSITORY_URL = "https://github.com/suitenumerique/accounts"
+DRY_RUN = "--dry-run" in sys.argv
 
 
 def run_command(cmd):
+    if DRY_RUN:
+        sys.stdout.write(f"# [dry-run] Would run: {cmd}\n")
+        return
     sys.stdout.write(f"# Running: {cmd}\n")
     subprocess.check_call(cmd, shell=True)
+
+
+def write_file(path, content):
+    with open(path, 'r') as file:
+        current = file.read()
+    if DRY_RUN:
+        diff = difflib.unified_diff(
+            current.splitlines(keepends=True),
+            content.splitlines(keepends=True),
+            fromfile=path,
+            tofile=path,
+            n=0,
+        )
+        sys.stdout.writelines(diff)
+        return
+    with open(path, 'w') as file:
+        file.write(content)
 
 
 def update_files(version):
@@ -26,8 +48,7 @@ def update_files(version):
         for index, line in enumerate(lines):
             if line.startswith("version = "):
                 lines[index] = re.sub(r'\"(.*?)\"', f'"{version}"', line)
-    with open(path, 'w+') as file:
-        file.writelines(lines)
+    write_file(path, "".join(lines))
 
     # uv lock file
     sys.stdout.write("Updating uv lock file...\n")
@@ -39,8 +60,7 @@ def update_files(version):
         f'\\1"{version}"',
         content,
     )
-    with open(path, 'w+') as file:
-        file.write(content)
+    write_file(path, content)
 
     # frontend package.json
     sys.stdout.write("Updating package.json...\n")
@@ -56,8 +76,7 @@ def update_files(version):
             for index, line in enumerate(lines):
                 if "version" in line:
                     lines[index] = re.sub(r'"version": \"(.*?)\"', f'"version": "{version}"', line)
-        with open(path, 'w+') as file:
-            file.writelines(lines)
+        write_file(path, "".join(lines))
 
     return
 
@@ -69,8 +88,7 @@ def update_helm_files(path, version):
         for index, line in enumerate(lines):
             if line.strip().startswith("tag:"):
                 lines[index] = re.sub(r'\"(.*?)\"', f'"v{version}"', line)
-    with open(path, 'w+') as file:
-        file.writelines(lines)
+    write_file(path, "".join(lines))
 
 
 def update_changelog(path, version):
@@ -89,8 +107,7 @@ def update_changelog(path, version):
                 lines.insert(index + 1, f"[v{version}]: {REPOSITORY_URL}/compare/{last_tag}...v{version}\n")
                 break
 
-    with open(path, 'w+') as file:
-        file.writelines(lines)
+    write_file(path, "".join(lines))
 
 
 def deployment_part(version):
@@ -114,7 +131,7 @@ def deployment_part(version):
         run_command(f"git add {path}")
         message = f"""🚀(preprod) bump version to v{version}"""
         run_command(f"git commit -m '{message}'")
-        confirm = input(f"""\033[0;32m
+        confirm = 'y' if DRY_RUN else input(f"""\033[0;32m
 ### DEPLOYMENT ###
 NEXT COMMAND on mon-compte-deploiement repository: 
     >> git push origin {deployment_branch}
@@ -147,7 +164,7 @@ def project_part(version, kind):
 
 Update all version files and changelog for {RELEASE_KINDS[kind]} release."""
     run_command(f"git commit -m '{message}'")
-    confirm = input(f"""\033[0;32m
+    confirm = 'y' if DRY_RUN else input(f"""\033[0;32m
 ### RELEASE ###
 NEXT COMMAND on current repository:
     >> git push origin {branch_to_release}
@@ -172,12 +189,40 @@ Continue ? (y,n)
  \x1b[0m""")
 
 
+def get_current_version():
+    """Read the current version from pyproject.toml"""
+    with open("src/backend/pyproject.toml", 'r') as file:
+        for line in file:
+            if line.startswith("version = "):
+                return line.split('"')[1]
+    return None
+
+
+def suggest_version(current_version, kind):
+    """Compute the next version for the given kind of release"""
+    major, minor, patch = (int(part) for part in current_version.split("."))
+    if kind == 'mj':
+        return f"{major + 1}.0.0"
+    if kind == 'm':
+        return f"{major}.{minor + 1}.0"
+    return f"{major}.{minor}.{patch + 1}"
+
+
 if __name__ == "__main__":
+    only_deployment = "--only-deployment-part" in sys.argv
+    current_version = get_current_version()
+    sys.stdout.write(f"Current version: {current_version}\n")
+
     version, kind = None, None
+    if only_deployment:
+        suggested_version = current_version
+    else:
+        while kind not in RELEASE_KINDS:
+            kind = input("Enter kind of release (p:patch, m:minor, mj:major):").strip()
+        suggested_version = suggest_version(current_version, kind)
     while not version or not VERSION_PATTERN.match(version):
-        version = input("Enter your release version (X.Y.Z):").strip()
-    while kind not in RELEASE_KINDS:
-        kind = input("Enter kind of release (p:patch, m:minor, mj:major):").strip()
-    if "--only-deployment-part" not in sys.argv:
+        version = input(f"Enter your release version [{suggested_version}]:").strip() or suggested_version
+
+    if not only_deployment:
         project_part(version, kind)
     deployment_part(version)

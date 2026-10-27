@@ -436,8 +436,8 @@ help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-30s$(RESET) %s\n", $$1, $$2}'
 .PHONY: help
 
-release:  ## helper for release and deployment
-	python3 bin/release.py
+release:  ## helper for release and deployment - DRY_RUN=1 to only show what would be done
+	python3 bin/release.py $(if $(DRY_RUN),--dry-run)
 .PHONY: release
 
 # Front
