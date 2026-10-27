@@ -29,6 +29,11 @@
     margin-top: 56px;
   }
 
+  // The UI kit sizes the (empty) right panel for its own 52px header.
+  .c__right-panel {
+    height: calc(100dvh - 56px);
+  }
+
   .c__main-layout__content__center__children {
     height: calc(100dvh - 56px);
     overflow-y: auto;
