@@ -10,6 +10,7 @@
 @use "./../pages/login/index.scss" as *;
 @use "./../pages/logout/index.scss" as *;
 @use "./../features/account/AccountPage.scss" as *;
+@use "./../features/encryption/EncryptionPanel.scss" as *;
 
 body {
   margin: 0;

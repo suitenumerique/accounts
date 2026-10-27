@@ -10,6 +10,7 @@ import "@/i18n/initI18n";
 import { useLocales } from "@/i18n/useLocale";
 import { ConfigProvider } from "@/features/config/ConfigProvider";
 import { Auth } from "@/features/auth/Auth";
+import { VaultClientProvider } from "@/features/encryption/VaultClientProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,7 +72,9 @@ function MyAppInner({ Component, pageProps }: AccountsAppProps) {
           page
         ) : (
           <ConfigProvider>
-            <Auth>{page}</Auth>
+            <Auth>
+              <VaultClientProvider>{page}</VaultClientProvider>
+            </Auth>
           </ConfigProvider>
         )}
       </CunninghamProvider>

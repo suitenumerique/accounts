@@ -41,3 +41,15 @@ class UserLightSerializer(UserSerializer):
         model = get_user_model()
         fields = ["full_name", "short_name"]
         read_only_fields = ["full_name", "short_name"]
+
+
+class UserMeSerializer(UserSerializer):
+    """
+    Serialize the current user, with the OIDC subject Accounts issues to the
+    products, which is how they identify this user (e.g. to the encryption service).
+    """
+
+    class Meta:
+        model = get_user_model()
+        fields = [*UserSerializer.Meta.fields, "sub"]
+        read_only_fields = [*UserSerializer.Meta.read_only_fields, "sub"]

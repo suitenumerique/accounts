@@ -1,0 +1,125 @@
+// Encryption page. Sizes, spacings and colors follow the design's variables,
+// mapped to the design system tokens; line heights have no token, so they are
+// the design's values (sm = 18px, xs = 16px). Text inherits the page's
+// Marianne font like the other account panels, buttons included.
+
+.encryption-panel__header {
+  gap: var(--c--globals--spacings--4xs);
+}
+
+.encryption-status {
+  display: flex;
+  align-items: center;
+  gap: var(--c--globals--spacings--xxxs);
+  padding: var(--c--globals--spacings--xs);
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: var(--c--globals--spacings--xs);
+
+  &--success {
+    border-color: var(--c--contextuals--border--semantic--success--tertiary);
+    background: var(--c--contextuals--background--semantic--success--tertiary);
+    color: var(--c--contextuals--content--semantic--success--tertiary);
+  }
+
+  &--warning {
+    border-color: var(--c--contextuals--border--semantic--warning--tertiary);
+    background: var(--c--contextuals--background--semantic--warning--tertiary);
+    color: var(--c--contextuals--content--semantic--warning--tertiary);
+  }
+
+  &--neutral,
+  &--loading {
+    border-color: var(--c--contextuals--border--semantic--neutral--tertiary);
+    background: var(--c--contextuals--background--semantic--neutral--tertiary);
+    color: var(--c--contextuals--content--semantic--neutral--tertiary);
+  }
+
+  // Same box as a banner with its 24px row, so nothing moves once the state is known.
+  &--loading {
+    justify-content: center;
+    min-height: calc(24px + 2 * var(--c--globals--spacings--xs) + 2px);
+  }
+}
+
+.encryption-status__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+.encryption-status__label {
+  flex: 1 0 0;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--c--globals--font--sizes--sm);
+  font-weight: var(--c--globals--font--weights--medium);
+  line-height: 18px;
+}
+
+.encryption-status .c__button,
+.encryption-setting .c__button {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-weight: var(--c--globals--font--weights--medium);
+  line-height: 16px;
+
+  // The design's nano buttons hug a leading icon tighter than the default.
+  &.c__button--with-icon--left {
+    padding: 0 var(--c--globals--spacings--xs) 0 var(--c--globals--spacings--xxxs);
+  }
+}
+
+.encryption-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--c--globals--spacings--xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.encryption-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--c--globals--spacings--xs);
+}
+
+.encryption-setting__text {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.encryption-setting__title {
+  margin: 0;
+  color: var(--c--contextuals--content--semantic--neutral--primary);
+  font-size: var(--c--globals--font--sizes--sm);
+  font-weight: var(--c--globals--font--weights--medium);
+  line-height: 18px;
+}
+
+.encryption-setting__description {
+  margin: 0;
+  color: var(--c--contextuals--content--semantic--neutral--secondary);
+  font-size: var(--c--globals--font--sizes--xs);
+  line-height: 16px;
+}
+
+.encryption-interface-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+@media (max-width: 1023px) {
+  .encryption-setting {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

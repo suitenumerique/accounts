@@ -371,6 +371,20 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     FRONTEND_LOGOUT_URL = values.Value(
         None, environ_name="FRONTEND_LOGOUT_URL", environ_prefix=None
     )
+
+    # End-to-end encryption service (vault + interface iframes loaded by the frontend)
+    ENCRYPTION_FEATURE_ENABLED = values.BooleanValue(
+        default=False,
+        environ_name="ENCRYPTION_FEATURE_ENABLED",
+        environ_prefix=None,
+    )
+    ENCRYPTION_VAULT_URL = values.Value(
+        None, environ_name="ENCRYPTION_VAULT_URL", environ_prefix=None
+    )
+    ENCRYPTION_INTERFACE_URL = values.Value(
+        None, environ_name="ENCRYPTION_INTERFACE_URL", environ_prefix=None
+    )
+
     THEME_CUSTOMIZATION_FILE_PATH = values.Value(
         os.path.join(BASE_DIR, "accounts/configuration/theme/default.json"),
         environ_name="THEME_CUSTOMIZATION_FILE_PATH",

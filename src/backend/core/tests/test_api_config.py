@@ -20,6 +20,9 @@ from core import factories
 @override_settings(
     API_USERS_SEARCH_QUERY_MIN_LENGTH=6,
     CRISP_WEBSITE_ID="123",
+    ENCRYPTION_FEATURE_ENABLED=True,
+    ENCRYPTION_INTERFACE_URL="https://encryption.test",
+    ENCRYPTION_VAULT_URL="https://data.encryption.test",
     FRONTEND_CSS_URL="http://testcss/",
     FRONTEND_JS_URL="http://testjs/",
     FRONTEND_THEME="test-theme",
@@ -42,6 +45,9 @@ def test_api_config(is_authenticated):
     assert response.json() == {
         "API_USERS_SEARCH_QUERY_MIN_LENGTH": 6,
         "CRISP_WEBSITE_ID": "123",
+        "ENCRYPTION_FEATURE_ENABLED": True,
+        "ENCRYPTION_INTERFACE_URL": "https://encryption.test",
+        "ENCRYPTION_VAULT_URL": "https://data.encryption.test",
         "ENVIRONMENT": "test",
         "FRONTEND_CSS_URL": "http://testcss/",
         "FRONTEND_JS_URL": "http://testjs/",
@@ -77,6 +83,23 @@ def test_api_config(is_authenticated):
         "style-src 'none'",
         "worker-src 'none'",
     ]
+
+
+@pytest.mark.parametrize("is_authenticated", [False, True])
+def test_api_config_encryption_disabled_by_default(is_authenticated):
+    """The encryption feature should be off, with no service URLs, unless configured."""
+    client = APIClient()
+
+    if is_authenticated:
+        user = factories.UserFactory()
+        client.force_login(user)
+
+    response = client.get("/api/v1.0/config/")
+    assert response.status_code == HTTP_200_OK
+    content = response.json()
+    assert content["ENCRYPTION_FEATURE_ENABLED"] is False
+    assert content["ENCRYPTION_INTERFACE_URL"] is None
+    assert content["ENCRYPTION_VAULT_URL"] is None
 
 
 @override_settings(

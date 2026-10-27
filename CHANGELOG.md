@@ -11,6 +11,7 @@ and this project adheres to
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
 - ✨(admin) add read-only identity providers admin
+- ✨(frontend) add an encryption page driving the LaSuite encryption service
 
 ### Fixed
 

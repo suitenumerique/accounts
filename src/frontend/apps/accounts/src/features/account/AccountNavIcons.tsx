@@ -1,3 +1,5 @@
+import { Shield } from '@gouvfr-lasuite/ui-kit/icons';
+
 export const PersonalInformationIcon = () => (
   <span className="account-sidebar__nav-icon" aria-hidden="true">
     <svg
@@ -37,5 +39,11 @@ export const SecurityIcon = () => (
         fill="currentColor"
       />
     </svg>
+  </span>
+);
+
+export const EncryptionIcon = () => (
+  <span className="account-sidebar__nav-icon" aria-hidden="true">
+    <Shield size={16} />
   </span>
 );

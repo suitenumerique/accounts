@@ -9,4 +9,7 @@ export interface Config {
   FRONTEND_THEME?: string;
   FRONTEND_CSS_URL?: string;
   FRONTEND_JS_URL?: string;
+  ENCRYPTION_FEATURE_ENABLED?: boolean;
+  ENCRYPTION_VAULT_URL?: string | null;
+  ENCRYPTION_INTERFACE_URL?: string | null;
 }

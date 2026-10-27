@@ -239,7 +239,7 @@ class UserViewSet(
         """
         context = {"request": request}
         return drf.response.Response(
-            self.serializer_class(request.user, context=context).data
+            serializers.UserMeSerializer(request.user, context=context).data
         )
 
 
@@ -257,6 +257,9 @@ class ConfigView(drf.views.APIView):
         array_settings = [
             "API_USERS_SEARCH_QUERY_MIN_LENGTH",
             "CRISP_WEBSITE_ID",
+            "ENCRYPTION_FEATURE_ENABLED",
+            "ENCRYPTION_INTERFACE_URL",
+            "ENCRYPTION_VAULT_URL",
             "ENVIRONMENT",
             "FRONTEND_CSS_URL",
             "FRONTEND_JS_URL",

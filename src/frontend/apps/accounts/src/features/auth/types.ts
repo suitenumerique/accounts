@@ -3,6 +3,7 @@
  */
 export interface User {
   id: string;
+  sub: string;
   email: string;
   full_name: string | null;
   short_name: string | null;

@@ -4,8 +4,10 @@ import dynamic from 'next/dynamic';
 import { useTranslation } from 'react-i18next';
 
 import { User } from '@/features/auth/types';
+import { useVaultClient } from '@/features/encryption/VaultClientProvider';
 
 import {
+  EncryptionIcon,
   PersonalInformationIcon,
   SecurityIcon,
 } from './AccountNavIcons';
@@ -15,7 +17,7 @@ const UserAvatar = dynamic(
   { ssr: false },
 );
 
-export type AccountSection = 'personal' | 'security';
+export type AccountSection = 'personal' | 'security' | 'encryption';
 
 type AccountSidebarProps = {
   user: User;
@@ -29,6 +31,7 @@ export const AccountSidebar = ({
   onSelectSection,
 }: AccountSidebarProps) => {
   const { t } = useTranslation();
+  const { isEnabled: isEncryptionEnabled } = useVaultClient();
   const displayName = user.full_name || user.email;
 
   return (
@@ -71,6 +74,24 @@ export const AccountSidebar = ({
           <SecurityIcon />
           <span>{t('Security and sign-in')}</span>
         </button>
+
+        {isEncryptionEnabled && (
+          <button
+            type="button"
+            className={[
+              'account-sidebar__nav-item',
+              activeSection === 'encryption' &&
+                'account-sidebar__nav-item--active',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => onSelectSection('encryption')}
+            aria-current={activeSection === 'encryption' ? 'page' : undefined}
+          >
+            <EncryptionIcon />
+            <span>{t('Encryption')}</span>
+          </button>
+        )}
       </nav>
     </aside>
   );
