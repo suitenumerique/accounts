@@ -436,6 +436,10 @@ help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-30s$(RESET) %s\n", $$1, $$2}'
 .PHONY: help
 
+release:  ## helper for release and deployment
+	python3 bin/release.py
+.PHONY: release
+
 # Front
 frontend-development-install: ## install the frontend locally
 	@$(FRONT_ACCOUNTS_YARN) install
