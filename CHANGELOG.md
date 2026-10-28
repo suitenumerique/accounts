@@ -19,6 +19,7 @@ and this project adheres to
 - 🐛(auth) fix crash on failed login to the Django admin
 - 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
 - ⏪️(auth) downgrade python-social-auth to 6.x to fix a crash
+- 🐛(oidc) fix `iss` authorization response parameter
 
 ## [v0.2.0] - 2026-10-07
 

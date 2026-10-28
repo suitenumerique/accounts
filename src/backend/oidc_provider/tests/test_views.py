@@ -148,6 +148,48 @@ def test_authorize_returns_authorization_code_for_authenticated_user(
     ).exists()
 
 
+@pytest.mark.parametrize(
+    "iss_endpoint, expected_issuer",
+    [
+        (None, "http://testserver/api/v1.0/o"),
+        ("http://issuer.domain/api/v1.0/o", "http://issuer.domain/api/v1.0/o"),
+    ],
+)
+def test_authorize_redirect_iss_matches_discovery_issuer(
+    settings, client, iss_endpoint, expected_issuer
+):
+    """The RFC 9207 ``iss`` response parameter must equal the discovery ``issuer``."""
+    settings.OAUTH2_PROVIDER = {
+        **settings.OAUTH2_PROVIDER,
+        "OIDC_ISS_ENDPOINT": iss_endpoint,
+    }
+    discovery = client.get("/api/v1.0/o/.well-known/openid-configuration").json()
+    assert discovery["issuer"] == expected_issuer
+
+    application = SimpleApplicationFactory()
+    user = UserFactory()
+    response = _authorize(client, application, user)
+
+    assert response.status_code == 302
+    assert get_query_params(response.url)["iss"] == expected_issuer
+
+
+@pytest.mark.parametrize("iss_endpoint", [None, "http://issuer.domain/api/v1.0/o"])
+def test_oauth_server_metadata_issuer_matches_discovery_issuer(
+    settings, client, iss_endpoint
+):
+    """The RFC 8414 metadata ``issuer`` must equal the OIDC discovery ``issuer``."""
+    settings.OAUTH2_PROVIDER = {
+        **settings.OAUTH2_PROVIDER,
+        "OIDC_ISS_ENDPOINT": iss_endpoint,
+    }
+    discovery = client.get("/api/v1.0/o/.well-known/openid-configuration").json()
+    response = client.get("/api/v1.0/o/.well-known/oauth-authorization-server")
+
+    assert response.status_code == 200
+    assert response.json()["issuer"] == discovery["issuer"]
+
+
 def test_authorize_rejects_unknown_client_id(client):
     """An authorization request for an unknown client must fail early."""
     user = UserFactory()
