@@ -770,6 +770,14 @@ class PreProduction(Production):
     """
 
 
+class Sandbox(Production):
+    """
+    Sandbox environment settings
+
+    nota bene: it should inherit from the Production environment.
+    """
+
+
 class Demo(Production):
     """
     Demonstration environment settings
