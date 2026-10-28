@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from social_core.backends.utils import get_backend
-from social_core.exceptions import AuthConfigurationError
+from social_core.exceptions import MissingBackend
 
 from core.admin import ReadOnlyAdminMixin
 
@@ -34,7 +34,7 @@ def get_displayed_claims(identity_provider: IdentityProviderUser) -> dict:
         backend = get_backend(
             settings.AUTHENTICATION_BACKENDS, identity_provider.provider
         )
-    except AuthConfigurationError:
+    except MissingBackend:
         return {}
 
     claim_names = {
