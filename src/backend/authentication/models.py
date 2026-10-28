@@ -49,8 +49,13 @@ class IdentityProviderUser(BaseModel, DjangoUserMixin):
         return f"{self.get_provider_display()} - {self.uid}"
 
     @classmethod
-    def _manager(cls):
-        return super()._manager().select_related("user")
+    def get_social_auth(cls, provider: str, uid: str | int):
+        if not isinstance(uid, str):
+            uid = str(uid)
+        try:
+            return cls.objects.select_related("user").get(provider=provider, uid=uid)
+        except cls.DoesNotExist:
+            return None
 
     @classmethod
     def username_max_length(cls):
