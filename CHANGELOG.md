@@ -18,6 +18,7 @@ and this project adheres to
 - ✅(auth) fix flaky `auth_time` assertion in OIDC e2e test
 - 🐛(auth) fix crash on failed login to the Django admin
 - 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
+- 🐛(oidc) fix `iss` authorization response parameter
 
 ## [v0.2.0] - 2026-10-07
 
