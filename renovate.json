@@ -20,6 +20,12 @@
       "allowedVersions": "<6.0.0"
     },
     {
+      "groupName": "allowed social-auth-app-django versions",
+      "matchManagers": ["pep621"],
+      "matchPackageNames": ["social-auth-app-django"],
+      "allowedVersions": "<7.0.0"
+    },
+    {
       "enabled": false,
       "groupName": "ignored js dependencies",
       "matchManagers": ["npm"],
