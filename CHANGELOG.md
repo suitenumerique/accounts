@@ -21,6 +21,7 @@ and this project adheres to
 - 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
 - ⏪️(auth) downgrade python-social-auth to 6.x to fix a crash
 - 🐛(oidc) fix `iss` authorization response parameter
+- 🐛(oidc) forward the upstream sub when no accounts user is linked
 
 ## [v0.2.0] - 2026-10-07
 

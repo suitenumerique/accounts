@@ -1,6 +1,7 @@
 """Tests for OAuth2/OIDC routes exposed under ``/api/<version>/o/``."""
 
 import base64
+import logging
 import uuid
 from urllib.parse import urljoin
 
@@ -700,18 +701,45 @@ def test_introspect_psa_backend_fallback(responses, settings, client):
 
 @pytest.mark.usefixtures("upstream_oidc_mocks")
 def test_introspect_psa_backend_fallback_when_the_sub_is_unknown(
-    responses, settings, client
+    responses, settings, client, caplog
 ):
-    """When we can't find a user matching the fallback's sub it should not be forwarded"""
+    """When no user matches the fallback's sub, it is forwarded as is"""
+    settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
+
+    application = SimpleApplicationFactory()
+    upstream_sub = str(uuid.uuid4())
+    responses.post(
+        f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
+        json={
+            "active": True,
+            "sub": upstream_sub,
+        },
+    )
+
+    with caplog.at_level(logging.WARNING, logger="oidc_provider.views"):
+        response = client.post(
+            "/api/v1.0/o/introspect/",
+            {"token": str(uuid.uuid4())},  # Unknown token
+            **_build_basic_auth_headers(application),
+        )
+    assert response.status_code == 200
+    assert response.json() == {"active": True, "sub": upstream_sub}
+    assert (
+        "No accounts user mapped to this pro-connect identity, "
+        "forwarding its sub on token introspection"
+    ) in caplog.text
+    assert upstream_sub not in caplog.text
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_introspect_psa_backend_fallback_without_sub(responses, settings, client):
+    """When the fallback's response has no sub, none is added"""
     settings.OAUTH2_PROVIDER_INTROSPECTION_PSA_BACKEND_FALLBACK = [ProConnect.name]
 
     application = SimpleApplicationFactory()
     responses.post(
         f"{settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT}/introspect/",
-        json={
-            "active": True,
-            "sub": str(uuid.uuid4()),
-        },
+        json={"active": True},
     )
 
     response = client.post(

@@ -230,12 +230,22 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
                     for k, v in introspection_response.items()
                     if k in {"active", "client_id", "aud"}
                 }
-                # Translate the backend's sub to the accounts' sub
+                # Translate the backend's sub to the accounts' sub. When the user never
+                # logged in through accounts, resource servers may still know them by the
+                # backend's sub, so forward it as is rather than leaving them unidentified.
                 if subject := introspection_response.get("sub"):
                     if social_auth := IdentityProviderUser.get_social_auth(
                         provider=backend.name, uid=subject
                     ):
                         rewritten_response["sub"] = social_auth.user.sub
+                    else:
+                        # Do not log the sub: it identifies a person.
+                        logger.warning(
+                            "No accounts user mapped to this %s identity, "
+                            "forwarding its sub on token introspection",
+                            backend.name,
+                        )
+                        rewritten_response["sub"] = subject
                 # Limit which scope are forwarded as is, we don't necessarily have the same ones
                 if scope := introspection_response.get("scope"):
                     rewritten_response["scope"] = " ".join(
