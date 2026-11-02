@@ -17,11 +17,16 @@ and this project adheres to
 
 - ✅(users) pin logged-in user name to fix flaky search API tests
 - ✅(auth) fix flaky `auth_time` assertion in OIDC e2e test
-- 🐛(auth) fix crash on failed login to the Django admin
-- 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
 - ⏪️(auth) downgrade python-social-auth to 6.x to fix a crash
 - 🐛(oidc) fix `iss` authorization response parameter
 - 🐛(oidc) forward the upstream sub when no accounts user is linked
+
+## [v0.2.1] - 2026-10-26
+
+### Fixed
+
+- 🐛(auth) fix crash on failed login to the Django admin
+- 🥅(OIDC Provider) recover from invalid token in RP-Initiated logout
 
 ## [v0.2.0] - 2026-10-07
 
@@ -61,6 +66,7 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.0...main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.1...main
+[v0.2.1]: https://github.com/suitenumerique/accounts/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/suitenumerique/accounts/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
