@@ -40,6 +40,7 @@ SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS="localhost:9900,localhost:9903"
 
 SOCIAL_AUTH_PRO_CONNECT_KEY=accounts
 SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT=http://nginx:9903/realms/accounts
+SOCIAL_AUTH_PRO_CONNECT_SCOPE=roles
 SOCIAL_AUTH_PRO_CONNECT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
 # Override the endpoints URL called from the backend as they doesn't match the Keycloak hostname
 SOCIAL_AUTH_PRO_CONNECT_ACCESS_TOKEN_URL=http://nginx:9903/realms/accounts/protocol/openid-connect/token

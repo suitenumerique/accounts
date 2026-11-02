@@ -68,6 +68,7 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
         "given_name",
         "usual_name",
         "siret",
+        "roles",
     ]
 
     def auth_params(self, state=None):

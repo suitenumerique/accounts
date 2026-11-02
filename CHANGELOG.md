@@ -11,6 +11,7 @@ and this project adheres to
 - ✨(login) add "Projets" logo
 - ✨(login) brand header login by product
 - ✨(admin) add read-only identity providers admin
+- 📈(auth) allow requesting ProConnect `roles` scope and track public agent roles
 
 ### Fixed
 

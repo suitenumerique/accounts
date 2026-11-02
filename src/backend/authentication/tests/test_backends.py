@@ -148,6 +148,21 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             params,
         )
 
+    def test_roles_scope_not_requested_by_default(self):
+        """Test the `roles` scope is only requested when added to SCOPE"""
+        self.assertEqual(
+            self.backend.get_scope(),
+            ["openid", "email", "given_name", "usual_name", "siret"],
+        )
+
+        self.strategy.set_settings(
+            {**self.extra_settings(), f"SOCIAL_AUTH_{self.name}_SCOPE": ["roles"]}
+        )
+        self.assertEqual(
+            self.backend.get_scope(),
+            ["roles", "openid", "email", "given_name", "usual_name", "siret"],
+        )
+
     def test_acr_values_auth_params(self):
         """Test ACR_VALUES are also requested as individual claims"""
         self.strategy.set_settings(
