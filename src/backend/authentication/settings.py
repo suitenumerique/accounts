@@ -22,8 +22,6 @@ class AuthenticationSettings:
     SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
     SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True  # Our User()'s username is an email
-    SOCIAL_AUTH_FORCE_EMAIL_LOWERCASE = True
-
     SOCIAL_AUTH_STRATEGY = "authentication.social_auth.OptionalURLSettingStrategy"
     SOCIAL_AUTH_STORAGE = "authentication.social_auth.AccountsDjangoStorage"
     SOCIAL_AUTH_USER_FIELDS = ["email"]

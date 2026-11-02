@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from timezone_field import TimeZoneField
 
 from core import models as core_models
+from core.utils.emails import normalize_email
 from core.validators import sub_validator, uuid_validator
 
 logger = getLogger(__name__)
@@ -26,12 +27,11 @@ class UserManager(auth_models.UserManager):
 
     @classmethod
     def normalize_email(cls, email):
-        # `.normalize_email()` only lower the domain part which would allow creating
-        # duplicate email value, we *really* don't want that so lower everything.
-        return super().normalize_email(email).lower()
+        # Emails are stored normalized and always matched exactly.
+        return normalize_email(email)
 
     def get_by_natural_key(self, username):
-        return self.get(email__iexact=username)
+        return self.get(email=self.normalize_email(username))
 
     def _create_user(self, email, password, **extra_fields):
         """
@@ -135,3 +135,8 @@ class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin
 
     def __str__(self):
         return self.email or str(self.id)
+
+    @classmethod
+    def normalize_username(cls, username):
+        # Applied to the email on every `full_clean()`, keep the stored form.
+        return UserManager.normalize_email(username)

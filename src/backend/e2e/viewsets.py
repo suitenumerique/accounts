@@ -28,8 +28,9 @@ class UserAuthViewSet(drf.viewsets.ViewSet):
         serializer = E2EAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user, _created = get_user_model().objects.get_or_create(
-            email=serializer.validated_data["email"].lower(),
+        user_manager = get_user_model().objects
+        user, _created = user_manager.get_or_create(
+            email=user_manager.normalize_email(serializer.validated_data["email"]),
             defaults={"password": make_password(None)},
         )
 

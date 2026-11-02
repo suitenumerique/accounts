@@ -58,6 +58,17 @@ class IdentityProviderUser(BaseModel, DjangoUserMixin):
             return None
 
     @classmethod
+    def get_users_by_email(cls, email):
+        """Return the active users whose email matches exactly once normalized.
+
+        Overrides the python-social-auth lookup, used by `associate_by_email`,
+        so emails are compared in their stored normalized form, like everywhere
+        else.
+        """
+        user_model = cls.user_model()
+        return cls.filter_active_users(email=user_model.objects.normalize_email(email))
+
+    @classmethod
     def username_max_length(cls):
         return cls.user_model()._meta.get_field(cls.username_field()).max_length  # noqa: SLF001
 

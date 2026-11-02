@@ -551,3 +551,71 @@ def test_oidc_auth_flow_roles_scope_not_requested(settings, client):
             },
         ),
     ]
+
+
+@pytest.mark.parametrize(
+    "upstream_email, associated",
+    [
+        ("DISK@Example.com", True),
+        ("dısk@example.com", False),
+    ],
+)
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_existing_user_via_email(client, upstream_email, associated):
+    """
+    Verify how an upstream identity with an unknown sub is associated by email.
+
+    Scenario:
+    1. A user already signed in with the upstream OIDC provider.
+    2. Accounts redirects the user to the upstream OIDC provider.
+    3. The upstream OIDC provider calls back Accounts with another sub and an email.
+    4. Accounts associates the identity to the existing user, or creates a new one.
+    """
+    existing_user = IdentityProviderUserFactory(
+        id_key="sub", uid="existing-sub", user__email="disk@example.com"
+    ).user
+    sub = "other-sub"
+
+    # ---- Step 1: Accounts redirects the user to the upstream OIDC provider ----
+    oidc_upstream_response = client.get(reverse("authentication:login"), follow=False)
+    callback_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+
+    # ---- Step 2: The upstream OIDC provider calls back Accounts ----
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
+            return_value={"sub": sub, "iss": "", "aud": "", "email": upstream_email},
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": sub,
+                "email": upstream_email,
+                "given_name": "Test",
+                "usual_name": "User",
+            },
+        ),
+    ):
+        callback_response = client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": callback_params["state"]},
+            follow=False,
+        )
+
+    assert callback_response.status_code == 302
+    user = User.objects.get(
+        identity_providers__provider="pro-connect", identity_providers__uid=sub
+    )
+    assert client.session["_auth_user_id"] == str(user.pk)
+    if associated:
+        assert user == existing_user
+        assert User.objects.count() == 1
+        assert existing_user.identity_providers.count() == 2
+    else:
+        assert user != existing_user
+        assert user.email == upstream_email
+        assert list(existing_user.identity_providers.values_list("uid", flat=True)) == [
+            "existing-sub"
+        ]

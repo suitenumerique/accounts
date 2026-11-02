@@ -13,6 +13,7 @@ and this project adheres to
 ### Changed
 
 - 🔥(users) remove unused get_user_by_sub_or_email
+- ♻️(users) match emails in a single normalized form
 
 ## [v0.3.0] - 2026-11-02
 
