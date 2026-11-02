@@ -6,6 +6,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-11-02
+
 ### Added
 
 - ✨(login) add "Projets" logo
@@ -66,7 +68,8 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.2.1...main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.3.0...main
+[v0.3.0]: https://github.com/suitenumerique/accounts/compare/v0.2.1...v0.3.0
 [v0.2.1]: https://github.com/suitenumerique/accounts/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/suitenumerique/accounts/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/suitenumerique/accounts/releases/v0.1.0
