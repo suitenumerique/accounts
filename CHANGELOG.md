@@ -10,6 +10,10 @@ and this project adheres to
 
 - 💚(ci) scope Playwright browsers cache to the runner image
 
+### Changed
+
+- 🔥(users) remove unused get_user_by_sub_or_email
+
 ## [v0.3.0] - 2026-11-02
 
 ### Added

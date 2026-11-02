@@ -19,7 +19,7 @@ from core.validators import sub_validator, uuid_validator
 logger = getLogger(__name__)
 
 
-class UserManager(core_models.UserManager):
+class UserManager(auth_models.UserManager):
     """Custom manager for User model."""
 
     # pylint: disable=arguments-differ
