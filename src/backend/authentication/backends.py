@@ -113,6 +113,15 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
 
         return self.validate_userinfo_sub(user_info)
 
+    def extra_data(self, user, uid, response, details, pipeline_kwargs):
+        data = super().extra_data(user, uid, response, details, pipeline_kwargs)
+        # ProConnect nests `email_verified` in the `custom` claim, only returned
+        # with the `custom` scope. Token refresh responses carry no `custom`
+        # claim, the stored value is kept then.
+        if isinstance(custom := response.get("custom"), dict):
+            data["email_verified"] = custom.get("email_verified")
+        return data
+
     def get_user_details(self, response):
         data = super().get_user_details(response)
         return {

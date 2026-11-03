@@ -32,3 +32,7 @@ Extend the `OIDCValidator` to add additional claims or modify standard ones.
 | account      | guest          | boolean | Always `false`. Forward compatibility for organization guests.                              |
 | organization | siret          | string  | [SIRET](https://en.wikipedia.org/wiki/SIRET_code) of the End-User's organization            |
 
+ProConnect only returns `email_verified`, nested in its `custom` claim, when the
+`custom` scope is requested: add it to `SOCIAL_AUTH_PRO_CONNECT_SCOPE`, otherwise
+`email_verified` is always `false` for ProConnect users.
+

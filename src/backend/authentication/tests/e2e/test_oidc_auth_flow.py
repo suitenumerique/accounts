@@ -90,7 +90,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
     and the login events.
     """
     settings.POSTHOG_KEY = {"id": "posthog-key", "host": "https://posthog.test"}
-    settings.SOCIAL_AUTH_PRO_CONNECT_SCOPE = ["roles"]
+    settings.SOCIAL_AUTH_PRO_CONNECT_SCOPE = ["roles", "custom"]
     SimpleApplicationFactory()
     sub = "test-user-sub-123"
 
@@ -130,7 +130,10 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         "http://testserver",
         reverse("authentication:social:complete", kwargs={"backend": "pro-connect"}),
     )
-    assert callback_params["scope"] == "roles openid email given_name usual_name siret"
+    assert (
+        callback_params["scope"]
+        == "roles custom openid email given_name usual_name siret"
+    )
 
     # ---- Step 2: The upstream OIDC provider calls back Accounts with an authorization code ----
     with (
@@ -152,6 +155,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
                 "usual_name": "User",
                 "siret": "1234567890123",
                 "roles": ["agent_public", "agent_public_etat"],
+                "custom": {"email_verified": True, "phone_number_verified": False},
             },
         ),
         mock.patch("posthog.capture") as posthog_capture_mock,
@@ -182,7 +186,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
         # straddle a second boundary.
         "auth_time": pytest.approx(int(user.last_login.timestamp()), abs=1),
         "email": "testuser@example.com",
-        "email_verified": None,
+        "email_verified": True,
         "given_name": "Test",
         "id_token": "upstream-id-token",
         "refresh_token": "upstream-refresh-token",

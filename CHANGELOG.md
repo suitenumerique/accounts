@@ -15,6 +15,7 @@ and this project adheres to
 ### Fixed
 
 - 💚(ci) scope Playwright browsers cache to the runner image
+- 🐛(auth) read ProConnect `email_verified` from the `custom` claim
 
 ### Changed
 
