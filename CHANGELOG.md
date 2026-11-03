@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 💚(ci) scope Playwright browsers cache to the runner image
+
 ## [v0.3.0] - 2026-11-02
 
 ### Added
