@@ -32,3 +32,4 @@ Extend the `OIDCValidator` to add additional claims or modify standard ones.
 | account      | guest          | boolean | Always `false`. Forward compatibility for organization guests.                              |
 | organization | siret          | string  | [SIRET](https://en.wikipedia.org/wiki/SIRET_code) of the End-User's organization            |
 
+
