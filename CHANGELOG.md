@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- ✨(admin) filter users whose email is not normalized
+
 ### Fixed
 
 - 💚(ci) scope Playwright browsers cache to the runner image
