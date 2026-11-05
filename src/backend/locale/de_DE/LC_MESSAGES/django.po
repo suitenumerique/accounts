@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 09:00+0000\n"
-"PO-Revision-Date: 2026-10-07 14:05\n"
+"POT-Creation-Date: 2026-11-05 08:18+0000\n"
+"PO-Revision-Date: 2026-11-05 11:48\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -17,6 +17,10 @@ msgstr ""
 "X-Crowdin-File: backend-accounts.pot\n"
 "X-Crowdin-File-ID: 46\n"
 
+#: authentication/admin.py:53
+msgid "claims"
+msgstr ""
+
 #: authentication/apps.py:16
 msgid "Accounts authentication application"
 msgstr ""
@@ -29,19 +33,19 @@ msgstr "Benutzer"
 msgid "identity provider"
 msgstr ""
 
-#: authentication/models.py:33
+#: authentication/models.py:34
 msgid "identity provider user id"
 msgstr ""
 
-#: core/admin.py:22 users/admin.py:30
+#: core/admin.py:42 users/admin.py:71
 msgid "Personal info"
 msgstr "Persönliche Daten"
 
-#: core/admin.py:36 users/admin.py:41
+#: core/admin.py:56 users/admin.py:82
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-#: core/admin.py:48 users/admin.py:53
+#: core/admin.py:68 users/admin.py:94
 msgid "Important dates"
 msgstr "Wichtige Termine"
 
@@ -49,33 +53,29 @@ msgstr "Wichtige Termine"
 msgid "Accounts core application"
 msgstr ""
 
-#: core/models.py:35
+#: core/models.py:23
 msgid "id"
 msgstr "ID"
 
-#: core/models.py:36
+#: core/models.py:24
 msgid "primary key for the record as UUID"
 msgstr "Primärschlüssel für den Datensatz als UUID"
 
-#: core/models.py:42
+#: core/models.py:30
 msgid "created on"
 msgstr "Erstellt am"
 
-#: core/models.py:43
+#: core/models.py:31
 msgid "date and time at which a record was created"
 msgstr "Datum und Uhrzeit, an dem ein Datensatz erstellt wurde"
 
-#: core/models.py:48
+#: core/models.py:36
 msgid "updated on"
 msgstr "Aktualisiert"
 
-#: core/models.py:49
+#: core/models.py:37
 msgid "date and time at which a record was last updated"
 msgstr "Datum und Uhrzeit, an dem zuletzt aktualisiert wurde"
-
-#: core/models.py:85
-msgid "We couldn't find a user with this sub but the email is already associated with a registered user."
-msgstr "Wir konnten keinen Benutzer mit diesem Abo finden, aber die E-Mail-Adresse ist bereits einem registrierten Benutzer zugeordnet."
 
 #: core/templates/mail/html/template.html:153
 #: core/templates/mail/text/template.txt:3
@@ -95,6 +95,14 @@ msgstr " Erstellt von %(brandname)s "
 
 #: oidc_provider/apps.py:15
 msgid "Accounts OIDC Provider application"
+msgstr ""
+
+#: users/admin.py:38
+msgid "email status"
+msgstr ""
+
+#: users/admin.py:43
+msgid "Not normalized"
 msgstr ""
 
 #: users/apps.py:11
