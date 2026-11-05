@@ -2,11 +2,31 @@
   "extends": ["github>suitenumerique/ci//renovate/default"],
   "dependencyDashboard": true,
   "labels": ["dependencies", "noChangeLog", "automated"],
+  "enabledManagers": ["github-actions", "npm", "pep621", "dockerfile", "docker-compose"],
+  "prConcurrentLimit": 6,
   "rangeStrategy": "pin",
   "lockFileMaintenance": {
     "enabled": true
   },
   "packageRules": [
+    {
+      "groupName": "allowed postgres versions",
+      "matchManagers": ["docker-compose"],
+      "matchPackageNames": ["postgres"],
+      "allowedVersions": "<16"
+    },
+    {
+      "groupName": "allowed keydb versions",
+      "matchManagers": ["docker-compose"],
+      "matchPackageNames": ["eqalpha/keydb"],
+      "allowedVersions": "<7"
+    },
+    {
+      "groupName": "allowed node versions",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchPackageNames": ["node"],
+      "allowedVersions": "<23"
+    },
     {
       "enabled": false,
       "groupName": "ignored python dependencies",
