@@ -10,6 +10,8 @@ and this project adheres to
 
 - 👔(authentication) update the email on IdP connection
 - 🐛(auth) forward the product's `login_hint` to ProConnect
+- 🐛(auth) redirect to an error page when the identity provider fails,
+  requires the new `FRONTEND_LOGIN_ERROR_URL` setting
 
 ## [v0.5.0] - 2026-11-10
 
