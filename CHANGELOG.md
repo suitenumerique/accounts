@@ -6,6 +6,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛(auth) redirect to an error page when the identity provider fails,
+  requires the new `FRONTEND_LOGIN_ERROR_URL` setting
+
 ## [v0.6.0] - 2026-11-25
 
 ### Added

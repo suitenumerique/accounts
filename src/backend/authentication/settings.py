@@ -18,6 +18,11 @@ class AuthenticationSettings:
     SOCIAL_AUTH_SANITIZE_REDIRECTS = True
     SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = values.ListValue([], environ_prefix=None)
 
+    # Without it, SocialAuthExceptionMiddleware re-raises auth errors as a 500
+    SOCIAL_AUTH_LOGIN_ERROR_URL = values.Value(
+        None, environ_name="FRONTEND_LOGIN_ERROR_URL", environ_prefix=None
+    )
+
     SOCIAL_AUTH_URL_NAMESPACE = "authentication:social"
     SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
