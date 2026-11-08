@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- ✨(oidc) add `iss`, `aud` and `iat` claims to the UserInfo JWT
+
 ## [v0.4.0] - 2026-11-05
 
 ### Added

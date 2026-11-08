@@ -2,9 +2,11 @@
 
 import base64
 import json
+import time
 
 import oauthlib.common
 import pytest
+from freezegun import freeze_time
 from oauth2_provider.oauth2_validators import OAuth2Validator
 
 from core.factories import UserFactory
@@ -134,15 +136,28 @@ def test_get_userinfo_claims(validator):
     }
 
 
-def test_get_userinfo_claims_for_lasuite():
-    """Test LaSuiteValidator's UserInfo is a JWT containing the requested scopes' claims."""
+def test_get_userinfo_claims_for_lasuite(settings):
+    """
+    Test LaSuiteValidator's UserInfo is a JWT containing the requested scopes' claims
+    and the `iss`, `aud` and `iat` claims.
+    """
+    settings.OAUTH2_PROVIDER = {
+        **settings.OAUTH2_PROVIDER,
+        "OIDC_ISS_ENDPOINT": "http://issuer.domain",
+    }
     user = UserFactory()
+    client = SimpleApplicationFactory()
 
-    userinfo = LaSuiteValidator().get_userinfo_claims(
-        _make_request(user, scopes="openid profile", client=SimpleApplicationFactory())
-    )
-    claims = _decode_jwt_payload(userinfo)
-    assert claims == {
+    with freeze_time():
+        userinfo = LaSuiteValidator().get_userinfo_claims(
+            _make_request(user, scopes="openid profile", client=client)
+        )
+        now = int(time.time())
+
+    assert _decode_jwt_payload(userinfo) == {
+        "iat": now,
+        "iss": "http://issuer.domain",
+        "aud": client.client_id,
         "sub": user.sub,
         "given_name": user.short_name,
         "name": user.full_name,

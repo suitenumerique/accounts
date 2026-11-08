@@ -6,6 +6,7 @@ Accounts and the products.
 """
 
 import json
+import time
 
 from jwcrypto import jwt
 from oauth2_provider.models import AbstractApplication
@@ -155,8 +156,17 @@ class LaSuiteValidator(OIDCValidator):
         current user's claims.
 
         This is overridden to enforce JWT signing, we use `finalize_id_token` like code.
+        The `iss`, `aud` and `iat` claims are added as clients rely on them to
+        validate the JWT.
         """
         claims = super().get_userinfo_claims(request)
+        claims.update(
+            {
+                "iss": self.get_oidc_issuer_endpoint(request),
+                "aud": request.client.client_id,
+                "iat": int(time.time()),
+            }
+        )
 
         header = {
             "typ": "JWT",
