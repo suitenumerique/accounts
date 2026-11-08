@@ -1,7 +1,9 @@
 """Tests for OAuth2/OIDC routes exposed under ``/api/<version>/o/``."""
 
 import base64
+import json
 import logging
+import time
 import uuid
 from urllib.parse import urljoin
 
@@ -11,6 +13,7 @@ from django.urls import reverse
 
 import pytest
 import requests
+from jwcrypto import jwk, jwt
 from oauth2_provider.models import AccessToken, Grant, RefreshToken
 from oauth2_provider.settings import oauth2_settings
 from pytest_django.asserts import assertRedirects  # pylint: disable=no-name-in-module
@@ -189,6 +192,46 @@ def test_oauth_server_metadata_issuer_matches_discovery_issuer(
 
     assert response.status_code == 200
     assert response.json()["issuer"] == discovery["issuer"]
+
+
+@pytest.mark.parametrize("iss_endpoint", [None, "http://issuer.domain/api/v1.0/o"])
+def test_userinfo_returns_a_signed_jwt(settings, client, iss_endpoint):
+    """The UserInfo response must be a JWT signed with the published keys."""
+    settings.OAUTH2_PROVIDER = {
+        **settings.OAUTH2_PROVIDER,
+        "OIDC_ISS_ENDPOINT": iss_endpoint,
+    }
+    discovery = client.get("/api/v1.0/o/.well-known/openid-configuration").json()
+    jwks = jwk.JWKSet.from_json(client.get(discovery["jwks_uri"]).content)
+
+    application = SimpleApplicationFactory()
+    user = UserFactory()
+    tokens = _issue_tokens(client, application, user)
+
+    before = int(time.time())
+    response = client.get(
+        discovery["userinfo_endpoint"],
+        HTTP_AUTHORIZATION=f"Bearer {tokens['access_token']}",
+    )
+    after = int(time.time())
+
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/jwt"
+
+    userinfo = jwt.JWT(jwt=response.content.decode(), key=jwks)
+    header = json.loads(userinfo.header)
+    assert header["alg"] == "RS256"
+    assert header["kid"] == application.jwk_key.thumbprint()
+
+    claims = json.loads(userinfo.claims)
+    assert before <= claims.pop("iat") <= after
+    assert claims == {
+        "iss": discovery["issuer"],
+        "aud": application.client_id,
+        "sub": user.sub,
+        "email": user.email,
+        "email_verified": False,
+    }
 
 
 def test_authorize_rejects_unknown_client_id(client):
