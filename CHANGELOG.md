@@ -9,6 +9,7 @@ and this project adheres to
 ### Added
 
 - ✨(oidc) add `iss`, `aud` and `iat` claims to the UserInfo JWT
+- ✨(oidc) forward ProConnect roles to products as `proconnect:roles`
 
 ## [v0.4.0] - 2026-11-05
 

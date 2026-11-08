@@ -12,6 +12,7 @@ from jwcrypto import jwt
 from oauth2_provider.models import AbstractApplication
 from oauth2_provider.oauth2_validators import OAuth2Validator
 
+from authentication.backends import ProConnect
 from authentication.utils import get_claim_from_identity_providers
 
 
@@ -116,6 +117,8 @@ class LaSuiteValidator(OIDCValidator):
         "guest": "account",
         # Claims for "organization" scope
         "siret": "organization",
+        # Claims for "proconnect" scope
+        "proconnect:roles": "proconnect",
     }
 
     def get_additional_claims(self, request):
@@ -147,6 +150,13 @@ class LaSuiteValidator(OIDCValidator):
         )
         if identity_providers_siret:
             additional_claims["siret"] = identity_providers_siret[0]
+
+        # "proconnect" claims
+        proconnect_roles = get_claim_from_identity_providers(
+            [s for s in identity_providers if s.provider == ProConnect.name], "roles"
+        )
+        if proconnect_roles:
+            additional_claims["proconnect:roles"] = proconnect_roles[0]
 
         return additional_claims
 

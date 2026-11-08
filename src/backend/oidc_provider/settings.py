@@ -80,6 +80,7 @@ class OIDCProviderSettings:
             # LaSuite scopes
             "account": "Account information",
             "organization": "Organization information",
+            "proconnect": "ProConnect specific information",
         },
         environ_name="SCOPES",
         environ_prefix="OAUTH2_PROVIDER",

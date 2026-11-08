@@ -10,13 +10,16 @@ These tests verify that:
 """
 
 import re
+import time
 from unittest import mock
 from urllib.parse import urljoin, urlparse
 
 from django.http import QueryDict
 from django.urls import reverse
 
+import jwt
 import pytest
+from freezegun import freeze_time
 from pytest_django.asserts import assertRedirects  # pylint: disable=no-name-in-module
 
 from core.factories import UserFactory
@@ -555,6 +558,129 @@ def test_oidc_auth_flow_roles_scope_not_requested(settings, client):
             },
         ),
     ]
+
+
+@pytest.mark.parametrize(
+    "product_scope, expected_userinfo",
+    [
+        (
+            "openid proconnect",
+            {"proconnect:roles": ["agent_public", "agent_public_etat"]},
+        ),
+        ("openid", {}),
+    ],
+)
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_roles_forwarded_to_product(
+    settings, client, product_scope, expected_userinfo
+):
+    """
+    Verify the upstream roles reach the product only when it requests the
+    `proconnect` scope.
+
+    Scenario:
+    1. The product redirects the user to Accounts's authorization endpoint,
+       with or without the `proconnect` scope.
+    2. Accounts redirects the user to the upstream OIDC provider.
+    3. The upstream OIDC provider calls back Accounts with roles.
+    4. Accounts redirects the user to the product with an authorization code.
+    5. The product exchanges this code for tokens from Accounts.
+    6. The product calls Accounts's userinfo endpoint with the access token.
+
+    Asserts that the userinfo contains the upstream roles as is in the
+    `proconnect:roles` claim when the `proconnect` scope is requested, and no roles
+    otherwise.
+    """
+    settings.OAUTH2_PROVIDER = {
+        **settings.OAUTH2_PROVIDER,
+        "OIDC_ISS_ENDPOINT": "http://issuer.domain",
+    }
+    SimpleApplicationFactory()
+    sub = "test-user-sub-123"
+
+    # ---- Step 1: The product sends the user to Accounts's authorization endpoint ----
+    oauth2_provider_authorize_url = reverse(
+        "oauth2_provider:authorize",
+        query={
+            "response_type": "code",
+            "client_id": CLIENT_ID,
+            "redirect_uri": REDIRECT_URI,
+            "scope": product_scope,
+        },
+    )
+    authorize_response = client.get(oauth2_provider_authorize_url)
+    oidc_upstream_response = client.get(authorize_response.url, follow=False)
+    upstream_authorize_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+
+    # ---- Step 2: The upstream OIDC provider calls back Accounts with roles ----
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
+            return_value={"sub": sub, "iss": "", "aud": "", "email": "a@example.com"},
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": sub,
+                "email": "a@example.com",
+                "given_name": "Test",
+                "usual_name": "User",
+                "roles": ["agent_public", "agent_public_etat"],
+            },
+        ),
+    ):
+        callback_response = client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": upstream_authorize_params["state"]},
+            follow=True,
+        )
+
+    product_callback_url = callback_response.redirect_chain[-1][0]
+    assert product_callback_url.startswith(REDIRECT_URI), (
+        f"The final redirect must point to the product, got: {product_callback_url}"
+    )
+    product_callback_params = get_query_params(product_callback_url)
+    assert "code" in product_callback_params, (
+        "An authorization code must be returned to the product, "
+        f"got: {product_callback_url}"
+    )
+
+    # ---- Step 3: The product exchanges the code for tokens ----
+    token_response = client.post(
+        reverse("oauth2_provider:token"),
+        {
+            "grant_type": "authorization_code",
+            "code": product_callback_params["code"],
+            "redirect_uri": REDIRECT_URI,
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+        },
+    )
+    assert token_response.status_code == 200
+
+    # ---- Step 4: The product calls the userinfo endpoint ----
+    with freeze_time():
+        userinfo_response = client.get(
+            reverse("oauth2_provider:user-info"),
+            headers={
+                "Authorization": f"Bearer {token_response.json()['access_token']}"
+            },
+        )
+        now = int(time.time())
+    assert userinfo_response.status_code == 200
+
+    user = User.objects.get()
+    assert jwt.decode(
+        userinfo_response.content, options={"verify_signature": False}
+    ) == {
+        "iss": "http://issuer.domain",
+        "aud": CLIENT_ID,
+        "iat": now,
+        "sub": str(user.sub),
+        **expected_userinfo,
+    }
 
 
 @pytest.mark.parametrize(
