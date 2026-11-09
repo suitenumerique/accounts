@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛(auth) redirect to an error page when the identity provider fails
+
 ## [v0.4.0] - 2026-11-05
 
 ### Added

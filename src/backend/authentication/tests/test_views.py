@@ -71,6 +71,27 @@ def test_login_routing_view_redirect(client, query, expected_next):
     assert load_strategy(client).session_get("next") == expected_next
 
 
+def test_complete_view_redirects_to_login_error_url_on_idp_error(settings, client):
+    """An error returned by the IdP on the callback should redirect to the error page."""
+    settings.SOCIAL_AUTH_LOGIN_ERROR_URL = "http://frontend.app/login-error/"
+
+    response = client.get(
+        reverse(
+            "authentication:social:complete",
+            kwargs={"backend": "pro-connect"},
+            query={
+                "error": "server_error",
+                "error_description": "authentication aborted due to a technical "
+                "error on the authorization server",
+            },
+        )
+    )
+
+    assertRedirects(
+        response, settings.SOCIAL_AUTH_LOGIN_ERROR_URL, fetch_redirect_response=False
+    )
+
+
 @pytest.mark.usefixtures("upstream_oidc_mocks")
 def test_logout_view(settings, client):
     """Test LogoutView."""
