@@ -13,6 +13,7 @@ from django.urls import reverse
 
 import pytest
 import requests
+from freezegun import freeze_time
 from jwcrypto import jwk, jwt
 from oauth2_provider.models import AccessToken, Grant, RefreshToken
 from oauth2_provider.settings import oauth2_settings
@@ -208,12 +209,12 @@ def test_userinfo_returns_a_signed_jwt(settings, client, iss_endpoint):
     user = UserFactory()
     tokens = _issue_tokens(client, application, user)
 
-    before = int(time.time())
-    response = client.get(
-        discovery["userinfo_endpoint"],
-        HTTP_AUTHORIZATION=f"Bearer {tokens['access_token']}",
-    )
-    after = int(time.time())
+    with freeze_time():
+        response = client.get(
+            discovery["userinfo_endpoint"],
+            HTTP_AUTHORIZATION=f"Bearer {tokens['access_token']}",
+        )
+        now = int(time.time())
 
     assert response.status_code == 200
     assert response["Content-Type"] == "application/jwt"
@@ -224,8 +225,8 @@ def test_userinfo_returns_a_signed_jwt(settings, client, iss_endpoint):
     assert header["kid"] == application.jwk_key.thumbprint()
 
     claims = json.loads(userinfo.claims)
-    assert before <= claims.pop("iat") <= after
     assert claims == {
+        "iat": now,
         "iss": discovery["issuer"],
         "aud": application.client_id,
         "sub": user.sub,
