@@ -93,9 +93,9 @@ def _exchange_code(client, application, code, **overrides):
     return client.post(reverse("oauth2_provider:token"), payload)
 
 
-def _issue_tokens(client, application, user):
+def _issue_tokens(client, application, user, **overrides):
     """Go through the authorization code flow and return the token response payload."""
-    code = _get_authorization_code(client, application, user)
+    code = _get_authorization_code(client, application, user, **overrides)
     response = _exchange_code(client, application, code)
 
     assert response.status_code == 200
@@ -232,6 +232,37 @@ def test_userinfo_returns_a_signed_jwt(settings, client, iss_endpoint):
         "sub": user.sub,
         "email": user.email,
         "email_verified": False,
+    }
+
+
+def test_userinfo_returns_proconnect_roles_with_proconnect_scope(client):
+    """The UserInfo JWT must contain the ProConnect roles with the `proconnect` scope."""
+    discovery = client.get("/api/v1.0/o/.well-known/openid-configuration").json()
+    jwks = jwk.JWKSet.from_json(client.get(discovery["jwks_uri"]).content)
+
+    application = SimpleApplicationFactory()
+    user = UserFactory()
+    IdentityProviderUserFactory(user=user, extra_data={"roles": ["agent_public"]})
+    tokens = _issue_tokens(client, application, user, scope="openid email proconnect")
+
+    with freeze_time():
+        response = client.get(
+            discovery["userinfo_endpoint"],
+            HTTP_AUTHORIZATION=f"Bearer {tokens['access_token']}",
+        )
+        now = int(time.time())
+
+    assert response.status_code == 200
+
+    claims = json.loads(jwt.JWT(jwt=response.content.decode(), key=jwks).claims)
+    assert claims == {
+        "iat": now,
+        "iss": discovery["issuer"],
+        "aud": application.client_id,
+        "sub": user.sub,
+        "email": user.email,
+        "email_verified": False,
+        "proconnect:roles": ["agent_public"],
     }
 
 
