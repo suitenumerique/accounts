@@ -110,8 +110,42 @@ def update_changelog(path, version):
     write_file(path, "".join(lines))
 
 
+def bump_environment(environment, version):
+    """Set the image tags of one deployment environment to the release version."""
+    path = f"manifests/mon-compte/env.d/{environment}/values.mon-compte.yaml.gotmpl"
+    update_helm_files(path, version)
+    run_command(f"git add {path}")
+
+
+def prepare_deployment_branch(version, branch, environments, message):
+    """Create a deployment branch from main and bump the given environments."""
+    run_command("git checkout main")
+    run_command("git pull")
+    run_command(f"git checkout -b {branch}")
+    run_command("git pull --rebase origin main")
+    for environment in environments:
+        bump_environment(environment, version)
+    run_command(f"git commit -m '{message}'")
+
+
+def confirm_push(branch):
+    """Ask before pushing a deployment branch."""
+    confirm = 'y' if DRY_RUN else input(f"""\033[0;32m
+### DEPLOYMENT ###
+NEXT COMMAND on mon-compte-deploiement repository:
+    >> git push origin {branch}
+Continue ? (y,n)
+\x1b[0m""").strip()
+    if confirm == 'y':
+        run_command(f"git push origin {branch}")
+
+
 def deployment_part(version):
-    """ Update helm file of preprod on deployment repository suitenumerique/mon-compte-deploiement
+    """Bump sandbox with preprod, and prepare a separate production branch.
+
+    On suitenumerique/mon-compte-deploiement:
+    - ``{version}/preprod`` updates sandbox and preprod together;
+    - ``{version}/production`` is ready to deploy production later.
     """
     # Move to mon-compte-deploiement repository
     try:
@@ -121,33 +155,37 @@ def deployment_part(version):
         sys.stdout.write("\033[0;32mPlease clone it and re-run script with option --only-deployment-part\x1b[0m\n")
         sys.stdout.write("  >>> python3 bin/release.py --only-deployment-part \x1b[0m\n")
     else:
-        run_command("git checkout main")
-        run_command("git pull")
-        deployment_branch = f"{version}/preprod"
-        run_command(f"git checkout -b {deployment_branch}")
-        run_command("git pull --rebase origin main")
-        path = "manifests/mon-compte/env.d/preprod/values.mon-compte.yaml.gotmpl"
-        update_helm_files(path, version)
-        run_command(f"git add {path}")
-        message = f"""🚀(preprod) bump version to v{version}"""
-        run_command(f"git commit -m '{message}'")
-        confirm = 'y' if DRY_RUN else input(f"""\033[0;32m
-### DEPLOYMENT ###
-NEXT COMMAND on mon-compte-deploiement repository: 
-    >> git push origin {deployment_branch}
-Continue ? (y,n) 
-\x1b[0m""").strip()
-        if confirm == 'y':
-            run_command(f"git push origin {deployment_branch}")
+        preprod_branch = f"{version}/preprod"
+        prepare_deployment_branch(
+            version,
+            preprod_branch,
+            ("preprod", "sandbox"),
+            f"🚀(preprod) bump preprod and sandbox to v{version}",
+        )
+        confirm_push(preprod_branch)
+
+        production_branch = f"{version}/production"
+        prepare_deployment_branch(
+            version,
+            production_branch,
+            ("production",),
+            f"🚀(production) bump version to v{version}",
+        )
+        confirm_push(production_branch)
         sys.stdout.write(f"""\033[1;34m
-PLEASE DO THE FOLLOWING INSTRUCTIONS: 
---> Image tags are already set to v{version}. If the release needs it, add commits into {deployment_branch} branch to:
+PLEASE DO THE FOLLOWING INSTRUCTIONS:
+--> Image tags are already set to v{version} on {preprod_branch} (preprod and sandbox)
+    and on {production_branch} (production). If the release needs it, add commits on each branch to:
     - bump the chart version in manifests/mon-compte/helmfile.yaml.gotmpl when the Helm chart changed
-    - update manifests/mon-compte/env.d/preprod/values.mon-compte.yaml.gotmpl when the release adds,
-      renames or removes environment variables or other settings
+    - update the environment values when the release adds, renames or removes environment variables or other settings:
+      - manifests/mon-compte/env.d/preprod/values.mon-compte.yaml.gotmpl
+      - manifests/mon-compte/env.d/sandbox/values.mon-compte.yaml.gotmpl
+      - manifests/mon-compte/env.d/production/values.mon-compte.yaml.gotmpl
     then...
 --> Do not forget to manually sign the v{version} images for PREPROD AND PROD, then...
---> Please submit PR {deployment_branch} and merge code to main [https://github.com/suitenumerique/mon-compte-deploiement]
+--> Please submit PR {preprod_branch} and merge it to main to deploy preprod and sandbox
+    [https://github.com/suitenumerique/mon-compte-deploiement]
+--> {production_branch} is ready for the production deployment. Submit its PR once preprod is validated.
 \x1b[0m""")
 
 
