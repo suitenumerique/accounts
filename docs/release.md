@@ -22,8 +22,12 @@ The script asks for the kind of release (`p`, `m`, `mj`) and the version, then:
 3. bumps the version in `src/backend/pyproject.toml`, `src/backend/uv.lock`
    and the `package.json` files under `src/frontend`;
 4. commits and pushes the branch after confirmation;
-5. in `../mon-compte-deploiement`, creates the `X.Y.Z/preprod` branch with the preprod image tags set to `vX.Y.Z`, commits and pushes
-   after confirmation.
+5. in `../mon-compte-deploiement`:
+   - creates the `X.Y.Z/preprod` branch with the preprod and sandbox image
+     tags set to `vX.Y.Z`, commits and pushes after confirmation;
+   - creates the `X.Y.Z/production` branch from `main` with the production
+     image tags set to `vX.Y.Z`, commits and pushes after confirmation. Merge
+     this branch later, once preprod is validated.
 
 The script does not create the git tag: it must point to the commit merged
 into `main`, which only exists once the steps below are done.
@@ -48,13 +52,16 @@ into `main`, which only exists once the steps below are done.
 5. Manually launch the image signing for `vX.Y.Z`, for preprod and prod. This
    must be done before deploying.
 6. Create the GitHub release for the `vX.Y.Z` tag.
-7. In `mon-compte-deploiement`, on the `X.Y.Z/preprod` branch, the script
-   already set the image tags to `vX.Y.Z`. If the release needs it, add
-   commits to:
+7. In `mon-compte-deploiement`, image tags are already set to `vX.Y.Z` on
+   `X.Y.Z/preprod` (preprod and sandbox) and `X.Y.Z/production` (production).
+   If the release needs it, add commits on each branch to:
    - bump the chart version in `manifests/mon-compte/helmfile.yaml.gotmpl`
      when the Helm chart changed;
-   - update `manifests/mon-compte/env.d/preprod/values.mon-compte.yaml.gotmpl`
-     when the release adds, renames or removes environment variables or
-     other settings.
+   - update the environment values when the release adds, renames or removes
+     environment variables or other settings:
+     - `manifests/mon-compte/env.d/preprod/values.mon-compte.yaml.gotmpl`
+     - `manifests/mon-compte/env.d/sandbox/values.mon-compte.yaml.gotmpl`
+     - `manifests/mon-compte/env.d/production/values.mon-compte.yaml.gotmpl`
 
-   Then open the PR and merge it into `main`.
+   Open the `X.Y.Z/preprod` PR and merge it into `main` to deploy preprod and
+   sandbox. Open the `X.Y.Z/production` PR once preprod is validated.
