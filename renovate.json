@@ -16,28 +16,10 @@
       "allowedVersions": "<16"
     },
     {
-      "groupName": "allowed keydb versions",
-      "matchManagers": ["docker-compose"],
-      "matchPackageNames": ["eqalpha/keydb"],
-      "allowedVersions": "<7"
-    },
-    {
-      "groupName": "allowed node versions",
-      "matchManagers": ["dockerfile", "docker-compose"],
-      "matchPackageNames": ["node"],
-      "allowedVersions": "<23"
-    },
-    {
       "groupName": "allowed python versions",
       "matchManagers": ["dockerfile", "docker-compose"],
       "matchPackageNames": ["python"],
       "allowedVersions": "<3.15"
-    },
-    {
-      "enabled": false,
-      "groupName": "ignored python dependencies",
-      "matchManagers": ["pep621"],
-      "matchPackageNames": []
     },
     {
       "description": "Disable requires-python updates - managed manually",
@@ -46,10 +28,28 @@
       "enabled": false
     },
     {
+      "groupName": "allowed node versions",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchPackageNames": ["node"],
+      "allowedVersions": "<23"
+    },
+    {
+      "groupName": "allowed keydb versions",
+      "matchManagers": ["docker-compose"],
+      "matchPackageNames": ["eqalpha/keydb"],
+      "allowedVersions": "<7"
+    },
+    {
       "groupName": "allowed redis versions",
       "matchManagers": ["pep621"],
       "matchPackageNames": ["redis"],
       "allowedVersions": "<6.0.0"
+    },
+    {
+      "enabled": false,
+      "groupName": "ignored python dependencies",
+      "matchManagers": ["pep621"],
+      "matchPackageNames": []
     },
     {
       "groupName": "allowed social-auth-app-django versions",
