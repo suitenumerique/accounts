@@ -46,6 +46,7 @@ jobs:
       target: ${{ matrix.target }}
       docker_user: "1001:127"
       should_push: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'preview') }}
+      trivy_ignore_files: ./.github/.trivyignore
     secrets:
       DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
       DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
