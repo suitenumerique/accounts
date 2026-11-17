@@ -28,6 +28,12 @@
       "allowedVersions": "<23"
     },
     {
+      "groupName": "allowed python versions",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchPackageNames": ["python"],
+      "allowedVersions": "<3.15"
+    },
+    {
       "enabled": false,
       "groupName": "ignored python dependencies",
       "matchManagers": ["pep621"],
