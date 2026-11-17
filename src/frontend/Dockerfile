@@ -2,7 +2,7 @@ ARG FRONTEND_IMAGE=frontend-build-output
 
 # Build stages run on the native build platform: the output is static files,
 # so emulating Node under QEMU for other architectures is useless (and hangs).
-FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-deps
+FROM --platform=$BUILDPLATFORM node:22.23.5-alpine AS frontend-deps
 
 # Upgrade system packages to install security updates
 RUN apk update && \
