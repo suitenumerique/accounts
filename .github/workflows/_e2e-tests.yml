@@ -36,15 +36,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22.x"
+          node-version: "22.23.5"
 
       - name: Restore the frontend cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: "src/frontend/**/node_modules"
           key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
@@ -52,7 +52,7 @@ jobs:
 
       - name: Restore Playwright browsers cache
         id: playwright-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ env.ImageOS }}-${{ hashFiles('src/frontend/yarn.lock', 'src/frontend/apps/e2e/yarn.lock') }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Save Playwright browsers cache
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: ${{ steps.playwright-cache.outputs.cache-primary-key }}
@@ -78,22 +78,22 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22.x"
+          node-version: "22.23.5"
 
       - name: Restore the frontend cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: "src/frontend/**/node_modules"
           key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
           fail-on-cache-miss: true
 
       - name: Restore Playwright browsers cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ env.ImageOS }}-${{ hashFiles('src/frontend/yarn.lock', 'src/frontend/apps/e2e/yarn.lock') }}
@@ -113,7 +113,7 @@ jobs:
       - name: Restore last-run cache
         if: ${{ github.run_attempt > 1 }}
         id: restore-last-run
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/frontend/apps/e2e/test-results/.last-run.json
           key: playwright-last-run-${{ github.run_id }}-${{ inputs.browser-name }}
@@ -140,14 +140,14 @@ jobs:
 
       - name: Save last-run cache
         if: always()
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/frontend/apps/e2e/test-results/.last-run.json
           key: playwright-last-run-${{ github.run_id }}-${{ inputs.browser-name }}
 
       - name: Upload last-run artifact
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-instance-last-run-${{ inputs.browser-name }}
           path: src/frontend/apps/e2e/test-results/.last-run.json
@@ -155,7 +155,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: playwright-${{ inputs.browser-name }}-report
