@@ -346,6 +346,8 @@ def test_full_oidc_auth_flow_associated_user(settings, client):  # pylint: disab
             "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
             return_value={
                 "sub": expected_user_info.sub,
+                "iss": "",
+                "aud": "",
                 "email": expected_user_info.email,
             },
         ),
@@ -389,6 +391,7 @@ def test_full_oidc_auth_flow_associated_user(settings, client):  # pylint: disab
     assert user.identity_providers.get(
         provider="pro-connect", uid=expected_user_info.sub
     ).extra_data == {
+        "_oidc_id_token_context": {"aud": "", "iss": "", "sub": expected_user_info.sub},
         "access_token": "upstream-access-token",
         "auth_time": int(user.last_login.timestamp()),
         "email": expected_user_info.email,
@@ -396,6 +399,7 @@ def test_full_oidc_auth_flow_associated_user(settings, client):  # pylint: disab
         "given_name": expected_user_info.short_name,
         "id_token": "upstream-id-token",
         "refresh_token": "upstream-refresh-token",
+        "roles": None,
         "siret": "1234567890123",
         "sub": expected_user_info.sub,
         "token_type": "Bearer",

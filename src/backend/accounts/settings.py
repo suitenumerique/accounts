@@ -638,6 +638,7 @@ class Test(Base):
     SOCIAL_AUTH_PRO_CONNECT_REVOKE_TOKEN_URL = ""
     SOCIAL_AUTH_PRO_CONNECT_USERINFO_URL = ""
     SOCIAL_AUTH_PRO_CONNECT_JWKS_URI = ""
+    SOCIAL_AUTH_PRO_CONNECT_SCOPE = []
 
     def __init__(self):
         # pylint: disable=invalid-name
