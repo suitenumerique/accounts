@@ -803,6 +803,46 @@ def test_oidc_auth_flow_roles_forwarded_to_product(
     }
 
 
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_forwards_login_hint(responses, settings, client):
+    """
+    Verify the product's `login_hint` reaches the upstream OIDC provider.
+
+    Scenario:
+    1. The product redirects the user to Accounts's authorization endpoint with a `login_hint`.
+    2. Accounts redirects the user to its login view, the `login_hint` nested in `next`.
+    3. Accounts redirects the user to the upstream OIDC provider with the same `login_hint`.
+    """
+    # The flow stops before the upstream token endpoint is called.
+    responses.assert_all_requests_are_fired = False
+    SimpleApplicationFactory()
+
+    oauth2_provider_authorize_url = reverse(
+        "oauth2_provider:authorize",
+        query={
+            "response_type": "code",
+            "client_id": CLIENT_ID,
+            "redirect_uri": REDIRECT_URI,
+            "scope": "openid email",
+            "login_hint": "user@example.com",
+        },
+    )
+    authentication_login_response = client.get(oauth2_provider_authorize_url)
+
+    # check that the login_hint is not in the query params but in the next parameter (nested)
+    assert "login_hint" not in get_query_params(authentication_login_response.url)
+    assert "next" in get_query_params(authentication_login_response.url)
+    assert "login_hint" in get_query_params(authentication_login_response.url)["next"]
+
+    oidc_upstream_response = client.get(authentication_login_response.url)
+    assert oidc_upstream_response.url.startswith(
+        settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT
+    )
+    assert (
+        get_query_params(oidc_upstream_response.url)["login_hint"] == "user@example.com"
+    )
+
+
 @pytest.mark.parametrize(
     "upstream_email, associated",
     [

@@ -9,7 +9,7 @@ from jwt import (
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.exceptions import AuthTokenError
 
-from core.utils.urls import add_query_params
+from core.utils.urls import add_query_params, get_query_params
 
 
 class OpenIdConnectRPInitiatedLogoutMixin:
@@ -71,9 +71,20 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
         "roles",
     ]
 
+    def login_hint(self) -> str | None:
+        """Return the `login_hint` sent to the login view or to the `next` URL.
+
+        The OIDC provider redirects unauthenticated users to the login view with
+        the `/authorize` URL as `next`, so the client's `login_hint` is nested there.
+        """
+        if login_hint := self.data.get("login_hint"):
+            return login_hint
+        login_hint = get_query_params(self.data.get("next") or "").get("login_hint")
+        return login_hint or None
+
     def auth_params(self, state=None):
         params = super().auth_params(state)
-        if login_hint := self.data.get("login_hint"):
+        if login_hint := self.login_hint():
             params.setdefault("login_hint", login_hint)
         if acr_values := self.setting("ACR_VALUES"):
             claims = json.loads(params.get("claims") or "{}")

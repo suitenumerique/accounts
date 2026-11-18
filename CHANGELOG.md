@@ -9,6 +9,7 @@ and this project adheres to
 ### Fixed
 
 - 👔(authentication) update the email on IdP connection
+- 🐛(auth) forward the product's `login_hint` to ProConnect
 
 ## [v0.5.0] - 2026-11-10
 

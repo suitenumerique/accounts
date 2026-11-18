@@ -163,6 +163,23 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             ["roles", "openid", "email", "given_name", "usual_name", "siret"],
         )
 
+    def test_login_hint_auth_params(self):
+        """Test the `login_hint` is forwarded, also when nested in the `next` URL"""
+        self.assertNotIn("login_hint", self.backend.auth_params())
+
+        self.strategy.set_request_data(
+            {
+                "next": "/api/v1.0/o/authorize/?client_id=abc&login_hint=next%40example.com"
+            },
+            self.backend,
+        )
+        self.assertEqual(self.backend.auth_params()["login_hint"], "next@example.com")
+
+        self.strategy.set_request_data(
+            {"login_hint": "direct@example.com"}, self.backend
+        )
+        self.assertEqual(self.backend.auth_params()["login_hint"], "direct@example.com")
+
     def test_acr_values_auth_params(self):
         """Test ACR_VALUES are also requested as individual claims"""
         self.strategy.set_settings(
