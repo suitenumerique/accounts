@@ -53,7 +53,7 @@ COPY --from=accounts-builder /home/frontend/apps/accounts/out /app
 FROM ${FRONTEND_IMAGE} AS frontend-source
 
 # ---- Front-end image ----
-FROM nginx/nginx-unprivileged:1.30.6-alpine3.24 AS frontend-production
+FROM nginx/nginx-unprivileged:1.31.9-alpine3.24 AS frontend-production
 
 # Upgrade system packages to install security updates
 USER root
