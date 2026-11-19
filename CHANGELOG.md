@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- 🔧(auth) warn when `FRONTEND_LOGIN_ERROR_URL` is not set
+
 ### Fixed
 
 - 👔(authentication) update the email on IdP connection
