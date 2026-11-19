@@ -7,3 +7,6 @@ API_CONFIG_THROTTLE_RATE=1000/min
 
 # Enable the e2e auth-bypass endpoints (never set in production)
 LOAD_E2E_URLS=True
+
+# Redirect identity provider errors to the login error page
+SOCIAL_AUTH_RAISE_EXCEPTIONS=False
