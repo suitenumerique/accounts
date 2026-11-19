@@ -7,9 +7,24 @@ from jwt import (
     PyJWTError,
 )
 from social_core.backends.open_id_connect import OpenIdConnectAuth
-from social_core.exceptions import AuthTokenError
+from social_core.exceptions import AuthException, AuthTokenError
 
 from core.utils.urls import add_query_params, get_query_params
+
+
+class AuthACRNotAllowed(AuthException):
+    """The identity provider authenticated the user with a non requested ACR."""
+
+    def __init__(self, backend, acr, allowed_acr_values):
+        super().__init__(backend, acr)
+        self.acr = acr
+        self.allowed_acr_values = allowed_acr_values
+
+    def __str__(self):
+        return (
+            f"ACR not allowed: {self.acr!r}, "
+            f"expected one of {' '.join(self.allowed_acr_values)}"
+        )
 
 
 class OpenIdConnectRPInitiatedLogoutMixin:
@@ -82,22 +97,42 @@ class ProConnect(OpenIdConnectRPInitiatedLogoutMixin, OpenIdConnectAuth):
         login_hint = get_query_params(self.data.get("next") or "").get("login_hint")
         return login_hint or None
 
+    def mfa_required(self) -> bool:
+        """Return whether users must be authenticated with an MFA ACR."""
+        return bool(self.setting("MFA_REQUIRED", False))
+
+    def acr_values(self) -> list[str]:
+        """Return the ACR values requested to the identity provider."""
+        setting = "MFA_ACR_VALUES" if self.mfa_required() else "ACR_VALUES"
+        return (self.setting(setting) or "").split()
+
     def auth_params(self, state=None):
         params = super().auth_params(state)
         if login_hint := self.login_hint():
             params.setdefault("login_hint", login_hint)
-        if acr_values := self.setting("ACR_VALUES"):
+        if acr_values := self.acr_values():
+            params["acr_values"] = " ".join(acr_values)
             claims = json.loads(params.get("claims") or "{}")
             claims.setdefault("id_token", {})
             claims["id_token"].setdefault(
                 "acr",
                 {
-                    "essential": False,
-                    "values": acr_values.split(" "),
+                    "essential": self.mfa_required(),
+                    "values": acr_values,
                 },
             )
             params["claims"] = json.dumps(claims)
         return params
+
+    def validate_claims(self, id_token) -> None:
+        """Also reject ID tokens without an MFA `acr` when MFA is required.
+        """
+        super().validate_claims(id_token)
+        if not self.mfa_required():
+            return
+        acr_values = self.acr_values()
+        if id_token.get("acr") not in acr_values:
+            raise AuthACRNotAllowed(self, id_token.get("acr"), acr_values)
 
     def user_data(self, access_token: str, *args, **kwargs):
         """Decode the JWT returned by ProConnect as user info"""

@@ -90,6 +90,13 @@ class AuthenticationSettings:
     SOCIAL_AUTH_PRO_CONNECT_ACR_VALUES = values.Value(
         default="eidas1", environ_prefix=None
     )
+    # Feature flag: request MFA_ACR_VALUES as essential instead of ACR_VALUES.
+    SOCIAL_AUTH_PRO_CONNECT_MFA_REQUIRED = values.BooleanValue(
+        default=False, environ_prefix=None
+    )
+    SOCIAL_AUTH_PRO_CONNECT_MFA_ACR_VALUES = values.Value(
+        default="eidas0-mfa eidas1-mfa eidas2 eidas3", environ_prefix=None
+    )
     # Scopes requested in addition to the backend default ones. ProConnect rejects
     # the whole authorization request if one of them is not allowed for the client.
     SOCIAL_AUTH_PRO_CONNECT_SCOPE = values.ListValue([], environ_prefix=None)

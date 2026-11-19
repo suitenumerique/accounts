@@ -7,8 +7,12 @@ These tests verify that:
    creates/updates the user, then returns an authorization code to the product.
 2. When the user already has an active session, Accounts does not contact
    the upstream OIDC provider and directly grants the authorization code to the product.
+3. When MFA is required, Accounts asks the upstream OIDC provider for an
+   essential `acr` claim, and only signs in users whose ID token `acr` is one
+   of the requested MFA values.
 """
 
+import json
 import re
 import time
 from unittest import mock
@@ -972,3 +976,100 @@ def test_oidc_auth_flow_imported_user_first_login(client):
     identity = user.identity_providers.get()
     assert identity.uid == "imported-sub"
     assert identity.extra_data["siret"] == "12345678900011"
+
+
+@pytest.mark.parametrize(
+    "mfa_required, token_acr, signed_in",
+    [
+        (True, "eidas0-mfa", True),
+        (True, "eidas1-mfa", True),
+        (True, "eidas2", True),
+        (True, "eidas3", True),
+        (True, None, False),
+        (True, "", False),
+        (True, "eidas1", False),
+        (True, "eidas1-mfa eidas2", False),
+        (False, "eidas1", True),
+    ],
+)
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_mfa_acr(settings, client, mfa_required, token_acr, signed_in):
+    """
+    Verify Accounts only signs in an MFA `acr` when MFA is required.
+
+    Scenario:
+    1. Accounts redirects the user to the upstream OIDC provider, asking for an `acr`.
+    2. The upstream OIDC provider calls back Accounts with an ID token `acr`.
+    3. Accounts signs the user in only when that `acr` is one of the requested MFA values.
+    """
+    settings.SOCIAL_AUTH_PRO_CONNECT_MFA_REQUIRED = mfa_required
+    settings.SOCIAL_AUTH_LOGIN_ERROR_URL = "http://frontend.test/login-error/"
+    acr_values = (
+        ["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"]
+        if mfa_required
+        else ["eidas1"]
+    )
+    settings.SOCIAL_AUTH_PRO_CONNECT_MFA_ACR_VALUES = " ".join(acr_values)
+    settings.SOCIAL_AUTH_PRO_CONNECT_ACR_VALUES = " ".join(acr_values)
+
+    # ---- Step 1: Accounts redirects the user to the upstream OIDC provider ----
+    oidc_upstream_response = client.get(reverse("authentication:login"), follow=False)
+    callback_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+    assert callback_params["acr_values"] == " ".join(acr_values)
+    assert json.loads(callback_params["claims"]) == {
+        "id_token": {"acr": {"essential": mfa_required, "values": acr_values}}
+    }
+
+    # ---- Step 2: The upstream OIDC provider calls back Accounts ----
+    # Only the signature check is mocked: the claims, `acr` included, are validated.
+    sub = "mfa-user-sub"
+    now = int(time.time())
+    id_token = {
+        "iss": settings.SOCIAL_AUTH_PRO_CONNECT_OIDC_ENDPOINT,
+        "sub": sub,
+        "aud": settings.SOCIAL_AUTH_PRO_CONNECT_KEY,
+        "exp": now + 60,
+        "iat": now,
+        "nonce": callback_params["nonce"],
+    }
+    if token_acr is not None:
+        id_token["acr"] = token_acr
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.decode_and_validate_id_token",
+            return_value=id_token,
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": sub,
+                "email": "mfa-user@example.com",
+                "given_name": "Test",
+                "usual_name": "User",
+            },
+        ),
+    ):
+        callback_response = client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": callback_params["state"]},
+            follow=False,
+        )
+
+    # ---- Step 3: Accounts signs the user in, or redirects to the error page ----
+    if signed_in:
+        assertRedirects(
+            callback_response,
+            settings.LOGIN_REDIRECT_URL,
+            fetch_redirect_response=False,
+        )
+        assert client.session["_auth_user_id"] == str(User.objects.get().pk)
+    else:
+        assertRedirects(
+            callback_response,
+            settings.SOCIAL_AUTH_LOGIN_ERROR_URL,
+            fetch_redirect_response=False,
+        )
+        assert "_auth_user_id" not in client.session
+        assert not User.objects.exists()
