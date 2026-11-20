@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- ⚡️(admin) remove the `assoc_type` filter of the associations admin
+
 ## [v0.5.1] - 2026-11-19
 
 ### Fixed

@@ -9,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 
 from social_core.backends.utils import get_backend
 from social_core.exceptions import MissingBackend
+from social_django.admin import AssociationOption
+from social_django.models import Association
 
 from core.admin import ReadOnlyAdminMixin
 
@@ -85,3 +87,17 @@ class IdentityProviderUserAdmin(
     ordering = ("-updated_at",)
     search_fields = ("uid", "user__email", "user__sub")
     fields = ("user", "provider", "uid", "claims", "created_at", "updated_at")
+
+
+admin.site.unregister(Association)
+
+
+@admin.register(Association)
+class AssociationAdmin(AssociationOption):
+    """Admin of the OIDC associations, without the upstream `assoc_type` filter.
+
+    The OIDC backend stores the random `state` of each login in `assoc_type`,
+    so filtering on it lists one entry per pending login.
+    """
+
+    list_filter = ()

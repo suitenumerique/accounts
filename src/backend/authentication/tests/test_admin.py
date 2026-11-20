@@ -1,6 +1,9 @@
 """Tests for the Django admin login."""
 
+from django.contrib import admin
 from django.urls import reverse
+
+from social_django.models import Association
 
 
 def test_admin_login_with_wrong_password_does_not_crash(client):
@@ -12,3 +15,8 @@ def test_admin_login_with_wrong_password_does_not_crash(client):
 
     assert response.status_code == 200
     assert response.context["form"].non_field_errors()
+
+
+def test_association_admin_has_no_assoc_type_filter():
+    """The association admin must not filter on `assoc_type`, which holds OIDC states."""
+    assert admin.site.get_model_admin(Association).list_filter == ()
