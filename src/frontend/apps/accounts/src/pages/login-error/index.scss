@@ -1,0 +1,83 @@
+@use "../../styles/auth-page-background" as *;
+
+.login-error-page {
+  @include auth-page-background;
+}
+
+.login-error-page__canvas {
+  position: relative;
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  padding: 44px 24px 72px;
+}
+
+.login-error-page__content {
+  display: flex;
+  width: min(100%, 420px);
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  transform: translateY(-28px);
+
+  h1 {
+    margin: 0;
+    color: var(--c--contextuals--content--semantic--neutral--primary);
+    font-family: Marianne, sans-serif;
+    font-size: var(--c--globals--font--sizes--h1);
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+  }
+
+  p {
+    margin: 0;
+    color: var(--c--contextuals--content--semantic--neutral--secondary);
+    font-family: Marianne, sans-serif;
+    text-align: center;
+  }
+
+  .c__button {
+    font-family: Marianne, sans-serif;
+  }
+}
+
+.login-error-page__illustration {
+  width: 160px;
+  height: 160px;
+}
+
+.login-error-page__illustration-image {
+  display: block;
+  width: 160px;
+  height: 160px;
+}
+
+.login-error-page__actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 576px) {
+  .login-error-page__canvas {
+    padding-inline: 16px;
+  }
+
+  .login-error-page__content h1 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+@media (max-height: 700px) {
+  .login-error-page__canvas {
+    place-items: start center;
+    padding-top: 32px;
+  }
+
+  .login-error-page__content {
+    transform: none;
+  }
+}

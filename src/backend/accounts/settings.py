@@ -583,6 +583,10 @@ class Development(Base):
     CORS_ALLOW_ALL_ORIGINS = True
     CSRF_TRUSTED_ORIGINS = ["http://localhost:9901", "http://localhost:9900"]
     DEBUG = True
+    # Show identity provider errors as a traceback instead of the login error page
+    SOCIAL_AUTH_RAISE_EXCEPTIONS = values.BooleanValue(
+        True, environ_name="SOCIAL_AUTH_RAISE_EXCEPTIONS", environ_prefix=None
+    )
 
     USE_SWAGGER = True
     CACHES = {

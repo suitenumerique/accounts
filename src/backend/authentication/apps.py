@@ -6,7 +6,7 @@ from django.apps import AppConfig
 from django.contrib.auth import user_logged_in, user_logged_out, user_login_failed
 from django.utils.translation import gettext_lazy as _
 
-from authentication import signals
+from authentication import checks, signals  # noqa: F401  # pylint: disable=unused-import
 
 
 class AuthenticationConfig(AppConfig):
