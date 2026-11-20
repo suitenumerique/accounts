@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:18+0000\n"
-"PO-Revision-Date: 2026-11-10 14:24\n"
+"POT-Creation-Date: 2026-11-18 08:28+0000\n"
+"PO-Revision-Date: 2026-11-19 18:07\n"
 "Last-Translator: \n"
 "Language-Team: Dutch\n"
 "Language: nl_NL\n"
@@ -19,11 +19,11 @@ msgstr ""
 
 #: authentication/admin.py:53
 msgid "claims"
-msgstr ""
+msgstr "claims"
 
 #: authentication/apps.py:16
 msgid "Accounts authentication application"
-msgstr ""
+msgstr "Accounts authenticatie applicatie"
 
 #: authentication/models.py:28 users/models.py:133
 msgid "user"
@@ -35,7 +35,7 @@ msgstr ""
 
 #: authentication/models.py:34
 msgid "identity provider user id"
-msgstr ""
+msgstr "identiteitsprovider gebruikers-id"
 
 #: core/admin.py:42 users/admin.py:71
 msgid "Personal info"
@@ -77,18 +77,18 @@ msgstr "Laatst gewijzigd op"
 msgid "date and time at which a record was last updated"
 msgstr "datum en tijd waarop dossier laatst was gewijzigd"
 
-#: core/templates/mail/html/template.html:153
-#: core/templates/mail/text/template.txt:3
+#: core/templates/mail/html/template.html:116
+#: core/templates/mail/text/template.txt:1
 msgid "Logo email"
 msgstr ""
 
-#: core/templates/mail/html/template.html:219
-#: core/templates/mail/text/template.txt:14
+#: core/templates/mail/html/template.html:182
+#: core/templates/mail/text/template.txt:12
 msgid " LaSuite, your collaborating place. "
 msgstr ""
 
-#: core/templates/mail/html/template.html:226
-#: core/templates/mail/text/template.txt:16
+#: core/templates/mail/html/template.html:189
+#: core/templates/mail/text/template.txt:14
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Geleverd door %(brandname)s "

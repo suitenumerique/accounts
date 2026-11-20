@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:18+0000\n"
-"PO-Revision-Date: 2026-11-10 14:24\n"
+"POT-Creation-Date: 2026-11-18 08:28+0000\n"
+"PO-Revision-Date: 2026-11-19 18:07\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -77,18 +77,18 @@ msgstr "Aktualisiert"
 msgid "date and time at which a record was last updated"
 msgstr "Datum und Uhrzeit, an dem zuletzt aktualisiert wurde"
 
-#: core/templates/mail/html/template.html:153
-#: core/templates/mail/text/template.txt:3
+#: core/templates/mail/html/template.html:116
+#: core/templates/mail/text/template.txt:1
 msgid "Logo email"
 msgstr "Logo-E-Mail"
 
-#: core/templates/mail/html/template.html:219
-#: core/templates/mail/text/template.txt:14
+#: core/templates/mail/html/template.html:182
+#: core/templates/mail/text/template.txt:12
 msgid " LaSuite, your collaborating place. "
 msgstr " LaSuite, Ihr gemeinsamer Ort. "
 
-#: core/templates/mail/html/template.html:226
-#: core/templates/mail/text/template.txt:16
+#: core/templates/mail/html/template.html:189
+#: core/templates/mail/text/template.txt:14
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Erstellt von %(brandname)s "
