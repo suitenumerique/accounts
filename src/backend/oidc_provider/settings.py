@@ -69,6 +69,9 @@ class OIDCProviderSettings:
     """
 
     # OAuth configuration
+    # The Application model is not swapped, this is oauth2_provider's default.
+    # Django needs it in the settings for the migrations of ApplicationPolicy.
+    OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
     _OAUTH2_PROVIDER_SCOPES = values.DictValue(
         default={
             # Base OIDC scopes
@@ -206,6 +209,7 @@ class OIDCProviderSettings:
             for config_key in keys
         }
         config["OIDC_RSA_PRIVATE_KEY"] = self._get_oidc_rsa_private_key()
+        config["APPLICATION_MODEL"] = self.OAUTH2_PROVIDER_APPLICATION_MODEL
         # Let django-oauth-toolkit prompt only when the OIDC request requires it.
         config["OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT"] = False
         # Disable tokens deletion on RP logout until we implement Back-Channel Logout,
