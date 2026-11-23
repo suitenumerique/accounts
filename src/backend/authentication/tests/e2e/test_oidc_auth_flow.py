@@ -32,7 +32,8 @@ from oidc_provider.factories import (
     REDIRECT_URI,
     SimpleApplicationFactory,
 )
-from users.models import User
+from users.imports import match_or_create_product_users
+from users.models import User, UserSource
 
 
 @pytest.fixture(name="upstream_oidc_mocks")
@@ -911,3 +912,61 @@ def test_oidc_auth_flow_existing_user_via_email(client, upstream_email, associat
         assert list(existing_user.identity_providers.values_list("uid", flat=True)) == [
             "existing-sub"
         ]
+
+
+@pytest.mark.usefixtures("upstream_oidc_mocks")
+def test_oidc_auth_flow_imported_user_first_login(client):
+    """
+    Verify the first login of a user imported from a product.
+
+    Scenario:
+    1. A product imported a user known by its upstream sub, with a former email.
+    2. Accounts redirects the user to the upstream OIDC provider.
+    3. The upstream OIDC provider calls back Accounts with this sub and another email.
+    4. Accounts logs the imported user in and updates its email and identity.
+    """
+    accounts_sub = match_or_create_product_users(
+        {"imported-sub": "former@example.com"}
+    )["imported-sub"].accounts_sub
+
+    oidc_upstream_response = client.get(reverse("authentication:login"), follow=False)
+    callback_params = QueryDict(urlparse(oidc_upstream_response.url).query)
+
+    with (
+        mock.patch(
+            "social_core.backends.open_id_connect.OpenIdConnectAuth.validate_and_return_id_token",
+            return_value={
+                "sub": "imported-sub",
+                "iss": "",
+                "aud": "",
+                "email": "current@example.com",
+            },
+        ),
+        mock.patch(
+            "authentication.backends.ProConnect.user_data",
+            return_value={
+                "sub": "imported-sub",
+                "email": "current@example.com",
+                "given_name": "Test",
+                "usual_name": "User",
+                "siret": "12345678900011",
+            },
+        ),
+    ):
+        callback_response = client.get(
+            reverse(
+                "authentication:social:complete", kwargs={"backend": "pro-connect"}
+            ),
+            {"code": "upstream-auth-code", "state": callback_params["state"]},
+            follow=False,
+        )
+
+    assert callback_response.status_code == 302
+    user = User.objects.get()
+    assert client.session["_auth_user_id"] == str(user.pk)
+    assert user.sub == accounts_sub
+    assert user.email == "current@example.com"
+    assert user.source == UserSource.IMPORT
+    identity = user.identity_providers.get()
+    assert identity.uid == "imported-sub"
+    assert identity.extra_data["siret"] == "12345678900011"

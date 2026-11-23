@@ -18,6 +18,7 @@ urlpatterns = [
     ),
     # Override oauth2_provider's IntrospectTokenView
     path("introspect/", views.IntrospectTokenView.as_view(), name="introspect"),
+    path("users-import/", views.UsersImportView.as_view(), name="users-import"),
     # Without OIDC_ISS_ENDPOINT, oauth2_provider derives the RFC 9207 `iss` authorization
     # response parameter from this route: it must live under the same prefix as the
     # OIDC discovery, otherwise `iss` falls back to the domain root.

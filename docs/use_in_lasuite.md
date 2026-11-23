@@ -142,3 +142,62 @@ If something other than `openid` is used in `OIDC_RS_SCOPES` then the desired sc
 #### lasuite.oidc_resource_server.backend.JWTResourceServerBackend
 
 > ⚠️ **Warning** Not yet supported
+
+### Importing the existing users
+
+A product which knows its users by their ProConnect sub can replace them by
+_accounts_ subs, without waiting for each user to log in. It sends its users by
+batches to `http://accounts:8000/api/v1.0/o/users-import/`, authenticated as
+the application: its `client_id` and `client_secret` in an HTTP Basic
+`Authorization` header. A user's access token (`Bearer`) is not accepted.
+In the _accounts_ admin, the policy of the product's application must allow it to
+"import users". Uncheck it once the import is done.
+
+```http
+POST /api/v1.0/o/users-import/
+Authorization: Basic base64(client_id:client_secret)
+Content-Type: application/json
+
+{
+  "users": [{"pk": "product-user-id", "sub": "proconnect-or-accounts-sub", "email": "user@example.com"}]
+}
+```
+
+Add `"dry_run": true` to report what would be created, without writing. Omitted
+or `false`, the users are imported. Any other value is refused with a `400`.
+
+Each sub is matched, in this order, with an _accounts_ sub, then with a ProConnect sub
+already known by _accounts_. The email is never used to match a user, as ProConnect
+may return former emails. An unknown sub creates an _accounts_ user, with the email
+as a starting value: it is updated at the first login. These users have the `import`
+source, to find them if they never log in.
+
+```json
+{
+  "counts": {"accounts": 1},
+  "results": [
+    {"pk": "product-user-id", "sub": "proconnect-or-accounts-sub", "status": "accounts", "accounts_sub": "..."}
+  ]
+}
+```
+
+| `status`            | Meaning                                                         | `accounts_sub` |
+|---------------------|-----------------------------------------------------------------|----------------|
+| `accounts`          | The sub is already an _accounts_ sub                            | the same sub   |
+| `identity_provider` | The ProConnect sub of an _accounts_ user                        | its sub        |
+| `created`           | Unknown sub, the user was created                               | its new sub    |
+| `to_create`         | Unknown sub, the user would be created (dry run only)           | `null`         |
+| `email_conflict`    | Unknown sub, but its email belongs to another _accounts_ user   | `null`         |
+| `ambiguous`         | The _accounts_ sub of a user and the ProConnect sub of another  | `null`         |
+| `invalid`           | The row has no valid `sub` or `email`                           | `null`         |
+
+Several rows may get the same `accounts_sub`: they are duplicates the product decides
+how to merge. A deactivated _accounts_ user is matched too: the product gets its sub,
+but this user cannot log in.
+
+The size of a batch is only limited by the size of the request body
+(`DATA_UPLOAD_MAX_MEMORY_SIZE`): _accounts_ creates the users by chunks, one
+transaction each. When a request fails midway, the users of the chunks already
+created stay created. Importing a batch again returns the same subs, so send it again:
+the users already created come back as `identity_provider`. A `409` response means a
+concurrent import or login created some of the users first.

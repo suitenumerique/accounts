@@ -1,12 +1,18 @@
 """Views for OIDC provider."""
 
+import json
 import logging
+from collections import Counter
+from typing import Any, NamedTuple
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 import requests
@@ -28,11 +34,15 @@ from oauth2_provider.views import (
 from oauth2_provider.views import (
     RPInitiatedLogoutView as OAuth2RPInitiatedLogoutView,
 )
+from oauth2_provider.views.mixins import OAuthLibMixin
+from oauthlib.common import Request as OauthlibRequest
 
 from core.utils.state import set_state
 from core.utils.urls import add_query_params
 
 from authentication.models import IdentityProviderUser
+from oidc_provider.models import ApplicationPolicy
+from users.imports import match_or_create_product_users
 
 logger = logging.getLogger(__name__)
 
@@ -298,3 +308,164 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
                 return response
 
         return self.INACTIVE_RESPONSE
+
+
+class CleanedRow(NamedTuple):
+    """A row of a users import, with a sub and an email only when it is valid."""
+
+    pk: Any
+    sub: str | None = None
+    email: str | None = None
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_not_required, name="dispatch")
+class UsersImportView(OAuthLibMixin, View):
+    """
+    Match the users of a product with accounts users, creating the unknown ones.
+
+    Products call this endpoint by batches to replace the identity provider's
+    subs of their users by accounts subs. See `users.imports.match_or_create_product_users`.
+
+    To access this view the request must pass the client credentials with
+    HTTP Basic authentication, and the policy of the client must allow it to
+    import users. A Bearer token is not enough: users must not be created on
+    behalf of another user.
+
+    Body (JSON):
+        {"users": [{"pk": "...", "sub": "...", "email": "..."}]}
+
+    `dry_run` is optional: `true` reports what would be created, without writing.
+    `pk` is the product's own identifier, returned as is. A row without a
+    valid `sub` or `email` is returned with the `invalid` status.
+    """
+
+    http_method_names = ["post", "options"]
+    INVALID_STATUS = "invalid"
+
+    @staticmethod
+    def _error_response(error, description, status=400):
+        return JsonResponse(
+            {"error": error, "error_description": description}, status=status
+        )
+
+    def _get_client(self, request):
+        """Return the client authenticated by its credentials, None otherwise.
+
+        Same as OAuthLibCore.authenticate_client, which only returns a boolean:
+        the client is needed for its policy.
+        """
+        core = self.get_oauthlib_core()
+        # pylint: disable=protected-access
+        uri, http_method, body, headers = core._extract_params(request)  # noqa: SLF001
+        oauth_request = OauthlibRequest(uri, http_method, body, headers)
+        if not core.server.request_validator.authenticate_client(oauth_request):
+            return None
+        return oauth_request.client
+
+    @staticmethod
+    def _clean_row(row):
+        """Return the pk of a row, with its sub and email only when they are valid."""
+        if not isinstance(row, dict):
+            return CleanedRow(pk=None)
+        pk, sub, email = row.get("pk"), row.get("sub"), row.get("email")
+        if not isinstance(sub, str) or not 0 < len(sub) <= 255:
+            return CleanedRow(pk)
+        if not isinstance(email, str):
+            return CleanedRow(pk)
+        try:
+            validate_email(email)
+        except ValidationError:
+            return CleanedRow(pk)
+        return CleanedRow(pk, sub, email)
+
+    def _client_error_response(self, client):
+        """Return the error response when the client is refused, None otherwise."""
+        if client is None:
+            return self._error_response(
+                "invalid_client", "Client authentication failed.", status=401
+            )
+        if not ApplicationPolicy.for_application(client).import_users:
+            return self._error_response(
+                "unauthorized_client",
+                "This client is not allowed to import users.",
+                status=403,
+            )
+        return None
+
+    @staticmethod
+    def _parse_body(body):
+        """Return the rows, the dry run flag and an error description, if any."""
+        try:
+            payload = json.loads(body)
+        except ValueError:
+            return None, None, "The body must be JSON."
+        rows = payload.get("users") if isinstance(payload, dict) else None
+        if not isinstance(rows, list):
+            return None, None, "The users parameter must be a list."
+        dry_run = payload.get("dry_run", False)
+        if not isinstance(dry_run, bool):
+            return None, None, "The dry_run parameter must be a boolean."
+        return rows, dry_run, None
+
+    def _build_results(self, cleaned_rows, results_by_sub):
+        """Return the result of each row, in the order of the rows."""
+        results = []
+        for cleaned_row in cleaned_rows:
+            result = results_by_sub[cleaned_row.sub] if cleaned_row.sub else None
+            results.append(
+                {
+                    "pk": cleaned_row.pk,
+                    "sub": cleaned_row.sub,
+                    "status": result.status if result else self.INVALID_STATUS,
+                    "accounts_sub": result.accounts_sub if result else None,
+                }
+            )
+        return results
+
+    def post(self, request, *args, **kwargs):
+        """Authenticate the client and return one result per user of the batch."""
+        # A multipart body is consumed by the client authentication, and
+        # request.body cannot be read afterwards. Read it first so an invalid
+        # body is a 400.
+        body = request.body
+        client = self._get_client(request)
+        if error_response := self._client_error_response(client):
+            return error_response
+        application = (
+            f"{client.name} ({client.client_id})" if client.name else client.client_id
+        )
+        rows, dry_run, error = self._parse_body(body)
+        if error:
+            logger.warning(
+                "Invalid users import request body from %s: %s", application, error
+            )
+            return self._error_response("invalid_request", error)
+
+        cleaned_rows = [self._clean_row(row) for row in rows]
+        # accounts matches and creates the users by sub: several rows with the
+        # same sub are the same person, and get the same result. Only the email
+        # of the first one is used, to create the user.
+        emails_by_sub = {}
+        for cleaned_row in cleaned_rows:
+            if cleaned_row.sub:
+                emails_by_sub.setdefault(cleaned_row.sub, cleaned_row.email)
+        try:
+            results_by_sub = match_or_create_product_users(
+                emails_by_sub, dry_run=dry_run
+            )
+        except IntegrityError:
+            # A concurrent import created some of these users first.
+            return self._error_response(
+                "conflict", "Concurrent import, retry the request.", status=409
+            )
+
+        results = self._build_results(cleaned_rows, results_by_sub)
+        counts = Counter(result["status"] for result in results)
+        logger.info(
+            "Users import by %s%s: %s",
+            application,
+            " (dry run)" if dry_run else "",
+            dict(counts),
+        )
+        return JsonResponse({"counts": counts, "results": results})

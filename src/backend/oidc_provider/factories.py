@@ -6,6 +6,8 @@ import factory.fuzzy
 from faker import Faker
 from oauth2_provider.models import Application, get_application_model
 
+from oidc_provider.models import ApplicationPolicy
+
 fake = Faker()
 
 
@@ -47,3 +49,13 @@ class SimpleApplicationFactory(ApplicationFactory):
     client_secret = CLIENT_SECRET
     redirect_uris = REDIRECT_URI
     post_logout_redirect_uris = LOGOUT_REDIRECT_URI
+
+
+class ApplicationPolicyFactory(factory.django.DjangoModelFactory):
+    """Factory for the accounts' policy for an OAuth2 application."""
+
+    class Meta:
+        model = ApplicationPolicy
+
+    application = factory.SubFactory(ApplicationFactory)
+    import_users = False

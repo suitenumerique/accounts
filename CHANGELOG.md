@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- ✨(users) add the users import endpoint for the products
+
 ### Fixed
 
 - ⚡️(admin) remove the `assoc_type` filter of the associations admin
