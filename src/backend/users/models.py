@@ -67,6 +67,13 @@ class UserManager(auth_models.UserManager):
     create_superuser.alters_data = True
 
 
+class UserSource(models.TextChoices):
+    """How a user was created in accounts."""
+
+    LOGIN = "login", _("Login")
+    IMPORT = "import", _("Import from a product")
+
+
 class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin):
     """User model to work with OIDC only authentication."""
 
@@ -121,6 +128,17 @@ class User(AbstractBaseUser, core_models.BaseModel, auth_models.PermissionsMixin
             "Whether this user should be treated as active. "
             "Unselect this instead of deleting accounts."
         ),
+    )
+    source = models.CharField(
+        _("source"),
+        max_length=255,
+        choices=UserSource.choices,
+        default=UserSource.LOGIN,
+        # Kept in the database for the code which does not know this field yet,
+        # e.g. the pods of the previous release during a deployment.
+        db_default=UserSource.LOGIN,
+        editable=False,
+        help_text=_("How the user was created."),
     )
 
     objects = UserManager()

@@ -91,7 +91,7 @@ class UserAdmin(core_admin.UserAdmin):
                 ),
             },
         ),
-        (_("Important dates"), {"fields": ("created_at", "updated_at")}),
+        (_("Audit"), {"fields": ("source", "created_at", "updated_at")}),
     )
     inlines = (IdentityProviderUserInline,)
     list_display = tuple(
@@ -99,7 +99,12 @@ class UserAdmin(core_admin.UserAdmin):
         for f in core_admin.UserAdmin.list_display
         if f not in USER_FIELDS_NOT_IMPLEMENTED
     )
-    list_filter = (*core_admin.UserAdmin.list_filter, NotNormalizedEmailFilter)
+    list_filter = (
+        *core_admin.UserAdmin.list_filter,
+        "source",
+        NotNormalizedEmailFilter,
+    )
+    readonly_fields = (*core_admin.UserAdmin.readonly_fields, "source")
     search_fields = tuple(
         f
         for f in core_admin.UserAdmin.search_fields
