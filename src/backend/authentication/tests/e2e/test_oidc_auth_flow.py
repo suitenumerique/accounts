@@ -393,7 +393,9 @@ def test_full_oidc_auth_flow_associated_user(settings, client):  # pylint: disab
     ).extra_data == {
         "_oidc_id_token_context": {"aud": "", "iss": "", "sub": expected_user_info.sub},
         "access_token": "upstream-access-token",
-        "auth_time": int(user.last_login.timestamp()),
+        # `auth_time` and `last_login` are computed at different moments and may
+        # straddle a second boundary.
+        "auth_time": pytest.approx(int(user.last_login.timestamp()), abs=1),
         "email": expected_user_info.email,
         "email_verified": None,
         "given_name": expected_user_info.short_name,
