@@ -371,6 +371,9 @@ class Base(AuthenticationSettings, OIDCProviderSettings, Configuration):
     FRONTEND_LOGOUT_URL = values.Value(
         None, environ_name="FRONTEND_LOGOUT_URL", environ_prefix=None
     )
+    FRONTEND_FEEDBACK_FORM_URL = values.Value(
+        None, environ_name="FRONTEND_FEEDBACK_FORM_URL", environ_prefix=None
+    )
 
     # End-to-end encryption service (vault + interface iframes loaded by the frontend)
     ENCRYPTION_FEATURE_ENABLED = values.BooleanValue(

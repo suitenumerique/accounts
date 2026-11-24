@@ -24,6 +24,7 @@ from core import factories
     ENCRYPTION_INTERFACE_URL="https://encryption.test",
     ENCRYPTION_VAULT_URL="https://data.encryption.test",
     FRONTEND_CSS_URL="http://testcss/",
+    FRONTEND_FEEDBACK_FORM_URL="http://testfeedback/",
     FRONTEND_JS_URL="http://testjs/",
     FRONTEND_THEME="test-theme",
     MEDIA_BASE_URL="http://testserver/",
@@ -50,6 +51,7 @@ def test_api_config(is_authenticated):
         "ENCRYPTION_VAULT_URL": "https://data.encryption.test",
         "ENVIRONMENT": "test",
         "FRONTEND_CSS_URL": "http://testcss/",
+        "FRONTEND_FEEDBACK_FORM_URL": "http://testfeedback/",
         "FRONTEND_JS_URL": "http://testjs/",
         "FRONTEND_THEME": "test-theme",
         "LANGUAGES": [

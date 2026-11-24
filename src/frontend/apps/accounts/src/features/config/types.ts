@@ -8,6 +8,7 @@ export interface Config {
   LANGUAGE_CODE: string;
   FRONTEND_THEME?: string;
   FRONTEND_CSS_URL?: string;
+  FRONTEND_FEEDBACK_FORM_URL?: string | null;
   FRONTEND_JS_URL?: string;
   ENCRYPTION_FEATURE_ENABLED?: boolean;
   ENCRYPTION_VAULT_URL?: string | null;
