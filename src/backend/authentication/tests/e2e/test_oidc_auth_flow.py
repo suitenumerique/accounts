@@ -229,6 +229,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
             properties={
                 **person_properties,
                 "$set": person_properties,
+                "$set_once": {"source": "login"},
                 **common_properties,
             },
         ),
@@ -240,6 +241,7 @@ def test_full_oidc_auth_flow_new_user(responses, settings, client):  # pylint: d
                 "backend_sub": sub,
                 **person_properties,
                 "$set": person_properties,
+                "$set_once": {"source": "login"},
                 **common_properties,
             },
         ),

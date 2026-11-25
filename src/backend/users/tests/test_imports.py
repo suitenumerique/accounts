@@ -185,8 +185,65 @@ def test_match_or_create_product_users_by_chunks(django_assert_num_queries):
     )
 
 
+def test_match_or_create_product_users_capture_events(
+    settings, django_capture_on_commit_callbacks
+):
+    """A created user sends the events of a user created and associated at login."""
+    settings.POSTHOG_KEY = {"id": "posthog-key", "host": "https://posthog.test"}
+
+    with (
+        mock.patch("posthog.capture") as posthog_capture_mock,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        match_or_create_product_users({"unknown-sub": "new@example.com"})
+
+    user = User.objects.get()
+    person_properties = {"sub": user.sub, "email": "new@example.com"}
+    properties = {
+        **person_properties,
+        "$set": person_properties,
+        "$set_once": {"source": "import"},
+        "environment": settings.ENVIRONMENT,
+        "release": settings.RELEASE,
+    }
+    assert posthog_capture_mock.call_args_list == [
+        mock.call("account:created", distinct_id=str(user.pk), properties=properties),
+        mock.call(
+            "account:associated",
+            distinct_id=str(user.pk),
+            properties={
+                "backend": "pro-connect",
+                "backend_sub": "unknown-sub",
+                **properties,
+            },
+        ),
+    ]
+
+
+def test_match_or_create_product_users_capture_no_events(
+    settings, django_capture_on_commit_callbacks
+):
+    """The matched users, and the users of a dry run, send no events."""
+    settings.POSTHOG_KEY = {"id": "posthog-key", "host": "https://posthog.test"}
+    user = UserFactory()
+    IdentityProviderUserFactory(uid="proconnect-sub")
+
+    with (
+        mock.patch("posthog.capture") as posthog_capture_mock,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        match_or_create_product_users(
+            {user.sub: user.email, "proconnect-sub": "whatever@example.com"}
+        )
+        match_or_create_product_users({"unknown-sub": "new@example.com"}, dry_run=True)
+
+    posthog_capture_mock.assert_not_called()
+
+
 @mock.patch("users.imports.CREATE_CHUNK_SIZE", 2)
-def test_match_or_create_product_users_failing_chunk():
+def test_match_or_create_product_users_failing_chunk(
+    django_capture_on_commit_callbacks,
+):
     """A failing chunk keeps the previous ones: the batch can be sent again."""
     emails_by_sub = {f"sub-{i}": f"user-{i}@example.com" for i in range(5)}
     bulk_create = IdentityProviderUser.objects.bulk_create
@@ -205,10 +262,13 @@ def test_match_or_create_product_users_failing_chunk():
             side_effect=fail_on_second_chunk,
         ),
         pytest.raises(IntegrityError),
+        django_capture_on_commit_callbacks() as callbacks,
     ):
         match_or_create_product_users(emails_by_sub)
 
     assert User.objects.count() == 2
+    # Only the events of the first chunk are sent.
+    assert len(callbacks) == 1
 
     results = match_or_create_product_users(emails_by_sub)
 

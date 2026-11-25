@@ -9,6 +9,7 @@ and this project adheres to
 ### Added
 
 - ✨(users) add the users import endpoint for the products
+- ✨(analytics) track the users imports
 
 ### Fixed
 

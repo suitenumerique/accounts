@@ -58,6 +58,9 @@ def capture_events(
             user.identity_providers.order_by("-updated_at"), "siret"
         ),
     }
+    # Set once on the person: the source distinguishes the users created at
+    # login from the imported ones.
+    set_once_properties = {"source": user.source}
     if is_new:
         analytics.capture_event(
             "account:created",
@@ -65,6 +68,7 @@ def capture_events(
             properties={
                 **person_properties,
                 "$set": person_properties,
+                "$set_once": set_once_properties,
             },
         )
     if new_association:
@@ -76,6 +80,7 @@ def capture_events(
                 "backend_sub": social.uid,
                 **person_properties,
                 "$set": person_properties,
+                "$set_once": set_once_properties,
             },
         )
     return None

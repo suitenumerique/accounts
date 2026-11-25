@@ -1,10 +1,13 @@
 """Import the users known by a product into accounts."""
 
 import dataclasses
+import functools
 import itertools
 
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+
+from core.utils import analytics
 
 from authentication.models import IdentityProviderName, IdentityProviderUser
 
@@ -32,6 +35,30 @@ class ImportResult:
 
     status: ImportStatus
     accounts_sub: str | None = None
+
+
+def _capture_events(subs, users_by_sub, provider):
+    """Track the imported users, with the same events as at login.
+
+    The source of the user, set once on the person, distinguishes the imported
+    users from the ones created at login.
+    """
+    for sub in subs:
+        user = users_by_sub[sub]
+        person_properties = {"sub": str(user.sub), "email": user.email}
+        properties = {
+            **person_properties,
+            "$set": person_properties,
+            "$set_once": {"source": user.source},
+        }
+        analytics.capture_event(
+            "account:created", distinct_id=str(user.pk), properties={**properties}
+        )
+        analytics.capture_event(
+            "account:associated",
+            distinct_id=str(user.pk),
+            properties={"backend": provider, "backend_sub": sub, **properties},
+        )
 
 
 def match_or_create_product_users(
@@ -131,6 +158,10 @@ def match_or_create_product_users(
             IdentityProviderUser.objects.bulk_create(
                 IdentityProviderUser(user=users_by_sub[sub], provider=provider, uid=sub)
                 for sub in sorted(chunk)
+            )
+            # Never sent for a chunk rolled back.
+            transaction.on_commit(
+                functools.partial(_capture_events, chunk, users_by_sub, provider)
             )
     results.update(
         {
