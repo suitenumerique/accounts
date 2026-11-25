@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:18+0000\n"
-"PO-Revision-Date: 2026-11-10 14:24\n"
+"POT-Creation-Date: 2026-11-25 13:40+0000\n"
+"PO-Revision-Date: 2026-11-25 14:20\n"
 "Last-Translator: \n"
 "Language-Team: Ukrainian\n"
 "Language: uk_UA\n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Crowdin-File: backend-accounts.pot\n"
 "X-Crowdin-File-ID: 46\n"
 
-#: authentication/admin.py:53
+#: authentication/admin.py:55
 msgid "claims"
 msgstr "претензії"
 
@@ -25,7 +25,7 @@ msgstr "претензії"
 msgid "Accounts authentication application"
 msgstr "Додаток аутентифікації облікових записів"
 
-#: authentication/models.py:28 users/models.py:133
+#: authentication/models.py:28 users/models.py:151
 msgid "user"
 msgstr "користувач"
 
@@ -45,7 +45,7 @@ msgstr "Особисті дані"
 msgid "Permissions"
 msgstr "Дозволи"
 
-#: core/admin.py:68 users/admin.py:94
+#: core/admin.py:68
 msgid "Important dates"
 msgstr "Важливі дати"
 
@@ -77,25 +77,45 @@ msgstr "оновлено"
 msgid "date and time at which a record was last updated"
 msgstr "дата і час, коли запис був востаннє оновлений"
 
-#: core/templates/mail/html/template.html:153
-#: core/templates/mail/text/template.txt:3
+#: core/templates/mail/html/template.html:116
+#: core/templates/mail/text/template.txt:1
 msgid "Logo email"
 msgstr "Логотип пошти"
 
-#: core/templates/mail/html/template.html:219
-#: core/templates/mail/text/template.txt:14
+#: core/templates/mail/html/template.html:182
+#: core/templates/mail/text/template.txt:12
 msgid " LaSuite, your collaborating place. "
 msgstr " LaSuite, місце для вашої співпраці. "
 
-#: core/templates/mail/html/template.html:226
-#: core/templates/mail/text/template.txt:16
+#: core/templates/mail/html/template.html:189
+#: core/templates/mail/text/template.txt:14
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Запрошення отримане від %(brandname)s "
 
+#: oidc_provider/admin.py:27 oidc_provider/models.py:25
+msgid "import users"
+msgstr ""
+
 #: oidc_provider/apps.py:15
 msgid "Accounts OIDC Provider application"
 msgstr "Додаток постачальника облікових записів OIDC"
+
+#: oidc_provider/models.py:22
+msgid "application"
+msgstr ""
+
+#: oidc_provider/models.py:27
+msgid "Allow the application to import its users, creating the unknown ones. Transitional: only while the product replaces its identity provider's subs by accounts' subs."
+msgstr ""
+
+#: oidc_provider/models.py:35
+msgid "application policy"
+msgstr ""
+
+#: oidc_provider/models.py:36
+msgid "application policies"
+msgstr ""
 
 #: users/admin.py:38
 msgid "email status"
@@ -105,67 +125,111 @@ msgstr "стан e-mail"
 msgid "Not normalized"
 msgstr "Не нормалізовано"
 
+#: users/admin.py:94
+msgid "Audit"
+msgstr ""
+
 #: users/apps.py:11
 msgid "Accounts users application"
 msgstr "Додаток облікових даних"
 
+#: users/imports.py:24
+msgid "Already an accounts sub"
+msgstr ""
+
+#: users/imports.py:25
+msgid "Identity provider sub of a user"
+msgstr ""
+
+#: users/imports.py:26
+msgid "User created"
+msgstr ""
+
+#: users/imports.py:27
+msgid "User to create"
+msgstr ""
+
+#: users/imports.py:28
+msgid "Email of another user"
+msgstr ""
+
+#: users/imports.py:29
+msgid "Sub of a user and identity provider sub of another"
+msgstr ""
+
+#: users/models.py:73
+msgid "Login"
+msgstr ""
+
 #: users/models.py:74
+msgid "Import from a product"
+msgstr ""
+
+#: users/models.py:81
 msgid "sub"
 msgstr "вкладений документ"
 
-#: users/models.py:75
+#: users/models.py:82
 msgid "Required. 255 characters or fewer. ASCII characters only."
 msgstr "Обов'язкове. 255 символів або менше. Тільки символи ASCII."
 
-#: users/models.py:82
+#: users/models.py:89
 msgid "full name"
 msgstr "повне ім'я"
 
-#: users/models.py:84
+#: users/models.py:91
 msgid "short name"
 msgstr "коротке ім'я"
 
-#: users/models.py:90
+#: users/models.py:97
 msgid "email address"
 msgstr "електронна адреса"
 
-#: users/models.py:96
+#: users/models.py:103
 msgid "language"
 msgstr "мова"
 
-#: users/models.py:97
+#: users/models.py:104
 msgid "The language in which the user wants to see the interface."
 msgstr "Мова, якою користувач хоче бачити інтерфейс."
 
-#: users/models.py:105
+#: users/models.py:112
 msgid "The timezone in which the user wants to see times."
 msgstr "Часовий пояс, в якому користувач хоче бачити час."
 
-#: users/models.py:108
+#: users/models.py:115
 msgid "device"
 msgstr "пристрій"
 
-#: users/models.py:110
+#: users/models.py:117
 msgid "Whether the user is a device or a real user."
 msgstr "Чи є користувач пристроєм чи реальним користувачем."
 
-#: users/models.py:113
+#: users/models.py:120
 msgid "staff status"
 msgstr "статус співробітника"
 
-#: users/models.py:115
+#: users/models.py:122
 msgid "Whether the user can log into this admin site."
 msgstr "Чи може користувач увійти на цей сайт адміністратора."
 
-#: users/models.py:118
+#: users/models.py:125
 msgid "active"
 msgstr "активний"
 
-#: users/models.py:121
+#: users/models.py:128
 msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
 msgstr "Чи слід ставитися до цього користувача як до активного. Зніміть вибір замість видалення облікового запису."
 
-#: users/models.py:134
+#: users/models.py:133
+msgid "source"
+msgstr ""
+
+#: users/models.py:141
+msgid "How the user was created."
+msgstr ""
+
+#: users/models.py:152
 msgid "users"
 msgstr "користувачі"
 
