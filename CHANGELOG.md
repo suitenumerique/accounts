@@ -6,6 +6,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [v0.6.0] - 2026-11-25
+
 ### Added
 
 - ✨(users) add the users import endpoint for the products
@@ -107,7 +109,8 @@ and this project adheres to
 - 🩹(frontend) remove unused language
 - 🩹(frontend) enable trailingSlash to fix static export routes
 
-[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.5.1...main
+[unreleased]: https://github.com/suitenumerique/accounts/compare/v0.6.0...main
+[v0.6.0]: https://github.com/suitenumerique/accounts/compare/v0.5.1...v0.6.0
 [v0.5.1]: https://github.com/suitenumerique/accounts/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/suitenumerique/accounts/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/suitenumerique/accounts/compare/v0.3.0...v0.4.0
