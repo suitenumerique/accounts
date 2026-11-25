@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lasuite-accounts\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:18+0000\n"
-"PO-Revision-Date: 2026-11-10 14:24\n"
+"POT-Creation-Date: 2026-11-25 13:40+0000\n"
+"PO-Revision-Date: 2026-11-25 14:20\n"
 "Last-Translator: \n"
 "Language-Team: Dutch\n"
 "Language: nl_NL\n"
@@ -17,15 +17,15 @@ msgstr ""
 "X-Crowdin-File: backend-accounts.pot\n"
 "X-Crowdin-File-ID: 46\n"
 
-#: authentication/admin.py:53
+#: authentication/admin.py:55
 msgid "claims"
-msgstr ""
+msgstr "claims"
 
 #: authentication/apps.py:16
 msgid "Accounts authentication application"
-msgstr ""
+msgstr "Accounts authenticatie applicatie"
 
-#: authentication/models.py:28 users/models.py:133
+#: authentication/models.py:28 users/models.py:151
 msgid "user"
 msgstr "gebruiker"
 
@@ -35,7 +35,7 @@ msgstr ""
 
 #: authentication/models.py:34
 msgid "identity provider user id"
-msgstr ""
+msgstr "identiteitsprovider gebruikers-id"
 
 #: core/admin.py:42 users/admin.py:71
 msgid "Personal info"
@@ -45,7 +45,7 @@ msgstr "Persoonlijke informatie"
 msgid "Permissions"
 msgstr "Machtigingen"
 
-#: core/admin.py:68 users/admin.py:94
+#: core/admin.py:68
 msgid "Important dates"
 msgstr "Belangrijke data"
 
@@ -77,24 +77,44 @@ msgstr "Laatst gewijzigd op"
 msgid "date and time at which a record was last updated"
 msgstr "datum en tijd waarop dossier laatst was gewijzigd"
 
-#: core/templates/mail/html/template.html:153
-#: core/templates/mail/text/template.txt:3
+#: core/templates/mail/html/template.html:116
+#: core/templates/mail/text/template.txt:1
 msgid "Logo email"
 msgstr ""
 
-#: core/templates/mail/html/template.html:219
-#: core/templates/mail/text/template.txt:14
+#: core/templates/mail/html/template.html:182
+#: core/templates/mail/text/template.txt:12
 msgid " LaSuite, your collaborating place. "
 msgstr ""
 
-#: core/templates/mail/html/template.html:226
-#: core/templates/mail/text/template.txt:16
+#: core/templates/mail/html/template.html:189
+#: core/templates/mail/text/template.txt:14
 #, python-format
 msgid " Brought to you by %(brandname)s "
 msgstr " Geleverd door %(brandname)s "
 
+#: oidc_provider/admin.py:27 oidc_provider/models.py:25
+msgid "import users"
+msgstr ""
+
 #: oidc_provider/apps.py:15
 msgid "Accounts OIDC Provider application"
+msgstr ""
+
+#: oidc_provider/models.py:22
+msgid "application"
+msgstr ""
+
+#: oidc_provider/models.py:27
+msgid "Allow the application to import its users, creating the unknown ones. Transitional: only while the product replaces its identity provider's subs by accounts' subs."
+msgstr ""
+
+#: oidc_provider/models.py:35
+msgid "application policy"
+msgstr ""
+
+#: oidc_provider/models.py:36
+msgid "application policies"
 msgstr ""
 
 #: users/admin.py:38
@@ -105,67 +125,111 @@ msgstr ""
 msgid "Not normalized"
 msgstr ""
 
+#: users/admin.py:94
+msgid "Audit"
+msgstr ""
+
 #: users/apps.py:11
 msgid "Accounts users application"
 msgstr ""
 
+#: users/imports.py:24
+msgid "Already an accounts sub"
+msgstr ""
+
+#: users/imports.py:25
+msgid "Identity provider sub of a user"
+msgstr ""
+
+#: users/imports.py:26
+msgid "User created"
+msgstr ""
+
+#: users/imports.py:27
+msgid "User to create"
+msgstr ""
+
+#: users/imports.py:28
+msgid "Email of another user"
+msgstr ""
+
+#: users/imports.py:29
+msgid "Sub of a user and identity provider sub of another"
+msgstr ""
+
+#: users/models.py:73
+msgid "Login"
+msgstr ""
+
 #: users/models.py:74
+msgid "Import from a product"
+msgstr ""
+
+#: users/models.py:81
 msgid "sub"
 msgstr "id"
 
-#: users/models.py:75
+#: users/models.py:82
 msgid "Required. 255 characters or fewer. ASCII characters only."
 msgstr "Vereist. 255 tekens of minder. Alleen ASCII tekens."
 
-#: users/models.py:82
+#: users/models.py:89
 msgid "full name"
 msgstr "volledige naam"
 
-#: users/models.py:84
+#: users/models.py:91
 msgid "short name"
 msgstr "gebruikersnaam"
 
-#: users/models.py:90
+#: users/models.py:97
 msgid "email address"
 msgstr ""
 
-#: users/models.py:96
+#: users/models.py:103
 msgid "language"
 msgstr "taal"
 
-#: users/models.py:97
+#: users/models.py:104
 msgid "The language in which the user wants to see the interface."
 msgstr "De taal waarin de gebruiker de interface wil zien."
 
-#: users/models.py:105
+#: users/models.py:112
 msgid "The timezone in which the user wants to see times."
 msgstr "De tijdzone waarin de gebruiker de tijden wil zien."
 
-#: users/models.py:108
+#: users/models.py:115
 msgid "device"
 msgstr "apparaat"
 
-#: users/models.py:110
+#: users/models.py:117
 msgid "Whether the user is a device or a real user."
 msgstr "Of de gebruiker een apparaat is of een echte gebruiker."
 
-#: users/models.py:113
+#: users/models.py:120
 msgid "staff status"
 msgstr "beheerder status"
 
-#: users/models.py:115
+#: users/models.py:122
 msgid "Whether the user can log into this admin site."
 msgstr "Of de gebruiker kan inloggen in het beheer gedeelte."
 
-#: users/models.py:118
+#: users/models.py:125
 msgid "active"
 msgstr "actief"
 
-#: users/models.py:121
+#: users/models.py:128
 msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
 msgstr "Of een gebruiker als actief moet worden beschouwd. Deselecteer dit in plaats van het account te deleten."
 
-#: users/models.py:134
+#: users/models.py:133
+msgid "source"
+msgstr ""
+
+#: users/models.py:141
+msgid "How the user was created."
+msgstr ""
+
+#: users/models.py:152
 msgid "users"
 msgstr "gebruikers"
 
