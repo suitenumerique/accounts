@@ -6,6 +6,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- 🚩(auth) require MFA on ProConnect sign-in behind the
+  `SOCIAL_AUTH_PRO_CONNECT_MFA_REQUIRED` feature flag
+
 ### Fixed
 
 - 🐛(auth) redirect to an error page when the identity provider fails,

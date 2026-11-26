@@ -12,6 +12,8 @@ from social_core.utils import get_querystring, parse_qs
 
 from core.utils.urls import get_query_params
 
+from authentication.backends import AuthACRNotAllowed
+
 
 class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
     """Test the ProConnect backend with Python Social Auth testing utilities."""
@@ -52,9 +54,17 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
             algorithm="RS256",
         )
 
+        self.id_token_acr = None
+
         # Clear the backend cache
         self.backend.oidc_config.invalidate()
         self.backend.get_jwks_keys.invalidate()
+
+    def get_id_token(self, *args, **kwargs):
+        id_token = super().get_id_token(*args, **kwargs)
+        if self.id_token_acr is not None:
+            id_token["acr"] = self.id_token_acr
+        return id_token
 
     def extra_settings(self):
         settings = super().extra_settings()
@@ -180,14 +190,21 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
         )
         self.assertEqual(self.backend.auth_params()["login_hint"], "direct@example.com")
 
-    def test_acr_values_auth_params(self):
-        """Test ACR_VALUES are also requested as individual claims"""
+    def set_acr_settings(self, **acr_settings):
+        """Configure the ACR related settings of the backend."""
         self.strategy.set_settings(
             {
                 **self.extra_settings(),
-                f"SOCIAL_AUTH_{self.name}_ACR_VALUES": "acr1 acr2",
+                **{
+                    f"SOCIAL_AUTH_{self.name}_{name}": value
+                    for name, value in acr_settings.items()
+                },
             }
         )
+
+    def test_acr_values_auth_params(self):
+        """Test ACR_VALUES are requested as a voluntary claim without MFA"""
+        self.set_acr_settings(ACR_VALUES="acr1 acr2", MFA_ACR_VALUES="mfa1 mfa2")
 
         params = self.backend.auth_params()
         self.assertEqual(params["acr_values"], "acr1 acr2")
@@ -197,3 +214,53 @@ class ProConnectTest(open_id_connect.OpenIdConnectTest, BaseAuthUrlTestMixin):
                 {"id_token": {"acr": {"essential": False, "values": ["acr1", "acr2"]}}}
             ),
         )
+
+    def test_mfa_acr_values_auth_params(self):
+        """Test MFA_ACR_VALUES are requested as an essential claim with MFA"""
+        self.set_acr_settings(
+            MFA_REQUIRED=True, ACR_VALUES="acr1 acr2", MFA_ACR_VALUES="mfa1 mfa2"
+        )
+
+        params = self.backend.auth_params()
+        self.assertEqual(params["acr_values"], "mfa1 mfa2")
+        self.assertEqual(
+            params["claims"],
+            json.dumps(
+                {"id_token": {"acr": {"essential": True, "values": ["mfa1", "mfa2"]}}}
+            ),
+        )
+
+    def test_mfa_acr_accepted(self):
+        """Test the login succeeds with MFA when the ID token `acr` is an MFA one"""
+        self.set_acr_settings(MFA_REQUIRED=True, MFA_ACR_VALUES="eidas1-mfa eidas2")
+        self.id_token_acr = "eidas2"
+
+        self.do_login()
+
+    def test_mfa_acr_not_requested_rejected(self):
+        """Test the login fails with MFA when the ID token `acr` is not an MFA one"""
+        self.set_acr_settings(MFA_REQUIRED=True, MFA_ACR_VALUES="eidas1-mfa eidas2")
+        self.id_token_acr = "eidas1"
+
+        with self.assertRaisesRegex(
+            AuthACRNotAllowed,
+            "ACR not allowed: 'eidas1', expected one of eidas1-mfa eidas2",
+        ):
+            self.do_login()
+
+    def test_mfa_acr_missing_rejected(self):
+        """Test the login fails with MFA when the ID token has no `acr`"""
+        self.set_acr_settings(MFA_REQUIRED=True, MFA_ACR_VALUES="eidas1-mfa eidas2")
+
+        with self.assertRaisesRegex(
+            AuthACRNotAllowed,
+            "ACR not allowed: None, expected one of eidas1-mfa eidas2",
+        ):
+            self.do_login()
+
+    def test_acr_not_checked_without_mfa(self):
+        """Test any `acr` is accepted when MFA is not required"""
+        self.set_acr_settings(ACR_VALUES="eidas1-mfa", MFA_ACR_VALUES="eidas1-mfa")
+        self.id_token_acr = "eidas1"
+
+        self.do_login()
