@@ -61,6 +61,23 @@ def _capture_events(subs, users_by_sub, provider):
         )
 
 
+def _emails_are_likewise(a, b):
+    # Exact match
+    if a == b:
+        return True
+
+    # Match without domain, it could be a homonym, but we only check the email in case
+    # the sub (UUID v4) could be identical so the probability of both happening is abysmal.
+    a_local_part, b_local_part = (
+        a.rsplit("@", maxsplit=1)[0],
+        b.rsplit("@", maxsplit=1)[0],
+    )
+    if a_local_part == b_local_part:
+        return True
+
+    return False
+
+
 def match_or_create_product_users(
     emails_by_sub: dict[str, str],
     *,
@@ -85,14 +102,21 @@ def match_or_create_product_users(
     e.g. after a chunk failed once the previous ones were created.
     """
     subs = list(emails_by_sub)
+    normalized_emails_by_sub = {
+        sub: User.objects.normalize_email(email) for sub, email in emails_by_sub.items()
+    }
 
+    results = {}
     # First, match the subs of the product with accounts users.
     # If the sub is found, the result is ImportStatus.ACCOUNTS,
     # and the accounts sub is the same as the product sub.
-    results = {
-        sub: ImportResult(ImportStatus.ACCOUNTS, sub)
-        for sub in User.objects.filter(sub__in=subs).values_list("sub", flat=True)
-    }
+    for account_sub, account_email in User.objects.filter(sub__in=subs).values_list(
+        "sub", "email"
+    ):
+        if _emails_are_likewise(account_email, normalized_emails_by_sub[account_sub]):
+            results[account_sub] = ImportResult(ImportStatus.ACCOUNTS, account_sub)
+        else:
+            results[account_sub] = ImportResult(ImportStatus.AMBIGUOUS)
     # If the sub is found in the identity provider, the result is
     # ImportStatus.IDENTITY_PROVIDER, and the accounts sub is the sub of the
     # user this identity belongs to.
@@ -117,8 +141,8 @@ def match_or_create_product_users(
     # without an accounts sub, or ImportStatus.CREATED with the sub of the new
     # user.
     unknown = {
-        sub: User.objects.normalize_email(email)
-        for sub, email in emails_by_sub.items()
+        sub: email
+        for sub, email in normalized_emails_by_sub.items()
         if sub not in results
     }
     # Inactive users included: the email is unique.

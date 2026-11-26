@@ -14,17 +14,41 @@ from users.imports import ImportResult, ImportStatus, match_or_create_product_us
 from users.models import User, UserSource
 
 
-def test_match_or_create_product_users_accounts_sub():
-    """A sub of an accounts user is returned as is, its email is not used."""
+@pytest.mark.parametrize(
+    "email",
+    [
+        pytest.param("user@example.com", id="address"),
+        pytest.param("user@whatever.tld", id="local_part"),
+    ],
+)
+def test_match_or_create_product_users_accounts_sub(email):
+    """A sub of an accounts user is returned as is, if its email is likewise."""
     user = UserFactory(email="user@example.com")
 
-    assert match_or_create_product_users({user.sub: "other@example.com"}) == {
+    assert match_or_create_product_users({user.sub: email}) == {
         user.sub: ImportResult(ImportStatus.ACCOUNTS, user.sub)
     }
     user.refresh_from_db()
     assert user.email == "user@example.com"
     assert User.objects.count() == 1
     assert not IdentityProviderUser.objects.exists()
+
+
+@pytest.mark.parametrize(
+    "email",
+    [
+        pytest.param("other@whatever.tld", id="address"),
+        pytest.param("other@example.com", id="local_part"),
+    ],
+)
+def test_match_or_create_product_users_ambiguous_accounts_sub(email):
+    """A sub of an accounts user is ambiguous when the email is not likewise."""
+    user = UserFactory(email="user@example.com")
+    IdentityProviderUserFactory(uid=user.sub, user=user)
+
+    assert match_or_create_product_users({user.sub: email}) == {
+        user.sub: ImportResult(ImportStatus.AMBIGUOUS)
+    }
 
 
 def test_match_or_create_product_users_identity_provider_sub():
@@ -47,7 +71,7 @@ def test_match_or_create_product_users_identity_provider_sub():
     assert IdentityProviderUser.objects.count() == 1
 
 
-def test_match_or_create_product_users_ambiguous_sub():
+def test_match_or_create_product_users_ambiguous_identity_provider_sub():
     """A sub of a user, and identity provider sub of another, matches neither."""
     # first create a user with a sub
     user = UserFactory()
@@ -66,7 +90,7 @@ def test_match_or_create_product_users_accounts_sub_of_the_same_user():
     user = UserFactory()
     IdentityProviderUserFactory(uid=user.sub, user=user)
 
-    assert match_or_create_product_users({user.sub: "other@example.com"}) == {
+    assert match_or_create_product_users({user.sub: user.email}) == {
         user.sub: ImportResult(ImportStatus.ACCOUNTS, user.sub)
     }
 

@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- 🦺(imports) check the emails are likewise for accounts' sub
+
 ### Fixed
 
 - 🐛(auth) redirect to an error page when the identity provider fails,
